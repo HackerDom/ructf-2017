@@ -1,0 +1,29 @@
+{
+  "name": "viz",
+  "version": "1.2017.4",
+  "scripts": {
+    "lint": "node_modules/.bin/eslint src/*.js || exit 0",
+    "prebuild": "npm-run-all lint",
+    "build": "babel-node tools/build.js",
+    "build-nl": "babel-node tools/build.js"
+  },
+  "dependencies": {
+    "d3": "^4.4.3",
+    "event-emitter-es6": "^1.1.5",
+    "jquery": "^3.1.1",
+    "jquery-ui": "^1.12.1",
+    "md5": "^2.2.1",
+    "underscore": "^1.8.3",
+    "whatwg-fetch": "^2.0.2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.22.2",
+    "babel-core": "^6.22.1",
+    "babel-loader": "^6.2.10",
+    "babel-preset-es2015": "^6.22.0",
+    "eslint": "^3.14.0",
+    "eslint-plugin-import": "^2.2.0",
+    "npm-run-all": "^4.0.1",
+    "webpack": "^1.14.0"
+  }
+}
