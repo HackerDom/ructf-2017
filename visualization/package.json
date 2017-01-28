@@ -1,6 +1,6 @@
 {
-  "name": "viz",
-  "version": "1.2017.4",
+  "name": "ructf-2017-visualization",
+  "version": "0.0.1",
   "scripts": {
     "lint": "node_modules/.bin/eslint src/*.js || exit 0",
     "prebuild": "npm-run-all lint",
