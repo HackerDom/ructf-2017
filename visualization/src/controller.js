@@ -14,10 +14,15 @@ export default class Controller extends EventEmitter {
 		this._cur_round = -1;
 		this._prev_interval = -1;
 		this._pending_events = [];
+		this._new_events = [];
 
 		this.emitSync = this.emitSync.bind(this);
 		this.emit = this.emit.bind(this);
 		this.load_services_statuses = this.load_services_statuses.bind(this);
+
+		this.on('calcFlagStat', () => {
+			this.update_flag_stat();
+		});
 
 		this.start();
 	}
@@ -88,23 +93,23 @@ export default class Controller extends EventEmitter {
 			.then(
 				response => response.json()
 			).then(eventsData => {
-			const new_events = [];
-			for (let i = 0; i < eventsData.length; ++i) {
-				if (this._cur_round <= eventsData[i][0] && eventsData[i][0] < next_round) {
-					new_events.push(eventsData[i]);
+				this._new_events = [];
+				for (let i = 0; i < eventsData.length; ++i) {
+					if (this._cur_round <= eventsData[i][0] && eventsData[i][0] < next_round) {
+						this._new_events.push(eventsData[i]);
+					}
 				}
-			}
-			new_events.sort(function (a, b) {
-				const x = parseInt(a[1]);
-				const y = parseInt(b[1]);
-				if (x < y) { return -1; }
-				else if (x > y) { return 1; }
-				else { return 0; }
+				this._new_events.sort(function (a, b) {
+					const x = parseInt(a[1]);
+					const y = parseInt(b[1]);
+					if (x < y) { return -1; }
+					else if (x > y) { return 1; }
+					else { return 0; }
+				});
+				this._pending_events = this._pending_events.concat(this.new_events);
+				this._cur_round = next_round;
+				this.update_flag_stat();
 			});
-			this._pending_events = this._pending_events.concat(new_events);
-			this._cur_round = next_round;
-			this.update_flag_stat(new_events);
-		});
 	}
 
 	events_visualization_loop() {
@@ -121,9 +126,9 @@ export default class Controller extends EventEmitter {
 		const prev_interval_end = this._prev_interval + EVENTS_VISUALIZATION_INTERVAL;
 		while (this._pending_events.length > 0 && this._pending_events[0][1] < prev_interval_end) {
 			const event = this._pending_events.shift();
-			const showArrowFunc = ((arrowData) => {
-				return () => { this.emit('showArrow', arrowData); };
-			})({
+			const showArrowFunc = (arrowData =>
+				() => this.emit('showArrow', arrowData)
+			)({
 				from: this.model.getTeamById(event[3]),
 				to: this.model.getTeamById(event[4]),
 				svc: this.model.getServiceById(event[2])
@@ -133,11 +138,11 @@ export default class Controller extends EventEmitter {
 		this._prev_interval = prev_interval_end;
 	}
 
-	update_flag_stat(new_events) {
+	update_flag_stat() {
 		let flags_count = 0;
 
-		for (let i = 0; i < new_events.length; i++) {
-			const service_id = new_events[i][2];
+		for (let i = 0; i < this.new_events.length; i++) {
+			const service_id = this.new_events[i][2];
 			if (this.model.getServiceById(service_id).visible)
 				flags_count++;
 		}
