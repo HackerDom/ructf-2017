@@ -20,6 +20,7 @@ const allCoords = [[19,20],[19,18],[18,19],[18,21],[19,22],[20,21],[21,20],[22,2
 export default class View {
 
 	constructor(controller) {
+		this.controller = controller;
 		this.model = null;
 
 		controller.on('start', m => {
@@ -45,12 +46,13 @@ export default class View {
 		this.svg = d3.select("#" + svgId);
 		this.container = this.svg.append("g").classed("container", true);
 		this.defs = this.svg.append("defs");
-
-		const zoom = d3.zoom().scaleExtent([0.25, 3]).on("zoom", () => {
+		this.zoom = d3.zoom().scaleExtent([0.25, 3]).on("zoom", () => {
 			this.container.attr("transform", `translate(${d3.event.transform.x},${d3.event.transform.y})scale(${d3.event.transform.k})`);
 		});
-		this.svg.call(zoom);
+		this.svg.call(this.zoom);
+	}
 
+	init() {
 		this.drawTeams();
 		this.setResizeEvent();
 		this.initTooltips();
@@ -308,7 +310,7 @@ export default class View {
 					_this.model.services[index].visible = false;
 				}
 				_this.draw_services_statuses();
-				constructor.emit('calcFlagStat');
+				_this.controller.emit('calcFlagStat');
 			};
 			}(i));
 			$fc.append($filter);

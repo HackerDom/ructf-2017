@@ -37,17 +37,19 @@ export default class Controller extends EventEmitter {
 				this.model = new GameModel(info);
 				this.model.setScoreboard(scoreboard);
 				this.emitSync('start', this.model);
+
+				setTimeout(() => {
+					this.load_data();
+					setInterval(() => this.load_data(), LOAD_DATA_INTERVAL);
+				}, 0);
+
+				setTimeout(() => {
+					this.events_visualization_loop();
+					setInterval(() => {
+						this.events_visualization_loop();
+					}, EVENTS_VISUALIZATION_INTERVAL);
+				}, 0);
 			});
-
-		setTimeout(function () {
-			this.load_data();
-			setInterval(this.load_data, LOAD_DATA_INTERVAL);
-		}, 0);
-
-		setTimeout(function () {
-			this.events_visualization_loop();
-			setInterval(this.events_visualization_loop, EVENTS_VISUALIZATION_INTERVAL);
-		}, 0);
 	}
 
 	load_data() {
@@ -56,24 +58,24 @@ export default class Controller extends EventEmitter {
 				if (response.ok)
 					return response.json();
 			}).then(scoreboardData => {
-			this.model.setScoreboard(scoreboardData);
-			this.load_events();
-			fetch("/scoreboard.json")
-				.then(response => {
-					if (response.ok)
-						return response.json();
-				}).then(scores_json => {
-				this.load_services_statuses(scores_json);
-				this.model.updateScore();
-				this.emit('score');
+				this.model.setScoreboard(scoreboardData);
+				this.load_events();
+				fetch("/scoreboard.json")
+					.then(response => {
+						if (response.ok)
+							return response.json();
+					}).then(scores_json => {
+						this.load_services_statuses(scores_json);
+						this.model.updateScore();
+						this.emit('score');
+					});
 			});
-		});
 	}
 
 	load_services_statuses(scores_json) {
 		for (let i = 0; i < scores_json['scoreboard'].length; i++) {
 			const teamData = scores_json['scoreboard'][i];
-			const team = this.model.getTeamByName[teamData['name']];
+			const team = this.model.getTeamByName(teamData['name']);
 
 			for (let j = 0; j < teamData['services'].length; j++) {
 				const serviceData = teamData['services'][j];
@@ -99,14 +101,14 @@ export default class Controller extends EventEmitter {
 						this._new_events.push(eventsData[i]);
 					}
 				}
-				this._new_events.sort(function (a, b) {
+				this._new_events.sort((a, b) => {
 					const x = parseInt(a[1]);
 					const y = parseInt(b[1]);
 					if (x < y) { return -1; }
 					else if (x > y) { return 1; }
 					else { return 0; }
 				});
-				this._pending_events = this._pending_events.concat(this.new_events);
+				this._pending_events = this._pending_events.concat(this._new_events);
 				this._cur_round = next_round;
 				this.update_flag_stat();
 			});
@@ -141,8 +143,8 @@ export default class Controller extends EventEmitter {
 	update_flag_stat() {
 		let flags_count = 0;
 
-		for (let i = 0; i < this.new_events.length; i++) {
-			const service_id = this.new_events[i][2];
+		for (let i = 0; i < this._new_events.length; i++) {
+			const service_id = this._new_events[i][2];
 			if (this.model.getServiceById(service_id).visible)
 				flags_count++;
 		}

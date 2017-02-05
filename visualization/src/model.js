@@ -23,45 +23,49 @@ export class GameModel {
 		this.status = NOT_STARTED;
 		this.scoreboard = {};
 
-		(function() {
-			for (const fieldName in info.teams) {
-				if (info.teams.hasOwnProperty(fieldName)) {
-					const id = this.teams.length;
-					const name = info.teams[fieldName];
-					this.teams.push({
-						index: id,
-						id: id,
-						team_id:
-						fieldName,
-						name: name,
-						score: 0,
-						place: null,
-						status: 0,
-						servicesStatuses: new Array(SERVICES_COUNT)
-					});
-					const num = this.teams.length - 1;
-					this._teamIdToNum[fieldName] = num;
-					this._teamNameToNum[name] = num;
-				}
+		this.initTeams(info);
+		this.initServices(info);
+	}
+
+	initTeams(info) {
+		for (const fieldName in info.teams) {
+			if (info.teams.hasOwnProperty(fieldName)) {
+				const id = this.teams.length;
+				const name = info.teams[fieldName];
+				this.teams.push({
+					index: id,
+					id: id,
+					team_id:
+					fieldName,
+					name: name,
+					score: 0,
+					place: null,
+					status: 0,
+					servicesStatuses: new Array(SERVICES_COUNT)
+				});
+				const num = this.teams.length - 1;
+				this._teamIdToNum[fieldName] = num;
+				this._teamNameToNum[name] = num;
 			}
-		})();
-		(function() {
-			for (const fieldName in info.services) {
-				if (info.services.hasOwnProperty(fieldName)) {
-					const name = info.services[fieldName];
-					const num = SERVICE_NAME_TO_NUM[name];
-					this.services[num] = {
-						id: num,
-						service_id: fieldName,
-						name: name,
-						color: COLOR_CONSTANTS[num],
-						visible: true,
-						sphere_num: SERVICE_NAME_TO_SPHERE_NUM[name]
-					};
-					this._serviceIdToNum[fieldName] = num;
-				}
+		}
+	}
+
+	initServices(info) {
+		for (const fieldName in info.services) {
+			if (info.services.hasOwnProperty(fieldName)) {
+				const name = info.services[fieldName];
+				const num = SERVICE_NAME_TO_NUM[name];
+				this.services[num] = {
+					id: num,
+					service_id: fieldName,
+					name: name,
+					color: COLOR_CONSTANTS[num],
+					visible: true,
+					sphere_num: SERVICE_NAME_TO_SPHERE_NUM[name]
+				};
+				this._serviceIdToNum[fieldName] = num;
 			}
-		})();
+		}
 	}
 
 	getTeamByName(name) {

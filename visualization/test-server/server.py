@@ -23,7 +23,9 @@ def cround(): return (gtime() - start)//ROUND_TIME + 1
 
 @route('/<filepath:path>')
 def main_page(filepath):
-    return static_file(filepath, root='./')
+    response = static_file(filepath, root='./')
+    response.set_header("Cache-Control", "no-cache")
+    return response
 
 
 def tojson(fn):
