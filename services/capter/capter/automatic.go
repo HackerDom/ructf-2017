@@ -17,7 +17,7 @@ func NewCapter() *Capter {
 	capter := new(Capter)
 	capter.patterns = []byte("patterns")
 	capter.places = []byte("places")
-	db, err := bolt.Open("capter.db", 0600, &bolt.Options{Timeout: 1 * time.Second})
+	db, err := bolt.Open("db", 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Fatal(err)
 	}
