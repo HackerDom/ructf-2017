@@ -24,6 +24,9 @@ func randSlice(list []Choice, max_num int) chan string {
 
 	go func() {
 		for {
+			if len(choice) == len(list) {
+				break
+			}
 			r := rand.Intn(max_num)
 			for _, c := range list {
 				r -= c.Weight

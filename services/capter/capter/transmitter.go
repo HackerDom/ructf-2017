@@ -23,7 +23,7 @@ func transmit_patterns(places []Choice, sum int, id string, pattern []byte) []st
 }
 
 func store_pattern(place, id string, pattern []byte) error {
-	client := &http.Client{Timeout: time.Second * 10}
+	client := &http.Client{Timeout: time.Second * 1}
 	response, err := client.PostForm(
 		"http://"+place+":8081/",
 		url.Values{"id": {id}, "pattern": {string(pattern)}})

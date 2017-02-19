@@ -1,5 +1,13 @@
 package main
 
-func create_pattern(id, message string) ([]byte, []byte) {
-	return []byte(id + ":" + message), []byte("password")
+import (
+	"strings"
+)
+
+func create_pattern(id, message string) ([]byte, string) {
+	return []byte(id + ":" + message), "password"
+}
+
+func decode_pattern(pattern, password string) string {
+	return strings.Split(pattern, ":")[1]
 }

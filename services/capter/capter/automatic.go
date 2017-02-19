@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"github.com/boltdb/bolt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -31,11 +33,10 @@ func NewCapter() *Capter {
 		if err != nil {
 			return err
 		}
-		for i := 1; i < 31; i++ {
-			if err := b.Put([]byte("127.0.0."+strconv.Itoa(i)), []byte(strconv.Itoa(1))); err != nil {
+		for i := 1; i < 11; i++ {
+			if err := b.Put([]byte("team"+strconv.Itoa(i)), []byte(strconv.Itoa(1))); err != nil {
 				return err
 			}
-
 		}
 		return nil
 	})
@@ -63,11 +64,14 @@ func (self *Capter) store(id, message string) error {
 	pattern, password := create_pattern(id, message)
 	candidates, sum := self.choose()
 	places := transmit_patterns(candidates, sum, id, pattern)
-	log.Print(places)
+	if len(places) < 2 {
+		return errors.New("Not enough places")
+	}
 	self.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(self.patterns)
-		// Change local message
-		err := b.Put([]byte(id), password) // + places
+		local_message := strings.Join(append(places, password), ":")
+		log.Print(local_message)
+		err := b.Put([]byte(id), []byte(local_message))
 		p := tx.Bucket(self.places)
 		for _, place := range places {
 			db_place := []byte(place)
@@ -80,10 +84,25 @@ func (self *Capter) store(id, message string) error {
 }
 
 func (self *Capter) get(id string) string {
-	var answer string
+	var local_message string
 	self.db.View(func(tx *bolt.Tx) error {
-		answer = string(tx.Bucket(self.patterns).Get([]byte(id)))
+		local_message = string(tx.Bucket(self.patterns).Get([]byte(id)))
 		return nil
 	})
-	return answer
+	if local_message == "" {
+		return ""
+	}
+	local_messages := strings.Split(local_message, ":")
+	places, password := local_messages[:len(local_messages)-1], local_messages[len(local_messages)-1]
+	good_places, pattern := receive_pattern(places, id)
+	self.db.Update(func(tx *bolt.Tx) error {
+		p := tx.Bucket(self.places)
+		for _, place := range good_places {
+			db_place := []byte(place)
+			tries, _ := strconv.Atoi(string(p.Get(db_place)))
+			p.Put(db_place, []byte(strconv.Itoa(tries+1)))
+		}
+		return nil
+	})
+	return decode_pattern(pattern, password)
 }
