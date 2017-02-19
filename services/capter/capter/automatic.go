@@ -22,22 +22,23 @@ func NewCapter() *Capter {
 		log.Fatal(err)
 	}
 	db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucket(capter.patterns)
+		_, err := tx.CreateBucketIfNotExists(capter.patterns)
 		return err
 	})
 
-	// if db.places exists - skip
 	db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucket(capter.places)
-		return err
-	})
-	for i := 1; i < 31; i++ {
-		db.Update(func(tx *bolt.Tx) error {
-			b := tx.Bucket(capter.places)
-			err := b.Put([]byte(strconv.Itoa(i)), []byte(strconv.Itoa(1)))
+		b, err := tx.CreateBucket(capter.places)
+		if err != nil {
 			return err
-		})
-	}
+		}
+		for i := 1; i < 31; i++ {
+			if err := b.Put([]byte("127.0.0."+strconv.Itoa(i)), []byte(strconv.Itoa(1))); err != nil {
+				return err
+			}
+
+		}
+		return nil
+	})
 	capter.db = db
 	return capter
 }
