@@ -4,9 +4,9 @@ import (
 	"math/rand"
 )
 
-func intInSlice(i int, list []int) bool {
+func strInSlice(k string, list []string) bool {
 	for _, b := range list {
-		if b == i {
+		if b == k {
 			return true
 		}
 	}
@@ -14,22 +14,22 @@ func intInSlice(i int, list []int) bool {
 }
 
 type Choice struct {
-	Num    int
+	Key    string
 	Weight int
 }
 
-func randSlice(list []Choice, max_num int) chan int {
-	slice := make(chan int)
-	var choice []int
+func randSlice(list []Choice, max_num int) chan string {
+	slice := make(chan string)
+	var choice []string
 
 	go func() {
 		for {
 			r := rand.Intn(max_num)
 			for _, c := range list {
 				r -= c.Weight
-				if r < 0 && !intInSlice(c.Num, choice) {
-					slice <- c.Num
-					choice = append(choice, c.Num)
+				if r < 0 && !strInSlice(c.Key, choice) {
+					slice <- c.Key
+					choice = append(choice, c.Key)
 					break
 				}
 			}

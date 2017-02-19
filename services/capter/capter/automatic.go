@@ -25,6 +25,8 @@ func NewCapter() *Capter {
 		_, err := tx.CreateBucket(capter.patterns)
 		return err
 	})
+
+	// if db.places exists - skip
 	db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucket(capter.places)
 		return err
@@ -46,9 +48,8 @@ func (self *Capter) choose() ([]Choice, int) {
 	self.db.View(func(tx *bolt.Tx) error {
 		p := tx.Bucket(self.places)
 		p.ForEach(func(k, v []byte) error {
-			place, _ := strconv.Atoi(string(k))
 			sla, _ := strconv.Atoi(string(v))
-			candidates = append(candidates, Choice{place, sla})
+			candidates = append(candidates, Choice{string(k), sla})
 			sum += sla
 			return nil
 		})
@@ -58,17 +59,17 @@ func (self *Capter) choose() ([]Choice, int) {
 }
 
 func (self *Capter) store(id, message string) error {
-	pattern, password := create_pattern(message)
+	pattern, password := create_pattern(id, message)
 	candidates, sum := self.choose()
-	places := transmit_patterns(candidates, sum, pattern)
+	places := transmit_patterns(candidates, sum, id, pattern)
 	log.Print(places)
 	self.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(self.patterns)
 		// Change local message
-		err := b.Put([]byte(id), password)
+		err := b.Put([]byte(id), password) // + places
 		p := tx.Bucket(self.places)
 		for _, place := range places {
-			db_place := []byte(strconv.Itoa(place))
+			db_place := []byte(place)
 			tries, _ := strconv.Atoi(string(p.Get(db_place)))
 			err = p.Put(db_place, []byte(strconv.Itoa(tries+1)))
 		}

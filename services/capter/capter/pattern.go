@@ -1,5 +1,5 @@
 package main
 
-func create_pattern(message string) ([]byte, []byte) {
-	return []byte(message), []byte("password")
+func create_pattern(id, message string) ([]byte, []byte) {
+	return []byte(id + ":" + message), []byte("password")
 }
