@@ -7,11 +7,13 @@ import random
 from bottle import route, run, response, request, static_file
 from functools import wraps
 from time import time
+import asyncio
+import websockets
+import threading
 
 
 ROUND_TIME = 60*1000
 service_names = ["atlablog", "weather", "cartographer", "sapmarine", "crash", "thebin"]
-
 
 def team_(x): return 't{}'.format(x)
 def team_name(x): return 'TEAM{}'.format(x)
@@ -19,6 +21,8 @@ def service_(x): return 's{}'.format(x)
 
 def gtime(): return int(time()*1000)
 def cround(): return (gtime() - start)//ROUND_TIME + 1
+
+connected = set()
 
 
 @route('/<filepath:path>')
@@ -35,7 +39,6 @@ def tojson(fn):
         return fn(*args, **kwargs)
 
     return wrapper
-
 
 
 @route('/api/info')
@@ -112,6 +115,24 @@ def scoreboard_page():
     }
 
 
+async def websockets_handler(websocket, path):
+    global connected
+    connected.add(websocket)
+    while True:
+        await asyncio.sleep(1)
+        if not websocket in connected:
+            break
+
+
+async def write_to_websocket(text):
+    for ws in connected:
+        try:
+            await ws.send(text)
+        except:
+            connected.remove(ws)
+
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', '--teams', type=int, help='teams count',
@@ -123,10 +144,40 @@ def parse_args():
     return parser.parse_args()
 
 
+def websocket_server_run():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    start_server = websockets.serve(websockets_handler, 'localhost', 8080)
+    asyncio.get_event_loop().run_until_complete(start_server)
+    asyncio.get_event_loop().run_until_complete(create_events())
+
+
+async def create_events():
+    while True:
+        attacker = random.randint(0, args.teams - 1)
+        victim = attacker
+        while victim == attacker:
+            victim = random.randint(0, args.teams - 1)
+
+        evt_time = gtime()
+        event = [
+            (evt_time - start) // ROUND_TIME + 1,
+            evt_time,
+            service_(random.randint(0, args.services - 1)),
+            team_(attacker), team_(victim)
+        ]
+        json_str = json.dumps(event)
+        await write_to_websocket(json_str)
+        await asyncio.sleep(1)
+
+
 if __name__ == '__main__':
     args = parse_args()
     start = gtime()
     events = []
     scores = {team_(i): 0 for i in range(args.teams)}
 
-    run(host='0.0.0.0', port=8000, debug=True, reloader=True)
+    thread = threading.Thread(target=websocket_server_run)
+    thread.start()
+
+    run(host='0.0.0.0', port=8000, debug=True, reloader=False)

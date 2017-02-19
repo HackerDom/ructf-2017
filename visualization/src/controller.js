@@ -28,6 +28,7 @@ export default class Controller extends EventEmitter {
 	}
 
 	start() {
+		const _this = this;
 		Promise.all([fetch("/api/info"), fetch("/api/scoreboard")])
 			.then(response => {
 				if (response[0].ok && response[1].ok)
@@ -44,12 +45,26 @@ export default class Controller extends EventEmitter {
 				}, 0);
 
 				setTimeout(() => {
-					this.events_visualization_loop();
+					//this.events_visualization_loop();
 					setInterval(() => {
-						this.events_visualization_loop();
+						//this.events_visualization_loop();
 					}, EVENTS_VISUALIZATION_INTERVAL);
 				}, 0);
 			});
+
+		const ws = new WebSocket("ws://127.0.0.1:8080/websocket");
+		ws.onmessage = function(e) {
+			let event = JSON.parse(e.data);
+			let arrowData = {
+				from: _this.model.getTeamById(event[3]),
+				to: _this.model.getTeamById(event[4]),
+				svc: _this.model.getServiceById(event[2])
+			};
+			_this.emit('showArrow', arrowData);
+		};
+		ws.onerror = function(error) {
+			console.log("Ошибка " + error.message);
+		};
 	}
 
 	load_data() {

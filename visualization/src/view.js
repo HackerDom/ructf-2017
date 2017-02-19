@@ -81,7 +81,7 @@ export default class View {
 		if (this.openedTooltipTeamId == null)
 			return;
 		const team = this.model.teams[this.openedTooltipTeamId];
-		const html = this.createTooltipHtml(team);
+		const html = View.createTooltipHtml(team);
 		$("." + tooltipContentWrapperClass).empty().append(html);
 	}
 
