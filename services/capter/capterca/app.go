@@ -4,7 +4,6 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	"log"
 	"net/http"
-	"os"
 )
 
 type Capterca struct {
@@ -79,9 +78,5 @@ func (self *Capterca) Index(w http.ResponseWriter, r *http.Request) {
 func main() {
 	capterca := *NewCapterca()
 	http.HandleFunc("/", capterca.Index)
-	port := "8081"
-	if len(os.Args) > 1 {
-		port = os.Args[1]
-	}
-	http.ListenAndServe(":"+port, nil)
+	http.ListenAndServe(":8081", nil)
 }
