@@ -18,14 +18,13 @@ type GetArgs struct {
 	ID string
 }
 
-func store(n int, wg *sync.WaitGroup) {
-	defer wg.Done()
+func store(n int) {
 	client, err := net.Dial("tcp", "127.0.0.1:1234")
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
 	c := jsonrpc.NewClient(client)
-	args := &StoreArgs{strconv.Itoa(n), "Hello"}
+	args := &StoreArgs{strconv.Itoa(n) + "06c99203", "06c992034824a48343e46280ec1330ff"}
 	var reply string
 	call := c.Go("Capter.Put", args, &reply, nil)
 	replyCall := <-call.Done
@@ -41,14 +40,13 @@ func store(n int, wg *sync.WaitGroup) {
 	client.Close()
 }
 
-func get(n int, wg *sync.WaitGroup) {
-	defer wg.Done()
+func get(n int) {
 	client, err := net.Dial("tcp", "127.0.0.1:1234")
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
 	c := jsonrpc.NewClient(client)
-	args := &GetArgs{strconv.Itoa(n)}
+	args := &GetArgs{strconv.Itoa(n) + "06c99203"}
 	var reply string
 	call := c.Go("Capter.Get", args, &reply, nil)
 	replyCall := <-call.Done
@@ -64,19 +62,22 @@ func get(n int, wg *sync.WaitGroup) {
 	client.Close()
 }
 
+func store_get(n int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	store(n)
+	get(n)
+}
+
 func main() {
 	var wg sync.WaitGroup
-	wg.Add(2)
-	store(0, &wg)
-	get(0, &wg)
+	// wg.Add(1)
+	// store_get(0, &wg)
 
-	// for i := 100; i < 10000; i += 10 {
-	// 	wg.Add(10)
-	// 	for j := 0; j < 10; j++ {
-	// 		go store(i+j, &wg)
-	// 		wg.Add(1)
-	// 		go get(i+j, &wg)
-	// 	}
-	// 	wg.Wait()
-	// }
+	for i := 0; i < 10000; i += 10 {
+		wg.Add(10)
+		for j := 0; j < 10; j++ {
+			store_get(i+j, &wg)
+		}
+	}
+	wg.Wait()
 }
