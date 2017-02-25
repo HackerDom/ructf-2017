@@ -163,11 +163,9 @@ async def create_attacks():
         while victim == attacker:
             victim = random.randint(0, args.teams - 1)
 
-        evt_time = gtime()
         event = {
             "type": "attack",
-            "time": evt_time,
-            "attack": {
+            "value": {
                 "service_id": service_(random.randint(0, args.services - 1)),
                 "attacker_id": team_(attacker),
                 "victim_id": team_(victim)
@@ -187,8 +185,7 @@ async def create_states():
 async def create_state():
     container = {
         "type": "state",
-        "time": gtime(),
-        "state": gen_state()
+        "value": gen_state()
     }
     json_str = json.dumps(container)
     await write_to_websocket(json_str)

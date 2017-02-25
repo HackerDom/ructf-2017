@@ -45,8 +45,7 @@
 /apiws/events => 
     {
         "type": "attack" | "state"
-        "time": number (millisec), // время на сервере на момент отправки собятия, считаем, что событие произошло в момент получения события подписчиком
-        "value": class attack | state
+        "attack" | "state" : class attack | state
     }
 
 class attack { // Отправляется в момент, когда произошла атака

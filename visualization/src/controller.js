@@ -30,9 +30,9 @@ export default class Controller extends EventEmitter {
 		ws.onmessage = (e) => {
 			let event = JSON.parse(e.data);
 			if (event.type == "attack")
-				this.processAttack(event);
+				this.processAttack(event.value);
 			else if (event.type == "state")
-				this.processState(event);
+				this.processState(event.value);
 		};
 		ws.onerror = (e) => {
 			console.error('WebSocket encountered error. Closing websocket.');
@@ -46,8 +46,7 @@ export default class Controller extends EventEmitter {
 		};
 	}
 
-	processAttack(event) {
-		const attack = event.attack;
+	processAttack(attack) {
 		const arrow = {
 			from: this.model.getTeamById(attack.attacker_id),
 			to: this.model.getTeamById(attack.victim_id),
@@ -56,8 +55,8 @@ export default class Controller extends EventEmitter {
 		this.emit('showArrow', arrow);
 	}
 
-	processState(event) {
-		this.model.setScoreboard(event.state.scoreboard);
+	processState(state) {
+		this.model.setScoreboard(state.scoreboard);
 		this.model.updateServicesStatuses();
 		this.emit('servicesStatuses');
 		this.model.updateFlagsStat();
