@@ -5,11 +5,6 @@ const COLOR_CONSTANTS = ["#ED953A", "#E5BD1F", "#3FE1D6", "#568AFF", "#8C41DA", 
 const SERVICE_NAME_TO_SPHERE_NUM = {"atlablog": 3, "weather": 4, "cartographer": 5, "sapmarine": 0, "crash": 1, "thebin": 2};
 const SERVICES_COUNT = 6;
 
-export const NOT_STARTED = "0";
-//const PLAYING = "1";
-//const SUSPEND = "2";
-//const FINISHED = "3";
-
 export class GameModel {
 	constructor(info) {
 		this.teams = [];
@@ -19,9 +14,8 @@ export class GameModel {
 		this.services = new Array(SERVICES_COUNT);
 		this._serviceIdToNum = {};
 
-		this.round = -1;
-		this.status = NOT_STARTED;
-		this.scoreboard = {};
+		this.scoreboard = undefined;
+		this.flagsCount = undefined;
 
 		this.initTeams(info);
 		this.initServices(info);
@@ -81,16 +75,32 @@ export class GameModel {
 	}
 
 	setScoreboard(scoreboard) {
-		this.round = scoreboard.round;
-		this.status = scoreboard.status;
-		this.scoreboard = scoreboard.table;
-		this.updateScore();
+		this.scoreboard = scoreboard;
+	}
+
+	updateFlagsStat() {
+		this.flagsCount = 0;
+		for (let i = 0; i < this.scoreboard.length; i++)
+			for (let j = 0; j < SERVICES_COUNT; j++)
+				if (this.getServiceById(this.scoreboard[i].services[j].id).visible)
+					this.flagsCount += this.scoreboard[i].services[j].flags;
+	}
+
+	updateServicesStatuses() {
+		for (let i = 0; i < this.scoreboard.length; i++) {
+			const teamData = this.scoreboard[i];
+			const team = this.getTeamByName(teamData.name);
+
+			for (let j = 0; j < teamData.services.length; j++) {
+				const serviceData = teamData.services[j];
+				team.servicesStatuses[this._serviceIdToNum[serviceData.id]] = serviceData.status == 101;
+			}
+		}
 	}
 
 	updateScore() {
-		for (let i = 0; i < this.teams.length; i++) {
-			this.teams[i].score = this.scoreboard[this.teams[i].team_id];
-		}
+		for (let i = 0; i < this.scoreboard.length; i++)
+			this.getTeamByName(this.scoreboard[i].name).score = this.scoreboard[i].score;
 		this.setPlaces();
 	}
 

@@ -118,14 +118,15 @@ def scoreboard_page():
 async def websockets_handler(websocket, path):
     global connected
     connected.add(websocket)
+    await create_state()
     while True:
         await asyncio.sleep(1)
-        if not websocket in connected:
+        if websocket not in connected:
             break
 
 
 async def write_to_websocket(text):
-    for ws in connected:
+    for ws in connected.copy():
         try:
             await ws.send(text)
         except:
@@ -148,11 +149,14 @@ def websocket_server_run():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     start_server = websockets.serve(websockets_handler, 'localhost', 8080)
-    asyncio.get_event_loop().run_until_complete(start_server)
-    asyncio.get_event_loop().run_until_complete(create_events())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(start_server)
+    asyncio.ensure_future(create_states(), loop=loop)
+    asyncio.ensure_future(create_attacks(), loop=loop)
+    loop.run_forever()
 
 
-async def create_events():
+async def create_attacks():
     while True:
         attacker = random.randint(0, args.teams - 1)
         victim = attacker
@@ -160,15 +164,55 @@ async def create_events():
             victim = random.randint(0, args.teams - 1)
 
         evt_time = gtime()
-        event = [
-            (evt_time - start) // ROUND_TIME + 1,
-            evt_time,
-            service_(random.randint(0, args.services - 1)),
-            team_(attacker), team_(victim)
-        ]
+        event = {
+            "type": "attack",
+            "time": evt_time,
+            "attack": {
+                "service_id": service_(random.randint(0, args.services - 1)),
+                "attacker_id": team_(attacker),
+                "victim_id": team_(victim)
+            }
+        }
         json_str = json.dumps(event)
         await write_to_websocket(json_str)
         await asyncio.sleep(1)
+
+
+async def create_states():
+    while True:
+        await asyncio.sleep(10)
+        await create_state()
+
+
+async def create_state():
+    container = {
+        "type": "state",
+        "time": gtime(),
+        "state": gen_state()
+    }
+    json_str = json.dumps(container)
+    await write_to_websocket(json_str)
+
+
+def gen_state():
+    return {
+        "round": cround(),
+        "scoreboard": [
+            {
+                "name": team_name(t),
+                "score": scores[team_(t)],
+                "services": [
+                    {
+                        "flags": random.choice((1, 2, 3)),
+                        "status": random.choice((101, 102, 103, 104, 110)),
+                        "id": service_(s)
+                    }
+                    for s in range(args.services)
+                    ]
+            }
+            for t in range(args.teams)
+            ]
+    }
 
 
 if __name__ == '__main__':

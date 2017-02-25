@@ -37,3 +37,25 @@
             ...
         ]
     }
+
+Обновления:
+
+/api/info - нужно для инициализации
+
+/apiws/events => 
+    {
+        "type": "attack" | "state"
+        "time": number (millisec), // время на сервере на момент отправки собятия, считаем, что событие произошло в момент получения события подписчиком
+        "value": class attack | state
+    }
+
+class attack { // Отправляется в момент, когда произошла атака
+    "round": number,
+    "service_id": string or number,
+    "attacker_id": string or number,
+    "victim_id": string or numbrt,
+}
+
+class state { // Отправляется в момент окончания раунда, содержит информацию за прошедший раунд, отправляется в момент открытия соединения websocket
+    // То же, что в scoreboard.json
+}

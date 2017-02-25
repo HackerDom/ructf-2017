@@ -27,15 +27,17 @@ export default class View {
 			this.model = m;
 			this.init();
 		});
-		controller.on('score', () => {
-			this.updateOpenedTooltip();
-			this.draw_services_statuses();
-		});
 		controller.on('showArrow', arrowData => {
 			this.showArrow(arrowData);
 		});
-		controller.on('flagStat', flags_count => {
-			$("#attacks").find(".value").text(flags_count);
+		controller.on('score', () => {
+			this.updateOpenedTooltip();
+		});
+		controller.on('servicesStatuses', () => {
+			this.drawServicesStatusesAndStat();
+		});
+		controller.on('flagStat', () => {
+			$("#attacks").find(".value").text(this.model.flagsCount);
 		});
 
 		this.nodes = null;
@@ -59,22 +61,22 @@ export default class View {
 		this.createFilterPanel();
 	}
 
-	draw_services_statuses() {
+	drawServicesStatusesAndStat() {
 		const _this = this;
-		let teams_with_alive = 0; // количество команд с хотя бы 1 сервисом
+		let teamsWithAliveService = 0; // количество команд с хотя бы 1 сервисом
 		d3.selectAll(".node").each(function () {
 			const n = d3.select(this);
 			const nData = n.data()[0];
 			let hasUp = false;
-			for (let i=0; i<_this.model.services.length; i++) {
+			for (let i = 0; i < _this.model.services.length; i++) {
 				const isUp = _this.model.services[i].visible && nData.servicesStatuses[i];
 				hasUp = hasUp || isUp;
 				n.select(".service_" + i).attr("fill", isUp ? _this.model.services[i].color : DOWN_SERVICE_COLOR);
 			}
 			if (hasUp)
-				teams_with_alive++;
+				teamsWithAliveService++;
 		});
-		$("#alive").find(".value").text(teams_with_alive);
+		$("#alive").find(".value").text(teamsWithAliveService);
 	}
 
 	updateOpenedTooltip() {
@@ -309,7 +311,7 @@ export default class View {
 					$(this).addClass(deselectionFlag);
 					_this.model.services[index].visible = false;
 				}
-				_this.draw_services_statuses();
+				_this.drawServicesStatusesAndStat();
 				_this.controller.emit('calcFlagStat');
 			};
 			}(i));
