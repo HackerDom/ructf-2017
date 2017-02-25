@@ -23,7 +23,7 @@ func (self *Capter) Put(args *StoreArgs, reply *string) error {
 	if err := self.store(args.ID, args.Message); err != nil {
 		return err
 	}
-	*reply = "Message stored"
+	*reply = "Stored"
 	return nil
 }
 

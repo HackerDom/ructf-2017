@@ -61,15 +61,23 @@ func (self *Capter) choose() ([]Choice, int) {
 }
 
 func (self *Capter) store(id, message string) error {
-	pattern, password := create_pattern(id, message)
+	var local_message string
+	self.db.View(func(tx *bolt.Tx) error {
+		local_message = string(tx.Bucket(self.patterns).Get([]byte(id)))
+		return nil
+	})
+	if local_message != "" {
+		return errors.New("409 Conflict")
+	}
+	pattern, password, ts := create_pattern(id, message)
 	candidates, sum := self.choose()
-	places := transmit_patterns(candidates, sum, id, pattern)
+	places := transmit_patterns(candidates, sum, id, ts, pattern)
 	if len(places) < 2 {
 		return errors.New("Not enough places")
 	}
 	self.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(self.patterns)
-		local_message := strings.Join(append(places, password), ":")
+		local_message := strings.Join(append(places, password, ts), ":")
 		log.Print(local_message)
 		err := b.Put([]byte(id), []byte(local_message))
 		p := tx.Bucket(self.places)
@@ -93,8 +101,8 @@ func (self *Capter) get(id string) string {
 		return ""
 	}
 	local_messages := strings.Split(local_message, ":")
-	places, password := local_messages[:len(local_messages)-1], local_messages[len(local_messages)-1]
-	good_places, pattern := receive_pattern(places, id)
+	places, password, ts := local_messages[:len(local_messages)-2], local_messages[len(local_messages)-2], local_messages[len(local_messages)-1]
+	good_places, pattern := receive_pattern(places, id, ts)
 	self.db.Update(func(tx *bolt.Tx) error {
 		p := tx.Bucket(self.places)
 		for _, place := range good_places {
