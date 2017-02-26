@@ -2,8 +2,10 @@ package main
 
 import (
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/util"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type Capterca struct {
@@ -64,12 +66,37 @@ func (self *Capterca) Put(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (self *Capterca) List(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Wrong key", http.StatusBadRequest)
+		return
+	}
+	key := r.FormValue("key")
+	if key == "" {
+		http.Error(w, "Nice weather, isn't it?", http.StatusNoContent)
+		return
+	}
+	iter := self.db.NewIterator(util.BytesPrefix([]byte(key)), nil)
+	var keys []string
+	for iter.Next() {
+		keys = append(keys, string(iter.Key()))
+	}
+	iter.Release()
+	if err := iter.Error(); err == nil {
+		http.Error(w, strings.Join(keys, ", "), http.StatusOK)
+	} else {
+		http.Error(w, "", http.StatusNotFound)
+	}
+}
+
 func (self *Capterca) Index(w http.ResponseWriter, r *http.Request) {
 	switch method := r.Method; method {
 	case "GET":
 		self.Get(w, r)
 	case "POST":
 		self.Put(w, r)
+	case "LIST":
+		self.List(w, r)
 	default:
 		http.Error(w, "Try again", http.StatusMethodNotAllowed)
 	}
