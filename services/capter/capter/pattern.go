@@ -36,7 +36,12 @@ func decode_pattern(pattern, password string) string {
 	}
 	message := u32ToString(upattern)
 	log.Print(message, " - ", pattern)
-	return strings.Split(message, ":")[1]
+	parts := strings.Split(message, ":")
+	if len(parts) > 1 {
+		return parts[1]
+	} else {
+		return ""
+	}
 }
 
 func b_enc(v0, v1 uint32, k []uint32) (uint32, uint32) {

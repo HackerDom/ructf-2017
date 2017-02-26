@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"net/rpc/jsonrpc"
 	"strconv"
@@ -18,13 +19,14 @@ type GetArgs struct {
 	ID string
 }
 
-func store(n int) {
+func store(n int) string {
 	client, err := net.Dial("tcp", "127.0.0.1:1234")
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
 	c := jsonrpc.NewClient(client)
-	args := &StoreArgs{strconv.Itoa(n) + "06c99203", "06c992034824a48343e46280ec1330ff"}
+	id := strconv.Itoa(n) + "-" + strconv.Itoa(rand.Intn(1000))
+	args := &StoreArgs{id, "06c992034824a48343e46280ec1330ff"}
 	var reply string
 	call := c.Go("Capter.Put", args, &reply, nil)
 	replyCall := <-call.Done
@@ -33,20 +35,21 @@ func store(n int) {
 	}
 	if call.Error != nil {
 		fmt.Printf("Put %s failed: %s\n", args.ID, call.Error.Error())
-	} else {
-		fmt.Printf("Put %s: %s\n", args.ID, reply)
+		// } else {
+		// fmt.Printf("Put %s: %s\n", args.ID, reply)
 	}
 	c.Close()
 	client.Close()
+	return id
 }
 
-func get(n int) {
+func get(id string) {
 	client, err := net.Dial("tcp", "127.0.0.1:1234")
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
 	c := jsonrpc.NewClient(client)
-	args := &GetArgs{strconv.Itoa(n) + "06c99203"}
+	args := &GetArgs{id}
 	var reply string
 	call := c.Go("Capter.Get", args, &reply, nil)
 	replyCall := <-call.Done
@@ -55,8 +58,8 @@ func get(n int) {
 	}
 	if call.Error != nil {
 		fmt.Printf("Get %s failed: %s\n", args.ID, call.Error.Error())
-	} else {
-		fmt.Printf("Get %s: %s\n", args.ID, reply)
+		// } else {
+		// 	fmt.Printf("Get %s: %s\n", args.ID, reply)
 	}
 	c.Close()
 	client.Close()
@@ -64,8 +67,7 @@ func get(n int) {
 
 func store_get(n int, wg *sync.WaitGroup) {
 	defer wg.Done()
-	store(n)
-	get(n)
+	get(store(n))
 }
 
 func main() {
@@ -73,11 +75,11 @@ func main() {
 	// wg.Add(1)
 	// store_get(0, &wg)
 
-	for i := 0; i < 10000; i += 10 {
-		wg.Add(10)
-		for j := 0; j < 10; j++ {
+	for i := 0; i < 1000; i += 50 {
+		wg.Add(50)
+		for j := 0; j < 50; j++ {
 			store_get(i+j, &wg)
 		}
+		wg.Wait()
 	}
-	wg.Wait()
 }

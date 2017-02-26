@@ -5,6 +5,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/util"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -89,6 +90,20 @@ func (self *Capterca) List(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (self *Capterca) Len(w http.ResponseWriter, r *http.Request) {
+	iter := self.db.NewIterator(nil, nil)
+	keys := 0
+	for iter.Next() {
+		keys++
+	}
+	iter.Release()
+	if err := iter.Error(); err == nil {
+		http.Error(w, strconv.Itoa(keys), http.StatusOK)
+	} else {
+		http.Error(w, "", http.StatusNotFound)
+	}
+}
+
 func (self *Capterca) Index(w http.ResponseWriter, r *http.Request) {
 	switch method := r.Method; method {
 	case "GET":
@@ -97,6 +112,10 @@ func (self *Capterca) Index(w http.ResponseWriter, r *http.Request) {
 		self.Put(w, r)
 	case "LIST":
 		self.List(w, r)
+	case "LEN":
+		self.Len(w, r)
+	case "OPTIONS":
+		http.Error(w, "Available methods: {GET|POST|LIST|OPTIONS|LEN}", http.StatusOK)
 	default:
 		http.Error(w, "Try again", http.StatusMethodNotAllowed)
 	}

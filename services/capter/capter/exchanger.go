@@ -46,7 +46,6 @@ func main() {
 		if conn, err := listener.Accept(); err != nil {
 			log.Fatal("accept error: " + err.Error())
 		} else {
-			log.Print("new connection established")
 			rand.Seed(time.Now().Unix())
 			go server.ServeCodec(jsonrpc.NewServerCodec(conn))
 		}
