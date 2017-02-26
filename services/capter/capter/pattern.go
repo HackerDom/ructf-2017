@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/hex"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -34,12 +35,13 @@ func decode_pattern(pattern, password string) string {
 		upattern = append(upattern, l, r)
 	}
 	message := u32ToString(upattern)
+	log.Print(message, " - ", pattern)
 	return strings.Split(message, ":")[1]
 }
 
 func b_enc(v0, v1 uint32, k []uint32) (uint32, uint32) {
 	sum, delta := uint32(0), uint32(0x9e3779b9)
-	for i := 0; i < 32; i++ {
+	for i := 0; i < 5; i++ {
 		sum += delta
 		v0 += ((v1 << 4) + k[0]) ^ (v1 + sum) ^ ((v1 >> 5) + k[1])
 		v1 += ((v0 << 4) + k[2]) ^ (v0 + sum) ^ ((v0 >> 5) + k[3])
@@ -48,8 +50,8 @@ func b_enc(v0, v1 uint32, k []uint32) (uint32, uint32) {
 }
 
 func b_dec(v0, v1 uint32, k []uint32) (uint32, uint32) {
-	sum, delta := uint32(0xc6ef3720), uint32(0x9e3779b9)
-	for i := 0; i < 32; i++ {
+	sum, delta := uint32(0x1715609d), uint32(0x9e3779b9)
+	for i := 0; i < 5; i++ {
 		v1 -= ((v0 << 4) + k[2]) ^ (v0 + sum) ^ ((v0 >> 5) + k[3])
 		v0 -= ((v1 << 4) + k[0]) ^ (v1 + sum) ^ ((v1 >> 5) + k[1])
 		sum -= delta
