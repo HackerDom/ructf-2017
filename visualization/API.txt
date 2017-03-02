@@ -40,21 +40,21 @@
 
 Обновления:
 
-/api/info - нужно для инициализации
+Из старых api планирую использовать только /api/info для инициализации
 
 /apiws/events => 
     {
-        "type": "attack" | "state"
-        "attack" | "state" : class attack | state
+        "type": "attack" | "state",
+        "value" : class attack | state
     }
 
-class attack { // Отправляется в момент, когда произошла атака
+class attack { // Отправляется в момент, когда произошла атака. Это данные из /api/events
     "round": number,
     "service_id": string or number,
     "attacker_id": string or number,
     "victim_id": string or numbrt,
 }
 
-class state { // Отправляется в момент окончания раунда, содержит информацию за прошедший раунд, отправляется в момент открытия соединения websocket
-    // То же, что в scoreboard.json
+class state { // Отправляется в момент окончания раунда, содержит информацию за прошедший раунд, плюс отправляется в момент открытия соединения websocket
+    // То же, что есть в /scoreboard.json
 }
