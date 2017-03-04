@@ -69,8 +69,7 @@ func (self *Capter) store(id, message string) error {
 	if local_message != "" {
 		return errors.New("409 Conflict")
 	}
-	pattern, password, ts := create_pattern(id, message)
-	// log.Print(pattern)
+	pattern, password, ts := create_pattern(message)
 	candidates, sum := self.choose()
 	places := transmit_patterns(candidates, sum, id, ts, pattern)
 	if len(places) < 2 {
@@ -79,7 +78,6 @@ func (self *Capter) store(id, message string) error {
 	self.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(self.patterns)
 		local_message := strings.Join(append(places, password, ts), ":")
-		// log.Print(local_message)
 		err := b.Put([]byte(id), []byte(local_message))
 		p := tx.Bucket(self.places)
 		for _, place := range places {
@@ -101,11 +99,9 @@ func (self *Capter) get(id string) string {
 	if local_message == "" {
 		return ""
 	}
-	// log.Print(local_message)
 	local_messages := strings.Split(local_message, ":")
 	places, password, ts := local_messages[:len(local_messages)-2], local_messages[len(local_messages)-2], local_messages[len(local_messages)-1]
 	good_places, pattern := receive_pattern(places, id, ts)
-	// log.Print(pattern)
 	self.db.Update(func(tx *bolt.Tx) error {
 		p := tx.Bucket(self.places)
 		for _, place := range good_places {

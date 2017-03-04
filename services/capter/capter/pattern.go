@@ -8,11 +8,11 @@ import (
 	"time"
 )
 
-func create_pattern(id, message string) (string, string, string) {
+func create_pattern(message string) (string, string, string) {
 	ts := strconv.FormatInt(time.Now().Unix(), 16)
 	password := randString(16)
 	key := strToU32(password)
-	btext := strToU32(id + ":" + message)
+	btext := strToU32(":" + message + "pattern")
 	var upattern []uint32
 	for i := 0; i < len(btext); i += 2 {
 		l, r := b_enc(btext[i], btext[i+1], key)
@@ -36,30 +36,19 @@ func decode_pattern(pattern, password string) string {
 	}
 	message := u32ToString(upattern)
 	log.Print(message, " - ", pattern)
-	parts := strings.Split(message, ":")
-	if len(parts) > 1 {
-		return parts[1]
-	} else {
-		return ""
-	}
+	return strings.TrimPrefix(strings.TrimSuffix(message, "pattern"), ":")
 }
 
 func b_enc(v0, v1 uint32, k []uint32) (uint32, uint32) {
-	sum, delta := uint32(0), uint32(0x9e3779b9)
-	for i := 0; i < 5; i++ {
-		sum += delta
-		v0 += ((v1 << 4) + k[0]) ^ (v1 + sum) ^ ((v1 >> 5) + k[1])
-		v1 += ((v0 << 4) + k[2]) ^ (v0 + sum) ^ ((v0 >> 5) + k[3])
-	}
+	delta := uint32(0x9e3779b9)
+	v0 += (v1 << 4) ^ (k[0] << 4) ^ (v1 + delta) ^ (v1 >> 5) ^ (k[2] >> 5)
+	v1 += (v0 << 4) ^ (k[1] << 4) ^ (v0 + delta) ^ (v0 >> 5) ^ (k[3] >> 5)
 	return v0, v1
 }
 
 func b_dec(v0, v1 uint32, k []uint32) (uint32, uint32) {
-	sum, delta := uint32(0x1715609d), uint32(0x9e3779b9)
-	for i := 0; i < 5; i++ {
-		v1 -= ((v0 << 4) + k[2]) ^ (v0 + sum) ^ ((v0 >> 5) + k[3])
-		v0 -= ((v1 << 4) + k[0]) ^ (v1 + sum) ^ ((v1 >> 5) + k[1])
-		sum -= delta
-	}
+	delta := uint32(0x9e3779b9)
+	v1 -= (v0 << 4) ^ (k[1] << 4) ^ (v0 + delta) ^ (v0 >> 5) ^ (k[3] >> 5)
+	v0 -= (v1 << 4) ^ (k[0] << 4) ^ (v1 + delta) ^ (v1 >> 5) ^ (k[2] >> 5)
 	return v0, v1
 }

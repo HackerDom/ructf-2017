@@ -26,7 +26,7 @@ func store(n int) string {
 	}
 	c := jsonrpc.NewClient(client)
 	id := strconv.Itoa(n) + "-" + strconv.Itoa(rand.Intn(1000))
-	args := &StoreArgs{id, "06c992034824a48343e46280ec1330ff"}
+	args := &StoreArgs{id, strconv.Itoa(rand.Intn(1000)+2000) + "92034824a48343e46280ec1330f="}
 	var reply string
 	call := c.Go("Capter.Put", args, &reply, nil)
 	replyCall := <-call.Done
