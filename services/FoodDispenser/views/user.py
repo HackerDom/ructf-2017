@@ -14,7 +14,7 @@ def init_models(db):
         username = CharField(unique=True, max_length=32)
         registration_date = DateTimeField(default=datetime.now)
         password = CharField(max_length=128)
-        # fill it
+        is_food_service = BooleanField(default=False)
 
         @staticmethod
         def generate_auth_token(data, expiration=300):
