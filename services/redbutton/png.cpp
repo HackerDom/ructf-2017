@@ -99,15 +99,17 @@ int read_png( const char* file_name, Image& image )
 			size_t i = y * width + x;
 			if ( has_alpha )
 			{
-				image.rgba[ i ].r = rgb[ stride * y + x * 4 + 1 ];
+				image.rgba[ i ].r = rgb[ stride * y + x * 4 + 0 ];
+				image.rgba[ i ].g = rgb[ stride * y + x * 4 + 1 ];
 				image.rgba[ i ].g = rgb[ stride * y + x * 4 + 2 ];
-				image.rgba[ i ].b = rgb[ stride * y + x * 4 + 3 ];
+				image.rgba[ i ].a = rgb[ stride * y + x * 4 + 3 ];
 			}
 			else
 			{
 				image.rgba[ i ].r = rgb[ stride * y + x * 3 + 0 ];
 				image.rgba[ i ].g = rgb[ stride * y + x * 3 + 1 ];
 				image.rgba[ i ].b = rgb[ stride * y + x * 3 + 2 ];
+				image.rgba[ i ].a = 255;
 			}
 		}
 	free( rgb );
