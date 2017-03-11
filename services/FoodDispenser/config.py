@@ -1,66 +1,53 @@
-import configparser
 import random
 from hashlib import md5
 import os
+import json
 
 
-class Configs:
-    def __init__(self):
-        self.config_file = "config.ini"
-        self.db_address = None
-        self.db_port = None
-        self.db_login = None
-        self.db_password = None
-        self.db_database = None
-        self.token_secret = None
-        self.dispenser_hash_method = None
-        self.dispenser_salt = None
+class Config:
+    __config_data = {}
+
+    def __init__(self, config_file):
+        self.config_file = "basic_config.json"
         self.__load_configs()
 
     @staticmethod
     def generate_random_hash():
         return md5(random.getrandbits(128).to_bytes(128, 'big')).hexdigest()
 
+    constants = property()
+
+    @constants.getter
+    def get_constants(self, additional_params=None):
+        if additional_params:
+            self.__config_data.update(additional_params)
+        return self.__config_data["constants"]
+
     def update_config(self):
         return self.__load_configs()
 
     def __load_configs(self):
         if not os.path.isfile(self.config_file):
-            config_default = configparser.ConfigParser()
 
-            config_default["connections"] = {
+            self.__config_data["connections"] = {
                 "address": "localhost",
                 "port": 3306,
                 "login": "root",
                 "password": "",
                 "database": "dispenser"
             }
-            config_default["constants"] = {
+            self.__config_data["constants"] = {
                 "token_secret": self.generate_random_hash(),
                 "dispenser_hash_method": "sha256",
                 "dispenser_salt": self.generate_random_hash()
             }
 
             with open(self.config_file, "w") as configfile:
-                config_default.write(configfile)
+                json.dump(self.__config_data, configfile, indent=4)
 
-        parser = configparser.ConfigParser()
-        try:
-            parser.read(self.config_file)
-            db_dir = parser["connections"]
-            self.db_address = db_dir["address"]
-            self.db_port = db_dir["port"]
-            self.db_login = db_dir["login"]
-            self.db_password = db_dir["password"]
-            self.db_database = db_dir["database"]
-
-            constants = parser["constants"]
-            self.token_secret = constants["token_secret"]
-            self.dispenser_hash_method = constants["dispenser_hash_method"]
-            self.dispenser_salt = constants["dispenser_salt"]
-            print("Config file sucessfully reloaded!")
-        except KeyError as e:
-            print("Fix ({}) or delete config file!".format(e))
+        else:
+            with open(self.config_file, "r") as configfile:
+                self.__config_data = json.load(configfile)
 
 
-config = Configs()
+config = Config("config.json")
