@@ -17,7 +17,7 @@ Shader::Shader( GLuint type, const char* fileName )
 	size_t fileSize = ftell( f );
 	fseek( f, 0, SEEK_SET );
 	char* shaderSource = new char[ fileSize + 1 ];
-	memset( shaderSource, 0, fileSize );
+	memset( shaderSource, 0, fileSize + 1 );
 	fread( shaderSource, 1, fileSize, f );
 	fclose( f );
 
