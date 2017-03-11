@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
+#from uwsgidecorators import cron
 from json import loads, JSONDecodeError
 from rest import rest_hub
+from config import config
 
 app = Flask(__name__)
 
@@ -15,12 +17,21 @@ def registration(user_type, action):
         return jsonify({"response": {"error": "Received incorrect data!"}})
 
 
+#@cron(-1, -1, -1, -1, -1)
+#def dynamically_load_config_changes(_):
+#    config.update_config()
+
+
 def get_request_json():
     try:
-        return loads(request.data)
+        return loads(request.data.decode())
+    except UnicodeDecodeError:
+        return None
     except JSONDecodeError:
         return None
     except ValueError:
+        return None
+    except TypeError:
         return None
 
 if __name__ == '__main__':
