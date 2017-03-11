@@ -37,9 +37,9 @@ int main(int argc, char *argv[])
     Context ctx;
     InitEGL( ctx );
 
+    const char* attribList[] = { "v_pos" };
     VertexShader vs( "shaders/simple.vert" );
     FragmentShader fs( "shaders/simple.frag" );
-    const char* attribList[] = { "v_pos" };
     Program pr( vs, fs, attribList, 1 );
 
     //
@@ -98,6 +98,30 @@ int main(int argc, char *argv[])
     glReadPixels(0, 0, 4, 4, GL_RGBA, GL_UNSIGNED_BYTE, ( GLvoid* )image1.rgba );
     CheckError( "glReadPixels");
     save_png( "image1.png", image1 );
+
+    /////
+    FragmentShader fs_flag( "shaders/flag.frag" );
+    Program pr_flag( vs, fs_flag, attribList, 1 );
+
+    Texture2D target2x2( 2, 2, FORMAT_RGBA );
+
+    glBindFramebuffer( GL_FRAMEBUFFER, target2x2.GetFramebuffer() );
+    glClearColor( 0.0, 0.0, 0.0, 0.0 );
+    glViewport(0, 0, 2, 2 );
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    glUseProgram( pr_flag.GetProgram() );
+
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, vVertices );
+    glEnableVertexAttribArray( 0 );
+    glDrawArrays( GL_TRIANGLES, 0, 6 );
+
+    //
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    Image image2x2( 2, 2 );
+    glReadPixels(0, 0, 2, 2, GL_RGBA, GL_UNSIGNED_BYTE, ( GLvoid* )image2x2.rgba );
+    CheckError( "glReadPixels");
+    save_png( "image2x2.png", image2x2 );
     
     ShutdownEGL( ctx );
     return 0;
