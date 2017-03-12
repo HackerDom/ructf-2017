@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
 	"github.com/boltdb/bolt"
 	"log"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -13,6 +16,10 @@ type Capter struct {
 	db       *bolt.DB
 	patterns []byte
 	places   []byte
+}
+
+type TopArgs struct {
+	Limit int
 }
 
 func NewCapter() *Capter {
@@ -33,7 +40,8 @@ func NewCapter() *Capter {
 		if err != nil {
 			return err
 		}
-		for i := 1; i < 11; i++ {
+		// TODO: Generate actual teams names
+		for i := 1; i < 50; i++ {
 			if err := b.Put([]byte("team"+strconv.Itoa(i)), []byte(strconv.Itoa(1))); err != nil {
 				return err
 			}
@@ -44,7 +52,7 @@ func NewCapter() *Capter {
 	return capter
 }
 
-func (self *Capter) choose() ([]Choice, int) {
+func (self *Capter) get_places() ([]Choice, int) {
 	var candidates []Choice
 	sum := 0
 	self.db.View(func(tx *bolt.Tx) error {
@@ -57,7 +65,25 @@ func (self *Capter) choose() ([]Choice, int) {
 		})
 		return nil
 	})
+	sort.Slice(candidates, func(i, j int) bool { return candidates[i].Weight > candidates[j].Weight })
 	return candidates, sum
+}
+
+func (self *Capter) Top(args *TopArgs, reply *string) error {
+	places, _ := self.get_places()
+	limit := args.Limit
+	if limit > len(places) {
+		limit = len(places)
+	}
+	var buffer bytes.Buffer
+	for i := 0; i < limit; i++ {
+		buffer.WriteString(fmt.Sprintf("%v:\t%v\n", places[i].Key, places[i].Weight))
+	}
+	*reply = buffer.String()
+	if reply == nil {
+		return errors.New("All hope is gone")
+	}
+	return nil
 }
 
 func (self *Capter) store(id, message string) error {
@@ -70,7 +96,7 @@ func (self *Capter) store(id, message string) error {
 		return errors.New("409 Conflict")
 	}
 	pattern, password, ts := create_pattern(message)
-	candidates, sum := self.choose()
+	candidates, sum := self.get_places()
 	places := transmit_patterns(candidates, sum, id, ts, pattern)
 	if len(places) < 2 {
 		return errors.New("Not enough places")

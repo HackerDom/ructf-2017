@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/hex"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -35,7 +34,6 @@ func decode_pattern(pattern, password string) string {
 		upattern = append(upattern, l, r)
 	}
 	message := u32ToString(upattern)
-	log.Print(message, " - ", pattern)
 	return strings.TrimPrefix(strings.TrimSuffix(message, "pattern"), ":")
 }
 

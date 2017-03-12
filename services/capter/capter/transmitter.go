@@ -35,6 +35,5 @@ func store_pattern(place, id, ts, pattern string) error {
 		log.Printf("%s-%s not stored to %s: %s", ts, id, place, response.Status)
 		return errors.New("Conflict")
 	}
-	log.Printf("%s-%s stored to %s", ts, id, place)
 	return nil
 }
