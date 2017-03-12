@@ -49,10 +49,29 @@ C.A.P.T.E.R.Сa - C.A.P.T.E.R Candidate
 
 Задепоить только бинарник.
 
+## Деплой
 
-## Build
++ Capter: порт 1234
++ Capterca: порт 8081
+
+### Build
 
     GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build
+
+### Если Docker
+
+После билда бинарников:
+
++ Capter: docker build -f Dockerfile-prod -t capter .
++ Capterca: docker build -t capterca .
+
+Ну и дальше как обычно. (два контейнера в итоге) (можно еще volume сделать для баз)
+
+### Если systemd
+
+1. Поместить директорию capter куда-нибудь (с бинарником вместе (смотреть чтоб права не слетели))
+2. Поместить бинарник capterca в /srv/ (с exec правами)
+3. Создать два unit: capterca requires: network, capter requires: capterca
 
 ## Уязвимости
 
