@@ -1,5 +1,5 @@
 #pragma once
-
+#include "png.h"
 
 //
 enum Format
@@ -16,16 +16,22 @@ class Texture2D
 public:
 	//
 	Texture2D() = delete;
-	Texture2D( int width, int height, Format format );
+	Texture2D( int width, int height, Format format, void* initData = nullptr );
+	Texture2D( const Image& image );
 	~Texture2D();
 
 
 	//
 	GLuint GetTexture() const;
 	GLuint GetFramebuffer() const;
+	int GetWidth() const;
+	int GetHeight() const;
 
 private:
 	//
-	GLuint m_texture = 0;
-	GLuint m_framebuffer = 0;
+	GLuint 	m_texture = 0;
+	GLuint 	m_framebuffer = 0;
+	int 	m_width = 0;
+	int		m_height = 0;
+	Format 	m_format = FORMAT_COUNT;
 };

@@ -1,8 +1,6 @@
-#include <GLES2/gl2.h>
 #include <stdio.h>
 #include <string.h>
-#include "shader.h"
-#include "egl.h"
+#include "glwrap.h"
 
 
 //
@@ -89,7 +87,7 @@ FragmentShader::FragmentShader( const char* fileName )
 
 
 //
-Program::Program( const VertexShader& vs, const FragmentShader& fs, const char** attributeList, int attributesNum )
+Program::Program( const VertexShader& vs, const FragmentShader& fs )
 	: m_vs( vs )
 	, m_fs( fs )
 {
@@ -101,9 +99,6 @@ Program::Program( const VertexShader& vs, const FragmentShader& fs, const char**
 
 	glAttachShader( m_program, vs.GetShader() );
 	glAttachShader( m_program, fs.GetShader() );
-
-	for( int i = 0; i < attributesNum; i++ ) 
-		glBindAttribLocation( m_program, i, attributeList[ i ] );
 	
 	glLinkProgram( m_program );
 
@@ -124,7 +119,28 @@ Program::Program( const VertexShader& vs, const FragmentShader& fs, const char**
 		return;
 	}
 
+	GLint attrNum = 0;
+	glGetProgramiv( m_program, GL_ACTIVE_ATTRIBUTES, &attrNum );
+	for( GLint i = 0; i < attrNum; i++ )
+	{
+		const int attrNameSize = 256;
+		char attrName[ attrNameSize ];
+		memset( attrName, 0, attrNameSize );
+		glGetActiveAttrib( m_program, i, attrNameSize, nullptr, nullptr, nullptr, attrName );
+		GLint attrLocation = glGetAttribLocation( m_program, attrName );
+
+		VertexAttribute attr;
+		m_attributes[ attrLocation ] = attr;
+	}
+
 	glUseProgram( 0 );
+}
+
+
+//
+Program::~Program()
+{
+	glDeleteProgram( m_program );
 }
 
 
@@ -132,4 +148,97 @@ Program::Program( const VertexShader& vs, const FragmentShader& fs, const char**
 GLuint Program::GetProgram() const
 {
 	return m_program;
+}
+
+
+//
+bool Program::SetTexture( const char* uniformName, const Texture2D& tex )
+{
+	const int texLocation = glGetUniformLocation( m_program, uniformName );
+    if( texLocation == -1 )
+        return false;
+
+    m_texBinds[ texLocation ] = tex.GetTexture();
+    return true;
+}
+
+
+//
+bool Program::SetVec4( const char* uniformName, const Vec4& v )
+{
+	const int location = glGetUniformLocation( m_program, uniformName );
+    if( location == -1 )
+        return false;
+
+    m_vec4s[ location ] = v;
+    return true;
+}
+
+
+//
+bool Program::SetIVec4( const char* uniformName, const IVec4& v )
+{
+	const int location = glGetUniformLocation( m_program, uniformName );
+    if( location == -1 )
+        return false;
+
+    m_ivec4s[ location ] = v;
+    return true;
+}
+
+
+//
+bool Program::SetAttribute( const char* attrName, GLint size, GLenum type, GLboolean normalized, GLsizei stride, void* data, int dataSizeInBytes )
+{
+	GLint attrLocation = glGetAttribLocation( m_program, attrName );
+	if( attrLocation == -1 )
+		return false;
+
+	auto iter = m_attributes.find( attrLocation );
+	if( iter == m_attributes.end() )
+		return false;
+
+	VertexAttribute& attr = iter->second;
+	glGenBuffers( 1, &attr.buffer );
+	glBindBuffer( GL_ARRAY_BUFFER, attr.buffer );
+	glBufferData( GL_ARRAY_BUFFER, dataSizeInBytes, data, GL_STATIC_DRAW );
+	glBindBuffer( GL_ARRAY_BUFFER, 0 );
+
+	attr.size = size;
+	attr.type = type;
+	attr.normalized = normalized;
+	attr.stride = stride;
+	attr.valid = true;
+}
+
+
+//
+void Program::BindUniforms() const
+{
+	int texUnit = 0;
+	for( auto iter : m_texBinds )
+	{
+	    glActiveTexture( GL_TEXTURE0 + texUnit );
+	    glBindTexture( GL_TEXTURE_2D, iter.second );
+	    glUniform1i( iter.first, texUnit );
+	}
+
+	for( auto iter : m_vec4s )
+		glUniform4fv( iter.first, 1, ( const GLfloat* )&iter.second );
+
+	for( auto iter : m_ivec4s )
+		glUniform4iv( iter.first, 1, ( const GLint* )&iter.second );
+
+	for( auto iter : m_attributes )
+	{
+		GLint location = iter.first;
+		VertexAttribute& attr = iter.second;
+
+		if( !attr.valid )
+			continue;
+
+		glBindBuffer( GL_ARRAY_BUFFER, attr.buffer );
+		glVertexAttribPointer( location, attr.size, attr.type, attr.normalized, attr.stride, 0 );
+		glEnableVertexAttribArray( location );
+	}
 }

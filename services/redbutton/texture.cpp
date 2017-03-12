@@ -1,7 +1,5 @@
-#include <GLES2/gl2.h>
 #include <stdio.h>
-#include "texture.h"
-#include "egl.h"
+#include "glwrap.h"
 
 
 //
@@ -17,18 +15,19 @@ struct TextureFormat
 
 
 //
-Texture2D::Texture2D( int width, int height, Format format )
+Texture2D::Texture2D( int width, int height, Format format, void* initData )
+	: m_width( width ), m_height( height ), m_format( format )
 {
 	glGenTextures( 1, &m_texture );
 	glBindTexture( GL_TEXTURE_2D, m_texture );
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
  
 
-	TextureFormat fmt = g_mapFormatToTextureFormat[ format ];
+	TextureFormat fmt = g_mapFormatToTextureFormat[ m_format ];
 
-	glTexImage2D( GL_TEXTURE_2D, 0, fmt.internalFormat, width, height, 0, fmt.format, fmt.type, NULL );
+	glTexImage2D( GL_TEXTURE_2D, 0, fmt.internalFormat, m_width, m_height, 0, fmt.format, fmt.type, NULL );
 
 	if( !CheckError( "Failed to create texture" ) ) {
 		glDeleteTextures( 1, &m_texture );
@@ -46,6 +45,14 @@ Texture2D::Texture2D( int width, int height, Format format )
 		m_texture = 0;
 		m_framebuffer = 0;
 	}
+}
+
+
+//
+Texture2D::Texture2D( const Image& image )
+	: Texture2D( image.width, image.height, FORMAT_RGBA, ( void* )image.rgba )
+{
+	
 }
 
 
@@ -70,4 +77,18 @@ GLuint Texture2D::GetTexture() const
 GLuint Texture2D::GetFramebuffer() const
 {
 	return m_framebuffer;
+}
+
+
+//
+int Texture2D::GetWidth() const
+{
+	return m_width;
+}
+
+
+//
+int Texture2D::GetHeight() const
+{
+	return m_height;
 }

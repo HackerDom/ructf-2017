@@ -37,12 +37,20 @@ struct Image
 
     Image( const Image& ) = delete;
     Image( const Image&& ) = delete;
-    Image& operator=( const Image&& ) = delete;
+    Image& operator=( const Image& ) = delete;
 
     ~Image()
     {
-        if( rgba )
-            delete[] rgba;
+        delete[] rgba;
+    }
+
+    //
+    void Reinit( uint16_t w, uint16_t h )
+    {
+        delete[] rgba;
+        width = w;
+        height = h;
+        rgba = new RGBA[ w * h ];
     }
 };
 
