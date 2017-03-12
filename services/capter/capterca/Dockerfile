@@ -1,5 +1,5 @@
 FROM alpine
 EXPOSE 8081
-ADD capterca /capterca
-RUN chmod +x /capterca
-CMD ["/capterca"]
+ADD capterca /srv/capterca
+RUN chmod +x /srv/capterca
+CMD ["/srv/capterca"]

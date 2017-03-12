@@ -38,7 +38,11 @@ func (self *Capter) Get(args *GetArgs, reply *string) error {
 
 func (self *Capter) Info(args *interface{}, reply *string) error {
 	stats := self.db.Stats()
-	*reply = fmt.Sprintf("Cursors:%v\nWrites:%v\nWriteTime:%v", stats.TxStats.CursorCount, stats.TxStats.Write, stats.TxStats.WriteTime)
+	*reply = fmt.Sprintf(
+		"Cursors:%v\nWrites:%v\nWriteTime:%v",
+		stats.TxStats.CursorCount,
+		stats.TxStats.Write,
+		stats.TxStats.WriteTime)
 	if reply == nil {
 		return errors.New("All hope is gone")
 	}

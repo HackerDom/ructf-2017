@@ -15,7 +15,7 @@ type Capterca struct {
 
 func NewCapterca() *Capterca {
 	capterca := new(Capterca)
-	db, err := leveldb.OpenFile("db", nil)
+	db, err := leveldb.OpenFile("/srv/db", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
