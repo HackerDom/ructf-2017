@@ -27,7 +27,7 @@ Texture2D::Texture2D( int width, int height, Format format, void* initData )
 
 	TextureFormat fmt = g_mapFormatToTextureFormat[ m_format ];
 
-	glTexImage2D( GL_TEXTURE_2D, 0, fmt.internalFormat, m_width, m_height, 0, fmt.format, fmt.type, NULL );
+	glTexImage2D( GL_TEXTURE_2D, 0, fmt.internalFormat, m_width, m_height, 0, fmt.format, fmt.type, initData );
 
 	if( !CheckError( "Failed to create texture" ) ) {
 		glDeleteTextures( 1, &m_texture );
