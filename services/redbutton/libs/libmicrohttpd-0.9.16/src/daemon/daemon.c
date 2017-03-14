@@ -2533,7 +2533,7 @@ MHD_stop_daemon (struct MHD_Daemon *daemon)
 	  MHD_DLOG (daemon, "Failed to join a thread: %s\n",
 		    STRERROR (rc));
 #endif
-	  abort();
+    mhd_panic (mhd_panic_cls, __FILE__, __LINE__, "Failed to join a thread");
 	}
       close_all_connections (&daemon->worker_pool[i]);
     }
@@ -2550,7 +2550,7 @@ MHD_stop_daemon (struct MHD_Daemon *daemon)
 	  MHD_DLOG (daemon, "Failed to join a thread: %s\n",
 		    STRERROR (rc));
 #endif
-	  abort();
+    mhd_panic (mhd_panic_cls, __FILE__, __LINE__, "Failed to join a thread");
 	}
     }
   close_all_connections (daemon);
@@ -2569,14 +2569,14 @@ MHD_stop_daemon (struct MHD_Daemon *daemon)
 #if HAVE_MESSAGES
 	  MHD_DLOG (daemon, "Failed to aquire gnutls mutex\n");
 #endif
-	  abort();
+    mhd_panic (mhd_panic_cls, __FILE__, __LINE__, "Failed to aquire gnutls mutex");
 	}
       if (0 != pthread_mutex_unlock (&MHD_gnutls_init_mutex))
 	{
 #if HAVE_MESSAGES
 	  MHD_DLOG (daemon, "Failed to release gnutls mutex\n");
 #endif
-	  abort();
+    mhd_panic (mhd_panic_cls, __FILE__, __LINE__, "Failed to release gnutls mutex");
 	}
     }
 #endif
