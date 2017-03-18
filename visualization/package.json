@@ -8,13 +8,13 @@
     "build-nl": "babel-node tools/build.js"
   },
   "dependencies": {
-    "d3": "^4.4.3",
+    "three": "^0.84.0",
     "event-emitter-es6": "^1.1.5",
     "jquery": "^3.1.1",
-    "jquery-ui": "^1.12.1",
     "md5": "^2.2.1",
     "underscore": "^1.8.3",
-    "whatwg-fetch": "^2.0.2"
+    "whatwg-fetch": "^2.0.2",
+    "stats": "^0.17.0"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",

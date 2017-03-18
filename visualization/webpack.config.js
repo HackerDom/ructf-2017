@@ -11,13 +11,11 @@ export default {
 		vendor: [
 			"jquery",
 			"underscore",
-			"d3-selection",
-			"d3-zoom",
-			"d3-shape",
+			"stats.js",
+			"three",
 			"md5",
 			"event-emitter-es6",
-			"whatwg-fetch",
-			"jquery-ui/ui/widgets/tooltip"],
+			"whatwg-fetch"]
 	},
 	target: 'web',
 	output: {
