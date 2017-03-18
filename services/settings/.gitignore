@@ -1,0 +1,18 @@
+echoserver
+
+*.swp
+*.c.l.h
+*.c.h
+*.i
+*.lst
+
+#generated files
+
+echoserver.c
+errnomessage.c
+logerror.c
+logerrorblock.c
+performserverdescriptor.c
+starthandling.c
+tunesocket.c
+
