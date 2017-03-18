@@ -25,17 +25,21 @@ int main(int argc, char *argv[])
     Context ctx;
     InitEGL( ctx );
 
+    VertexShader vs( "shaders/simple.vert" );
+    FragmentShader fs( "shaders/checkboard.frag" );
+    Program pr( vs, fs );
+    pr.SetAttribute( "v_pos", 3, GL_FLOAT, GL_FALSE, 0, vVertices, 6 * 3 * sizeof( GLfloat ) );
+    pr.SetAttribute( "v_uv", 2, GL_FLOAT, GL_FALSE, 0, vUv, 6 * 2 * sizeof( GLfloat ) );
+
+    /*const int C = 4;
+    Texture2D* texture[ C ];
+    for( int i = 0; i < C; i++ )
+        texture[ i ] = new Texture2D( 2, 2, FORMAT_RGBA );
+
+    for( int i = 0; i < C; i++ )
     {
-        VertexShader vs( "shaders/simple.vert" );
-        FragmentShader fs( "shaders/simple.frag" );
-        Program pr( vs, fs );
-        pr.SetAttribute( "v_pos", 3, GL_FLOAT, GL_FALSE, 0, vVertices, 6 * 3 * sizeof( GLfloat ) );
-        pr.SetAttribute( "v_uv", 2, GL_FLOAT, GL_FALSE, 0, vUv, 6 * 2 * sizeof( GLfloat ) );
-
-        //
-        Texture2D* texture = new Texture2D( 4, 4, FORMAT_RGBA );
-
-        BindFramebuffer( *texture );
+        pr.SetVec4( "color", Vec4( 1.0f - ( float )i * 0.25f, ( float )i * 0.25f, 0.0f, 1.0f ) );
+        BindFramebuffer( *texture[ i ] );
         Clear( 0.0, 0.0, 0.0, 0.0 );
 
         SetProgram( pr );
@@ -43,19 +47,29 @@ int main(int argc, char *argv[])
 
         Image image0;
         ReadPixels( image0 );
-        save_png( "image0.png", image0 );
-        delete texture;
+        char buf[ 256 ];
+        memset( buf, 0, 256 );
+        sprintf( buf, "image%d.png", i );
+        save_png( buf, image0 );
     }
 
+    for( int i = 0; i < C; i++ )
+        delete texture[ i ];
+
+    int W = 4096;
+    int H = 4096;
+    for( int i = 0; i < C; i++ )
+        texture[ i ] = new Texture2D( W, H, FORMAT_RGBA );
+
     //
+    for( int i = 0; i < C; i++ )
     {
-        Texture2D texture( 4, 4, FORMAT_RGBA );
-        Texture2D target( 4, 4, FORMAT_RGBA );
+        Texture2D target( W, H, FORMAT_RGBA );
 
         VertexShader vs( "shaders/simple.vert" );
         FragmentShader fs_copy( "shaders/copy.frag" );
         Program pr_copy( vs, fs_copy );
-        pr_copy.SetTexture( "tex", texture );
+        pr_copy.SetTexture( "tex", *texture[ i ] );
         pr_copy.SetAttribute( "v_pos", 3, GL_FLOAT, GL_FALSE, 0, vVertices, 6 * 3 * sizeof( GLfloat ) );
         pr_copy.SetAttribute( "v_uv", 2, GL_FLOAT, GL_FALSE, 0, vUv, 6 * 2 * sizeof( GLfloat ) );
 
@@ -68,8 +82,20 @@ int main(int argc, char *argv[])
         //
         Image image1;
         ReadPixels( image1 );
-        save_png( "image1.png", image1 );
+        char buf[ 256 ];
+        memset( buf, 0, 256 );
+        sprintf( buf, "imageX%d.png", i );
+        save_png( buf, image1 );
+
+        BindFramebuffer( target );
+        Clear( 0.0, 0.0, 0.0, 0.0 );
+
+        BindFramebuffer( *texture[ i ] );
+        Clear( 0.0, 0.0, 0.0, 0.0 );
     }
+
+    for( int i = 0; i < C; i++ )
+        delete texture[ i ];*/
 
     /////
     {
@@ -83,20 +109,26 @@ int main(int argc, char *argv[])
         pr_flag.SetTexture( "tex", crTex );
         pr_flag.SetAttribute( "v_pos", 3, GL_FLOAT, GL_FALSE, 0, vVertices, 6 * 3 * sizeof( GLfloat ) );
 
-        const int W = 1;
+        const int W = 32;
         const int H = 1;
         Texture2D target2x2( W, H, FORMAT_RGBA );
 
         BindFramebuffer( target2x2 );
         Clear( 0.0, 0.0, 0.0, 0.0 );
 
-        SetProgram( pr_flag );
+        SetProgram( pr_flag ); 
         glDrawArrays( GL_TRIANGLES, 0, 6 );
 
         //
         Image image2x2;
         ReadPixels( image2x2 );
         save_png( "image2x2.png", image2x2 );
+
+        for( int i = 0; i < W; i++ ) {
+            printf( "%u %u %u %u\n", image2x2.rgba[ i ].r, image2x2.rgba[ i ].g, 
+            image2x2.rgba[ i ].b, 
+            image2x2.rgba[ i ].a );
+        }
     }
 
     ShutdownEGL( ctx );
