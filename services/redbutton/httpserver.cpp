@@ -158,10 +158,16 @@ HttpRequestState::HttpRequestState(HttpRequest request, HttpRequestHandler *requ
 HttpRequestState::~HttpRequestState()
 {
 	if (postProcessor)
+	{
 		MHD_destroy_post_processor(postProcessor);
+		postProcessor = NULL;
+	}
 
 	if (userData)
+	{
 		delete userData;
+		userData = NULL;
+	}
 }
 
 int HttpRequestState::IteratePostData(void *context, MHD_ValueKind kind, const char *key, const char *filename, const char *contentType, const char *transferEncoding, const char *data, uint64_t offset, size_t size)

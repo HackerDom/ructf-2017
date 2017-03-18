@@ -6,7 +6,7 @@
 #include "texture.h"
 #include "png.h"
 
-#include "httpserver.h"
+#include "template.h"
 
 
 static GLfloat vVertices[] = {  -1.0f,  1.0f, 0.0f,
@@ -32,38 +32,21 @@ GLfloat vUv[] = {   0.0f, 1.0f,
                     0.0f, 0.0f
 };
 
-class TestHandler : public HttpRequestHandler
-{
-public:
-	virtual HttpResponse HandleGet(HttpRequest request)
-	{
-		printf("handle get");
-
-		return HttpResponse(MHD_HTTP_OK);
-	}
-
-	virtual HttpResponse HandlePost(HttpRequest request, HttpStateData **userData, PostIterator *postIterator, PostFinalizer *postFinalizer)
-	{
-		postFinalizer = NULL;
-
-		printf("handle post");
-
-		return HttpResponse(MHD_HTTP_OK);
-	}
-};
-
 //
 int main(int argc, char *argv[])
 {
-	TestHandler handler;
+	/*TestHandler handler;
 	HttpServer server(&handler);
 
 	server.Start(16780);
 
 	getchar();
 
-	server.Stop();
+	server.Stop();*/
 
+	TemplateStorage templates("templates");
+
+	printf("%s\n", templates.GetTemplate("test")->Fill("hello", "Hello, world!", "footer", "-- footer --"));
 
 	return 0;
 
