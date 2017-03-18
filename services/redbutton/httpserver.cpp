@@ -133,7 +133,7 @@ int HttpServer::SendResponse(MHD_Connection *connection, HttpResponse response)
 
 	MHD_destroy_response(mhdResponse);
 
-	delete response.content;
+	delete[] response.content;
 
 	return result;
 }

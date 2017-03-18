@@ -37,13 +37,13 @@ Template::~Template()
 {
 	if (text)
 	{
-		delete text;
+		delete[] text;
 		text = NULL;
 	}
 
 	if (name)
 	{
-		delete name;
+		delete[] name;
 		name = NULL;
 	}
 }
@@ -178,7 +178,7 @@ void TemplateStorage::LoadTemplate(const char *path, const char *name)
 
 	templates[templateCount++] = new Template(content, name);
 
-	delete content;
+	delete[] content;
 
 	fclose(f);
 }
