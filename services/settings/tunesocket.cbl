@@ -4,6 +4,7 @@
        data division.
        working-storage section.
        01 flags  binary-int.
+       01 is-success picture 9.
 
        77 SOL_SOCKET binary-int value 1.
        77 SO_REUSEADDR binary-int value 2.
@@ -22,10 +23,11 @@
 
        linkage section.
        01 fdesc binary-int.
+       01 need-abort picture 9.
 
-       procedure division using fdesc.
-      * TODO don't stop run if fail for peer 
+       procedure division using fdesc, need-abort returning is-success.
        start-tune-socket.
+           move 1 to is-success
            call 'setsockopt' using
              by value fdesc
              by value SOL_SOCKET
@@ -36,7 +38,10 @@
            if return-code is less than zero
              call 'log-error' using
                by content SETSOCKOPT_ERROR
+               by value need-abort
              end-call
+             move zero to is-success
+             goback
            end-if
 
            call 'fcntl' using
@@ -48,7 +53,10 @@
            if return-code is less than zero
              call 'log-error' using
                by content GET_ERROR 
+               by value need-abort
              end-call
+             move zero to is-success
+             goback
            end-if
 
            call 'or' using
@@ -65,7 +73,10 @@
            if return-code is less than zero
              call 'log-error' using
                by content SET_ERROR
+               by value need-abort
              end-call
+             move zero to is-success
+             goback
            end-if
            goback.
 

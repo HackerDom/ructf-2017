@@ -50,6 +50,7 @@
 
           call 'tune-socket' using
              by reference server-descriptor
+             by content 1
            end-call
 
       D    display "tune socket" end-display

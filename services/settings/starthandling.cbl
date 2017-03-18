@@ -23,6 +23,7 @@
 
        01 flag binary-int unsigned.
        01 need-close picture 9.
+       01 is-succes picture 9.
 
        77 MSG_NOSIGNAL binary-int value 16384.
 
@@ -97,7 +98,13 @@
 
              call 'tune-socket' using
                by reference peer-descriptor
+               by content 1
+               returning is-succes
              end-call
+             if is-succes is equal to zero
+               perform close-connection
+               exit perform
+             end-if
 
              call 'addRead' using
                by value peer-descriptor

@@ -27,8 +27,7 @@
              move 0 to need-close
            else
              move 1 to need-close
-           end-if
-           display need-close end-display.
+           end-if.
 
  
        end program log-error-nonblock.
