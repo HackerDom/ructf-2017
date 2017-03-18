@@ -112,32 +112,5 @@
 
       D    display "init polling" end-display
 
-      *     perform forever
-      *       perform accept-new
-      *       perform response-all
-      *     end-perform.
-
-      *accept-new.
-      *   move function length(peer-address) to peer-address-length
-      *   call 'accept' using
-      *     by value server-descriptor
-      *     by reference peer-address
-      *     by reference peer-address-length
-      *     giving peer-descriptor
-      *   end-call
-      *   if return-code is equal to -1
-      *     call 'errnomessage' using
-      *       by reference errno errno-name errno-message
-      *     end-call
-      *     if
-      *       errno-name is not equal to 'EAGAIN'
-      *       and errno-name is not equal to 'EWOULDBLOCK'
-      *         move "server call 'accept' failed" to abort-message
-      *         perform abort-server
-      *     end-if
-      *
-      *   end-if.
-
-
            goback.
        end program perform-server-descriptor.
