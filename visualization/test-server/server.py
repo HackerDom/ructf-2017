@@ -137,11 +137,11 @@ async def write_to_websocket(text):
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', '--teams', type=int, help='teams count',
-                        default=455)
+                        default=25)
     parser.add_argument('-s', '--services', type=int, help='services count',
                         default=6)
     parser.add_argument('-q', '--frequency', type=int, help='attack frequency',
-                        default=10)
+                        default=3)
     return parser.parse_args()
 
 

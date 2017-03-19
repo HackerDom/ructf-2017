@@ -35,7 +35,7 @@ export default class View {
 			const text = $(this).val().toLowerCase();
 		});
 
-		this.initThree();
+		this.initThree(this.model.teams);
 	}
 
 	drawServicesStatusesAndStat() {
@@ -83,100 +83,93 @@ export default class View {
 		}
 	}
 
-	initThree() {
-		var SCREEN_WIDTH = window.innerWidth - 100;
-		var SCREEN_HEIGHT = window.innerHeight - 100;
+	initThree(teams) {
+		const $container = $("#container");
+		let SCREEN_WIDTH = $container.width();
+		let SCREEN_HEIGHT = $container.height();
+		let aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 
-		var camera, scene;
-		var canvasRenderer, webglRenderer;
+		let camera, scene;
+		let renderer;
+		let planetGroup;
 
-		var container, mesh, geometry, plane;
+		const clock = new THREE.Clock();
+		let lon = 0, lat = 0;
+		let phi = 0, theta = 0;
 
-		var windowHalfX = window.innerWidth / 2;
-		var windowHalfY = window.innerHeight / 2;
-		var lon = 0, lat = 0;
-		var phi = 0, theta = 0;
-
-		var aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
-		var onPointerDownPointerX, onPointerDownPointerY, onPointerDownLon, onPointerDownLat;
+		let onPointerDownPointerX, onPointerDownPointerY, onPointerDownLon, onPointerDownLat;
 
 		init();
 		animate();
 
 		function init() {
-
-			container = document.createElement('div');
-			document.body.appendChild(container);
-
-			camera = new THREE.PerspectiveCamera( 60, aspect, 1, 1000 );
+			camera = new THREE.PerspectiveCamera(60, aspect, 1, 1000);
+			camera.position.set(0, 0, 100);
 
 			scene = new THREE.Scene();
 
+			const light = new THREE.DirectionalLight(0xdfebff, 1);
+			light.position.set(75, 20, 60);
+			light.shadow.mapSize.width = 2048; // default is 512
+			light.shadow.mapSize.height = 2048; // default is 512
+			light.castShadow = true;
+			light.shadow.camera.left = -80;
+			light.shadow.camera.right = 80;
+			light.shadow.camera.top = 80;
+			light.shadow.camera.bottom = -80;
+			light.shadowCameraHelper = new THREE.CameraHelper(light.shadow.camera);
+			scene.add(light);
+			scene.add(light.shadowCameraHelper);
 
-			var ambient = 0xf4f4f4;
-			var groundMaterial = new THREE.MeshLambertMaterial({
-				color: 0xFF0000,
-				// map: texture
-				// ambient: ambient
-			});
-			// LIGHTS
 			scene.add(new THREE.AmbientLight(0x666666));
 
-			var light;
+			planetGroup = new THREE.Object3D();
 
-			light = new THREE.SpotLight(0xdfebff, 1);
-			light.position.set(50, 0, 0);
-
-
-			light.castShadow = true;
-			light.shadowCameraVisible = true;
-
-// ------------------------------------------------------------------------------------
-
-// custom shadow frustum
-			light.shadow = new THREE.LightShadow( new THREE.PerspectiveCamera( 50, aspect, 1, 20 ) );
-
-// shadow camera helper
-			light.shadowCameraHelper = new THREE.CameraHelper( light.shadow.camera );
-			scene.add( light.shadowCameraHelper );
-
-// ------------------------------------------------------------------------------------
-
-
-
-			const group = new THREE.Object3D();
-
-			var sphere = new THREE.Mesh( new THREE.IcosahedronBufferGeometry( 40, 3 ), new THREE.MeshLambertMaterial( { color: 0xFF0000 } ) );
-			sphere.castShadow = false;
+			const sphere = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40, 5), new THREE.MeshLambertMaterial({color: 0xFF0000}));
+			sphere.castShadow = true;
 			sphere.position.set(0, 0, 0);
 			sphere.receiveShadow = true;
-			group.add(sphere);
+			planetGroup.add(sphere);
 
-			var cube = genNode();
-			cube.castShadow = true;
-			cube.position.set( 42, 0, 0 );
+			let points = [];
+			let samplesCount = teams.length;
+			while (points.length < teams.length) {
+				points = fibonacci_sphere(samplesCount);
+				points = points.filter(p => p[1] >= -0.5 && p[1] <= 0.5);
+				samplesCount++;
+			}
+			if (points.length > teams.length)
+				points = points.slice(0, teams.length);
 
-			group.add(cube);
-			group.add(light);
-			scene.add(group);
+			for(let i=0; i<points.length; i++) {
+				const node = genNode();
+				node.castShadow = true;
+				node.receiveShadow = true;
+				node.position.set(points[i][0] * 43, points[i][1] * 43, points[i][2] * 43);
+				let myDirectionVector = new THREE.Vector3(points[i][0], points[i][1], points[i][2]);
+				let mx = new THREE.Matrix4().lookAt(new THREE.Vector3(0,0,0), myDirectionVector, new THREE.Vector3(0,1,0));
+				let qt = new THREE.Quaternion().setFromRotationMatrix(mx);
+				node.quaternion.copy(qt);
+				planetGroup.add(node);
+				scene.add(planetGroup);
+			}
 
-			// RENDERER
-			webglRenderer = new THREE.WebGLRenderer({ alpha: true });
-			webglRenderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-			webglRenderer.domElement.style.position = "relative";
-			webglRenderer.shadowMapEnabled = true;
-			webglRenderer.shadowMapSoft = true;
+			const axes = new THREE.AxisHelper(100);
+			scene.add(axes);
 
-			container.appendChild(webglRenderer.domElement);
-			window.addEventListener( 'resize', onWindowResized, false );
-			document.addEventListener( 'mousedown', onDocumentMouseDown, false );
-			document.addEventListener( 'wheel', onDocumentMouseWheel, false );
+			renderer = new THREE.WebGLRenderer({alpha: true, antialias: true});
+			renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+			renderer.shadowMap.enabled = true;
 
+			$container.append(renderer.domElement);
+			window.addEventListener('resize', onWindowResized, false);
+			document.addEventListener('mousedown', onDocumentMouseDown, false);
+			document.addEventListener('wheel', onDocumentMouseWheel, false);
 		}
 
 		function genNode() {
 			const geometry = new THREE.Geometry();
-			const ISLAND_WIDTH = 5;
+			const ISLAND_WIDTH = 8;
 			const ISLAND_HEIGHT = ISLAND_WIDTH * 0.866; // sqrt(3)/2
 			const fig = [{x: ISLAND_WIDTH / 4 , y: 0},
 				{x: ISLAND_WIDTH * 3 / 4, y: 0},
@@ -185,66 +178,96 @@ export default class View {
 				{x: ISLAND_WIDTH / 4 , y: ISLAND_HEIGHT},
 				{x: 0, y: ISLAND_HEIGHT / 2}];
 			for (let i=0; i<fig.length; i++)
-				geometry.vertices.push(new THREE.Vector3(-1, fig[i].x - ISLAND_WIDTH / 2, fig[i].y - ISLAND_HEIGHT / 2 ));
+				geometry.vertices.push(new THREE.Vector3(fig[i].x - ISLAND_WIDTH / 2, fig[i].y - ISLAND_HEIGHT / 2, -1));
 			for (let i=0; i<fig.length; i++)
-				geometry.vertices.push(new THREE.Vector3(1, fig[i].x  - ISLAND_WIDTH / 2, fig[i].y - ISLAND_HEIGHT / 2 ));
+				geometry.vertices.push(new THREE.Vector3(fig[i].x  - ISLAND_WIDTH / 2, fig[i].y - ISLAND_HEIGHT / 2, 1));
 			const faces1 = [[0,5,1],[1,3,2],[3,5,4],[1,5,3]];
 			const faces2 = [[0,1,5],[1,2,3],[3,4,5],[1,3,5]];
 			for (let i=0; i<faces1.length; i++)
-				geometry.faces.push( new THREE.Face3(faces1[i][0], faces1[i][1], faces1[i][2] ) );
+				geometry.faces.push(new THREE.Face3(faces1[i][0], faces1[i][1], faces1[i][2]));
 			for (let i=0; i<faces2.length; i++)
-				geometry.faces.push( new THREE.Face3(faces2[i][0] + 6, faces2[i][1] + 6, faces2[i][2] + 6 ) );
+				geometry.faces.push(new THREE.Face3(faces2[i][0] + 6, faces2[i][1] + 6, faces2[i][2] + 6));
 			const borders = [[0,7,6],[1,8,7],[2,9,8],[3,10,9],[4,11,10],[5,6,11],
 				[0,1,7],[1,2,8],[2,3,9],[3,4,10],[4,5,11],[5,0,6]];
 			for (let i=0; i<borders.length; i++)
-				geometry.faces.push( new THREE.Face3(borders[i][0], borders[i][1], borders[i][2] ) );
+				geometry.faces.push(new THREE.Face3(borders[i][0], borders[i][1], borders[i][2]));
 			geometry.computeVertexNormals();
-			return new THREE.Mesh(geometry, new THREE.MeshLambertMaterial( { color: 0xff0000 } ) );
+			return new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({color: 0x0000ff}));
 		}
 
+		function fibonacci_sphere(samples) { // http://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere
+			const rnd = 1;
+			const points = [];
+			const offset = 2. / samples;
+			const increment = Math.PI * (3. - Math.sqrt(5.));
+
+			for (let i = 0; i<samples; i++) {
+				let y = ((i * offset) - 1) + (offset / 2);
+				let r = Math.sqrt(1 - Math.pow(y, 2));
+
+				let phi = ((i + rnd) % samples) * increment;
+
+				let x = Math.cos(phi) * r;
+				let z = Math.sin(phi) * r;
+
+				points.push([x, y, z]);
+			}
+			return points;
+		}
+
+
 		function onWindowResized() {
-			renderer.setSize(window.innerWidth - 1, window.innerHeight - 1 );
-			camera.aspect = (window.innerWidth - 1) / (window.innerHeight - 1);
+			SCREEN_WIDTH = $container.width();
+			SCREEN_HEIGHT = $container.height();
+			renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+			aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+			camera.aspect = aspect;
 			camera.updateProjectionMatrix();
 		}
-		function onDocumentMouseDown( event ) {
+
+		function onDocumentMouseDown(event) {
 			event.preventDefault();
 			onPointerDownPointerX = event.clientX;
 			onPointerDownPointerY = event.clientY;
 			onPointerDownLon = lon;
 			onPointerDownLat = lat;
-			document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-			document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+			document.addEventListener('mousemove', onDocumentMouseMove, false);
+			document.addEventListener('mouseup', onDocumentMouseUp, false);
 		}
-		function onDocumentMouseMove( event ) {
-			lon = ( event.clientX - onPointerDownPointerX ) * 0.1 + onPointerDownLon;
-			lat = ( event.clientY - onPointerDownPointerY ) * 0.1 + onPointerDownLat;
+
+		function onDocumentMouseMove(event) {
+			lon = (event.clientX - onPointerDownPointerX) * 0.1 + onPointerDownLon;
+			lat = (event.clientY - onPointerDownPointerY) * 0.1 + onPointerDownLat;
 		}
-		function onDocumentMouseUp( event ) {
-			document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
-			document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+
+		function onDocumentMouseUp() {
+			document.removeEventListener('mousemove', onDocumentMouseMove, false);
+			document.removeEventListener('mouseup', onDocumentMouseUp, false);
 		}
-		function onDocumentMouseWheel( event ) {
-			camera.fov += ( event.deltaY * 0.05 );
+
+		function onDocumentMouseWheel(event) {
+			const newFov = camera.fov + (event.deltaY * 0.05);
+			if(newFov > 60 && newFov < 100)
+				camera.fov = newFov;
 			camera.updateProjectionMatrix();
 		}
 
 		function animate() {
-			requestAnimationFrame( animate );
+			requestAnimationFrame(animate);
 			render();
 		}
-		function render() {
-			//var time = Date.now();
-			//lon = 20;
-			lat = Math.max( - 85, Math.min( 85, lat ) );
-			phi = THREE.Math.degToRad( 90 - lat );
-			theta = THREE.Math.degToRad( lon );
-			camera.position.x = 100 * Math.sin( phi ) * Math.cos( theta );
-			camera.position.y = 100 * Math.cos( phi );
-			camera.position.z = 100 * Math.sin( phi ) * Math.sin( theta );
-			camera.lookAt( scene.position );
-			webglRenderer.render( scene, camera );
-		}
 
+		function render() {
+			lat = Math.max(-89, Math.min(89, lat));
+			phi = THREE.Math.degToRad(lat - 90);
+			theta = THREE.Math.degToRad(lon - 90);
+			camera.position.x = 100 * Math.sin(phi) * Math.cos(theta);
+			camera.position.y = 100 * Math.cos(phi);
+			camera.position.z = 100 * Math.sin(phi) * Math.sin(theta);
+			camera.lookAt(scene.position);
+			const delta = clock.getDelta();
+			planetGroup.rotateY(delta / 3);
+			renderer.render(scene, camera);
+		}
 	}
 }
