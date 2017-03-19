@@ -97,7 +97,7 @@ func (self *Capter) store(id, message string) error {
 	}
 	pattern, password, ts := create_pattern(message)
 	candidates, sum := self.get_places()
-	places := transmit_patterns(candidates, sum, id, ts, pattern)
+	places := transmit_messages(candidates, sum, id, ts, pattern)
 	if len(places) < 2 {
 		return errors.New("Not enough places")
 	}
@@ -127,7 +127,7 @@ func (self *Capter) get(id string) string {
 	}
 	local_messages := strings.Split(local_message, ":")
 	places, password, ts := local_messages[:len(local_messages)-2], local_messages[len(local_messages)-2], local_messages[len(local_messages)-1]
-	good_places, pattern := receive_pattern(places, id, ts)
+	good_places, pattern := receive_message(places, id, ts)
 	self.db.Update(func(tx *bolt.Tx) error {
 		p := tx.Bucket(self.places)
 		for _, place := range good_places {

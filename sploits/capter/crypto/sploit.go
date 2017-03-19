@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func bytesToU32(b []byte) []uint32 {
@@ -41,18 +42,30 @@ func b_dec(v0, v1, k0, k1 uint32) (uint32, uint32) {
 
 func main() {
 	se := os.Args[1]
-	btext := []uint32{0x3d706174, 0x7465726e} // =pattern
-	epattern, _ := hex.DecodeString(se)
-	etext := bytesToU32(epattern)
-	delta := uint32(0x9e3779b9)
-	last := len(etext) - 1
-	prev := len(etext) - 2
-	k1 := (etext[last] - btext[1]) ^ (etext[prev] << 4) ^ (etext[prev] + delta) ^ (etext[prev] >> 5)
-	k0 := (etext[prev] - btext[0]) ^ (btext[1] << 4) ^ (btext[1] + delta) ^ (btext[1] >> 5)
-	var p []uint32
-	for i := 0; i < len(etext); i += 2 {
-		x, y := b_dec(etext[i], etext[i+1], k0, k1)
-		p = append(p, x, y)
+	suffixes := []string{
+		"pattern",
+		"Presult",
+		"Nresult",
+		"feedb3k",
+		"quality",
 	}
-	fmt.Println(u32ToString(p))
+	for _, suffix := range suffixes {
+		btext := strToU32("=" + suffix)[:2]
+		epattern, _ := hex.DecodeString(se)
+		etext := bytesToU32(epattern)
+		delta := uint32(0x9e3779b9)
+		last := len(etext) - 1
+		prev := len(etext) - 2
+		k1 := (etext[last] - btext[1]) ^ (etext[prev] << 4) ^ (etext[prev] + delta) ^ (etext[prev] >> 5)
+		k0 := (etext[prev] - btext[0]) ^ (btext[1] << 4) ^ (btext[1] + delta) ^ (btext[1] >> 5)
+		var p []uint32
+		for i := 0; i < len(etext); i += 2 {
+			x, y := b_dec(etext[i], etext[i+1], k0, k1)
+			p = append(p, x, y)
+		}
+		message := u32ToString(p)
+		if strings.Contains(message, ":") {
+			fmt.Println(strings.TrimSuffix(strings.TrimPrefix(message, ":"), suffix))
+		}
+	}
 }

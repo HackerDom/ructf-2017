@@ -30,7 +30,7 @@ func store(n int) string {
 	}
 	c := jsonrpc.NewClient(client)
 	id := strconv.Itoa(n) + "-" + strconv.Itoa(rand.Intn(1000))
-	args := &StoreArgs{id, strconv.Itoa(rand.Intn(1000)+2000) + "92034824a48343e46280ec1330f="}
+	args := &StoreArgs{id, strconv.Itoa(rand.Intn(1000)+2000) + "92034824a48343e46280ec1330f=pattern"}
 	var reply string
 	call := c.Go("Capter.Put", args, &reply, nil)
 	replyCall := <-call.Done
@@ -62,8 +62,8 @@ func get(id string) {
 	}
 	if call.Error != nil {
 		fmt.Printf("Get %s failed: %s\n", args.ID, call.Error.Error())
-		// } else {
-		// 	fmt.Printf("Get %s: %s\n", args.ID, reply)
+	} else {
+		fmt.Printf("Get %s: %s\n", args.ID, reply)
 	}
 	c.Close()
 	client.Close()
@@ -97,15 +97,15 @@ func store_get(n int, wg *sync.WaitGroup) {
 }
 
 func main() {
-	// var wg sync.WaitGroup
-	// wg.Add(1)
+	var wg sync.WaitGroup
+	wg.Add(1)
 	// store_get(0, &wg)
-	top(5)
-	// for i := 0; i < 1000; i += 50 {
-	// 	wg.Add(50)
-	// 	for j := 0; j < 50; j++ {
-	// 		store_get(i+j, &wg)
-	// 	}
-	// 	wg.Wait()
-	// }
+	// top(5)
+	for i := 0; i < 1000; i += 50 {
+		wg.Add(50)
+		for j := 0; j < 50; j++ {
+			store_get(i+j, &wg)
+		}
+		wg.Wait()
+	}
 }

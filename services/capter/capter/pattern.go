@@ -11,7 +11,7 @@ func create_pattern(message string) (string, string, string) {
 	ts := strconv.FormatInt(time.Now().Unix(), 16)
 	password := randString(16)
 	key := strToU32(password)
-	btext := strToU32(":" + message + "pattern")
+	btext := strToU32(":" + message)
 	var upattern []uint32
 	for i := 0; i < len(btext); i += 2 {
 		l, r := b_enc(btext[i], btext[i+1], key)
@@ -33,8 +33,8 @@ func decode_pattern(pattern, password string) string {
 		l, r := b_dec(btext[i], btext[i+1], key)
 		upattern = append(upattern, l, r)
 	}
-	message := u32ToString(upattern)
-	return strings.TrimPrefix(strings.TrimSuffix(message, "pattern"), ":")
+	message := strings.TrimPrefix(u32ToString(upattern), ":")
+	return message
 }
 
 func b_enc(v0, v1 uint32, k []uint32) (uint32, uint32) {

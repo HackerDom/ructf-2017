@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net"
 	"net/http"
 	"net/rpc/jsonrpc"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -79,19 +81,36 @@ type GetArgs struct {
 	ID string
 }
 
+func messageType() string {
+	rand.Seed(time.Now().UnixNano())
+	types := []string{
+		"pattern",
+		"Presult",
+		"Nresult",
+		"feedb3k",
+		"quality",
+	}
+	return types[rand.Intn(5)]
+}
+
 func put(hostname, id, flag string) {
-	args := &StoreArgs{id, flag}
+	message_type := messageType()
+	args := &StoreArgs{id, flag + message_type}
 	reply := capterCommand(hostname, "Put", args)
 	if reply == "Stored" {
-		die("", "", OK)
+		die(id+"="+message_type, "", OK)
 	}
 	die("Put failed", reply, MUMBLE)
 }
 
 func get(hostname, id, flag string) {
-	args := &GetArgs{id}
+	id_type := strings.Split(id, "=")
+	if len(id_type) < 2 {
+		die("Bad ID", id, INTERNAL_ERROR)
+	}
+	args := &GetArgs{id_type[0]}
 	reply := capterCommand(hostname, "Get", args)
-	if reply == flag {
+	if reply == flag+id_type[1] {
 		die("", "", OK)
 	}
 	if len(reply) > 0 {

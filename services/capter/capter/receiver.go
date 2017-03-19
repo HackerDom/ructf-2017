@@ -9,27 +9,27 @@ import (
 	"time"
 )
 
-func receive_pattern(places []string, id, ts string) ([]string, string) {
-	patterns := make(map[string]int)
+func receive_message(places []string, id, ts string) ([]string, string) {
+	messages := make(map[string]int)
 	var good_places []string
 	for _, place := range places {
-		if pattern, err := receive_one_pattern(place, id, ts); err == nil {
+		if message, err := receive_one_message(place, id, ts); err == nil {
 			good_places = append(good_places, place)
-			patterns[pattern] += 1
+			messages[message] += 1
 		}
 	}
-	var pattern string
+	var message string
 	freq := 0
-	for p, f := range patterns {
+	for p, f := range messages {
 		if f > freq {
 			freq = f
-			pattern = p
+			message = p
 		}
 	}
-	return good_places, pattern
+	return good_places, message
 }
 
-func receive_one_pattern(place, id, ts string) (string, error) {
+func receive_one_message(place, id, ts string) (string, error) {
 	client := &http.Client{Timeout: time.Second * 1}
 	response, err := client.Get(
 		"http://" + place + ":8081/?id=" + ts + "-" + id)

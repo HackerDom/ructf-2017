@@ -33,8 +33,8 @@ func (self *Capterca) Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Nice weather, isn't it?", http.StatusNoContent)
 		return
 	}
-	if pattern, err := self.db.Get([]byte(id), nil); err == nil {
-		http.Error(w, string(pattern), http.StatusOK)
+	if message, err := self.db.Get([]byte(id), nil); err == nil {
+		http.Error(w, string(message), http.StatusOK)
 	} else {
 		http.Error(w, "", http.StatusNotFound)
 	}
@@ -54,12 +54,12 @@ func (self *Capterca) Put(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "", http.StatusConflict)
 		return
 	}
-	pattern := r.FormValue("pattern")
-	if pattern == "" {
+	message := r.FormValue("message")
+	if message == "" {
 		http.Error(w, "Where is the box?", http.StatusBadRequest)
 		return
 	}
-	if err := self.db.Put([]byte(id), []byte(pattern), nil); err != nil {
+	if err := self.db.Put([]byte(id), []byte(message), nil); err != nil {
 		http.Error(w, "I'm a teapot", http.StatusInternalServerError)
 		return
 	} else {

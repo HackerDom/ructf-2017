@@ -21,7 +21,7 @@ function check() {
 			continue
 		fi
 		gen_flag
-		gtimeout 5 ./checker put localhost "$flag_id" "$flag" 1 2>&1
+		new_id=$(gtimeout 5 ./checker put localhost "$flag_id" "$flag" 1)
 		ret=$?
 		if [ $ret -ne 101 ]; then
 			echo "PUT FAILED: $flag_id - $ret"
@@ -29,10 +29,10 @@ function check() {
 			sleep 1
 			continue
 		fi
-		gtimeout 5 ./checker get localhost "$flag_id" "$flag" 1 2>&1
+		gtimeout 5 ./checker get localhost "$new_id" "$flag" 1 2>&1
 		ret=$?
 		if [ $ret -ne 101 ]; then
-			echo "GET FAILED: $flag_id - $ret"
+			echo "GET FAILED: $new_id - $ret"
 			((FAILED+=1))
 			sleep 1
 			continue

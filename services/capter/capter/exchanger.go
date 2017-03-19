@@ -60,7 +60,7 @@ func main() {
 		if conn, err := listener.Accept(); err != nil {
 			log.Fatal("accept error: " + err.Error())
 		} else {
-			rand.Seed(time.Now().Unix())
+			rand.Seed(time.Now().UnixNano())
 			go server.ServeCodec(jsonrpc.NewServerCodec(conn))
 		}
 	}
