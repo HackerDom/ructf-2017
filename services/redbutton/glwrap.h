@@ -1,5 +1,6 @@
 #pragma once
 #include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 #include <stdint.h>
 #include "vec.h"
 #include "egl.h"
