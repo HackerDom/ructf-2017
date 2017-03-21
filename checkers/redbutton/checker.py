@@ -32,6 +32,7 @@ def put(*args):
 	L1 = 26.0
 	ANGLE = 90.0
 
+	flag = flag[0:31] + "0" # replace '=' byte '0'
 	flag_defs = ""
 	for i in range( 0, 16 ):
 		s = flag[ i * 2 : ]

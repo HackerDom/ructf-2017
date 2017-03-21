@@ -1,24 +1,12 @@
 precision mediump float;
 uniform sampler2D tex;
 
-const vec3 COLOR = vec3( COLOR_R, COLOR_G, COLOR_B ) / 256.0;
+const vec3 COLOR = vec3( COLOR_R, COLOR_G, COLOR_B ) / 255.0;
 // L0, L1, ANGLE
 
-const float colorEpsilon = 8.0 / 256.0;
+const float colorEpsilon = 8.0 / 255.0;
 const float Lepsilon = 1.0;
 const float angleEpsilon = 4.0 / 360.0 * 2.0 * 3.1415926;
-
-
-void PrintFlag()
-{
-	vec4 flag[ 8 ];
-	flag[ 0 ] = vec4( F0,  F1,  F2,  F3 )  / 256.0;
-	flag[ 1 ] = vec4( F4,  F5,  F6,  F7 )  / 256.0;
-	flag[ 2 ] = vec4( F8,  F9,  F10, F11 ) / 256.0;
-	flag[ 3 ] = vec4( F12, F13, F14, F15 ) / 256.0;
-	
-	gl_FragColor = flag[ int( gl_FragCoord.x ) * 2 ];
-}
 
 
 //
@@ -170,7 +158,7 @@ void main()
 		}
 
 
-	ret.x = float( pointsCounter ) / 256.0;
+	/*ret.x = float( pointsCounter ) / 256.0;
 	ret.y = float( linesCounter ) / 256.0;
 	ret.z = float( crossingLinesCounter ) / 256.0;
 	ret.w = 0.0;
@@ -195,5 +183,15 @@ void main()
 		}
 
 	}
-	gl_FragColor = ret;
+	gl_FragColor = ret;*/
+	if( crossingLinesCounter == 0 )
+		discard;
+
+	vec4 flag[ 8 ];
+	flag[ 0 ] = vec4( F0,  F1,  F2,  F3 )  / 255.0;
+	flag[ 1 ] = vec4( F4,  F5,  F6,  F7 )  / 255.0;
+	flag[ 2 ] = vec4( F8,  F9,  F10, F11 ) / 255.0;
+	flag[ 3 ] = vec4( F12, F13, F14, F15 ) / 255.0;
+	
+	gl_FragColor = flag[ int( gl_FragCoord.x ) ];
 }
