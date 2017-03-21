@@ -104,31 +104,36 @@ int main(int argc, char *argv[])
         Texture2D crTex( cr );
 
         VertexShader vs( "shaders/simple.vert" );
-        FragmentShader fs_flag( "shaders/flag.frag" );
+        FragmentShader fs_flag( "shaders/flag.bin.non-prerotate", true );
         Program pr_flag( vs, fs_flag );
         pr_flag.SetTexture( "tex", crTex );
         pr_flag.SetAttribute( "v_pos", 3, GL_FLOAT, GL_FALSE, 0, vVertices, 6 * 3 * sizeof( GLfloat ) );
 
-        const int W = 32;
+        const int W = 4;
         const int H = 1;
-        Texture2D target2x2( W, H, FORMAT_RGBA );
+        Texture2D target( W, H, FORMAT_RGBA );
 
-        BindFramebuffer( target2x2 );
+        BindFramebuffer( target );
         Clear( 0.0, 0.0, 0.0, 0.0 );
 
         SetProgram( pr_flag ); 
         glDrawArrays( GL_TRIANGLES, 0, 6 );
 
         //
-        Image image2x2;
-        ReadPixels( image2x2 );
-        save_png( "image2x2.png", image2x2 );
+        Image flagImage;
+        ReadPixels( flagImage );
+        save_png( "flag.png", flagImage );
 
-        for( int i = 0; i < W; i++ ) {
-            printf( "%u %u %u %u\n", image2x2.rgba[ i ].r, image2x2.rgba[ i ].g, 
-            image2x2.rgba[ i ].b, 
-            image2x2.rgba[ i ].a );
+        /*for( int i = 0; i < W; i++ ) {
+            printf( "%u %u %u %u\n", flagImage.rgba[ i ].r, flagImage.rgba[ i ].g, 
+            flagImage.rgba[ i ].b, 
+            flagImage.rgba[ i ].a );
+        }*/
+        uint8_t* bytes = ( uint8_t* )flagImage.rgba;
+        for( int i = 0; i < W * 4; i++ ){
+            printf( "%02X", bytes[ i ] );
         }
+        printf( "\n" );
     }
 
     ShutdownEGL( ctx );
