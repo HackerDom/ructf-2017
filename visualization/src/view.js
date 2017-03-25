@@ -131,28 +131,40 @@ export default class View {
 			sphere.receiveShadow = true;
 			planetGroup.add(sphere);
 
-			let points = [];
+			let nodes_points = [];
 			let samplesCount = teams.length;
-			while (points.length < teams.length) {
-				points = fibonacci_sphere(samplesCount);
-				points = points.filter(p => p[1] >= -0.5 && p[1] <= 0.5);
+			while (nodes_points.length < teams.length) {
+				nodes_points = fibonacci_sphere(samplesCount);
+				nodes_points = nodes_points.filter(p => p[1] >= -0.5 && p[1] <= 0.5);
 				samplesCount++;
 			}
-			if (points.length > teams.length)
-				points = points.slice(0, teams.length);
+			if (nodes_points.length > teams.length)
+				nodes_points = nodes_points.slice(0, teams.length);
 
-			for(let i=0; i<points.length; i++) {
+			const nodes = [];
+			for(let i=0; i<nodes_points.length; i++) {
 				const node = genNode();
 				node.castShadow = true;
 				node.receiveShadow = true;
-				node.position.set(points[i][0] * 43, points[i][1] * 43, points[i][2] * 43);
-				let myDirectionVector = new THREE.Vector3(points[i][0], points[i][1], points[i][2]);
+				node.position.set(nodes_points[i][0] * 43, nodes_points[i][1] * 43, nodes_points[i][2] * 43);
+				let myDirectionVector = new THREE.Vector3(nodes_points[i][0], nodes_points[i][1], nodes_points[i][2]);
 				let mx = new THREE.Matrix4().lookAt(new THREE.Vector3(0,0,0), myDirectionVector, new THREE.Vector3(0,1,0));
 				let qt = new THREE.Quaternion().setFromRotationMatrix(mx);
 				node.quaternion.copy(qt);
+				nodes.push(node);
 				planetGroup.add(node);
-				scene.add(planetGroup);
 			}
+
+			scene.add(planetGroup);
+
+			scene.updateMatrixWorld(true); // Координаты вершин должны рассчитаться для рассчета координат стрелок
+			const pos0 = new THREE.Vector3();
+			pos0.setFromMatrixPosition(nodes[0].matrixWorld);
+			const pos1 = new THREE.Vector3();
+			pos1.setFromMatrixPosition(nodes[1].matrixWorld);
+			const spline_points = getSplinePoints(pos0.normalize().multiplyScalar(44), pos1.normalize().multiplyScalar(44));
+			const line = getLine(spline_points);
+			planetGroup.add(line);
 
 			const axes = new THREE.AxisHelper(100);
 			scene.add(axes);
@@ -215,6 +227,31 @@ export default class View {
 			return points;
 		}
 
+		function getLine(points) {
+			const spline = new THREE.CatmullRomCurve3(points);
+			const geometry = new THREE.Geometry();
+			const colors = [];
+			const stepsCount = 100;
+			for (let i = 0; i < stepsCount; i++) {
+				const index = i / stepsCount;
+				const position = spline.getPoint(index);
+				geometry.vertices[i] = new THREE.Vector3(position.x, position.y, position.z);
+				colors[i] = new THREE.Color(0xffffff);
+				colors[i].setHSL(1.0, 1.0, index);
+			}
+			geometry.colors = colors;
+			const material = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 1, linewidth: 3, vertexColors: THREE.VertexColors });
+			return new THREE.Line(geometry, material);
+		}
+
+		function getSplinePoints(pos0, pos1) {
+			const result = [pos0];
+			result.push(pos0.clone().normalize().multiplyScalar(46).add(pos1.clone().normalize()));
+			result.push(new THREE.Vector3(0.01, 0, 0).add(pos0).add(pos1).normalize().multiplyScalar(46));
+			result.push(pos1.clone().normalize().multiplyScalar(46).add(pos0.clone().normalize()));
+			result.push(pos1);
+			return result;
+		}
 
 		function onWindowResized() {
 			SCREEN_WIDTH = $container.width();
