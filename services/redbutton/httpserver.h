@@ -2,8 +2,6 @@
 
 #include <microhttpd.h>
 
-
-class HttpStateData;
 class HttpRequestState;
 class HttpRequestHandler;
 
@@ -21,6 +19,7 @@ struct HttpRequest
 
 struct HttpResponse
 {
+	HttpResponse();
 	HttpResponse(uint32_t code);
 	HttpResponse(uint32_t code, char *content, size_t contentLength);
 
@@ -50,33 +49,38 @@ private:
 	HttpRequestHandler *requestHandler;
 };
 
-typedef int (HttpRequestHandler:: *PostIterator)(HttpRequestState *state, MHD_ValueKind kind, const char *key, const char *filename, const char *contentType, const char *transferEncoding, const char *data, uint64_t offset, size_t size);
-typedef HttpResponse (HttpRequestHandler:: *PostFinalizer)(HttpRequestState *state);
+class HttpPostProcessor
+{
+public:
+	virtual ~HttpPostProcessor();
+
+	void CreateMhdProcessor();
+	bool TryGetResponse(HttpResponse *response);
+
+	virtual int IteratePostData(MHD_ValueKind kind, const char *key, const char *filename, const char *contentType, const char *transferEncoding, const char *data, uint64_t offset, size_t size) = 0;
+
+	MHD_PostProcessor *mhdProcessor;
+
+protected:
+	HttpPostProcessor(HttpRequest request);
+
+	void Complete(HttpResponse response);
+
+private:
+	bool isCompleted;
+	HttpRequest request;
+	HttpResponse response;
+
+	static int IteratePostDataBase(void *context, MHD_ValueKind kind, const char *key, const char *filename, const char *contentType, const char *transferEncoding, const char *data, uint64_t offset, size_t size);
+};
+
+#define OUT(x) NULL, sizeof(x), x
 
 class HttpRequestHandler
 {
 public:
 	virtual HttpResponse HandleGet(HttpRequest request) = 0;
-	virtual HttpResponse HandlePost(HttpRequest request, HttpStateData **userData, PostIterator *postIterator, PostFinalizer *postFinalizer) = 0;
-};
+	virtual HttpResponse HandlePost(HttpRequest request, HttpPostProcessor **postProcessor) = 0;
 
-class HttpRequestState
-{
-public:
-	HttpRequestState(HttpRequest request, HttpRequestHandler *requestHandler, PostIterator postIterator, PostFinalizer postFinalizer, HttpStateData *userData);
-	virtual ~HttpRequestState();
-	
-	HttpRequest request;
-	HttpStateData *userData;
-	PostIterator postIterator;
-	PostFinalizer postFinalizer;
-	MHD_PostProcessor *postProcessor;
-	HttpRequestHandler *requestHandler;
-
-private:
-	static int IteratePostData(void *context, MHD_ValueKind kind, const char *key, const char *filename, const char *contentType, const char *transferEncoding, const char *data, uint64_t offset, size_t size);
-};
-
-class HttpStateData
-{
+	static bool ParseUrl(const char *url, int parts, ...);
 };

@@ -6,7 +6,8 @@
 #include "texture.h"
 #include "png.h"
 
-#include "detector.h"
+#include "httpserver.h"
+#include "requesthandler.h"
 
 
 static GLfloat vVertices[] = {  -1.0f,  1.0f, 0.0f,
@@ -35,50 +36,22 @@ GLfloat vUv[] = {   0.0f, 1.0f,
 //
 int main(int argc, char *argv[])
 {
-	/*TestHandler handler;
+	TemplateStorage templates("templates");
+	DetectorStorage detectors("detectors");
+
+	RequestHandler handler(&detectors, &templates);
 	HttpServer server(&handler);
 
 	server.Start(16780);
 
 	getchar();
 
-	server.Stop();*/
+	server.Stop();
 
 	/*TemplateStorage templates("templates");
 
 	printf("%s\n", templates.GetTemplate("test")->Fill("hello", "Hello, world!", "footer", "-- footer --"));*/
 
-	DetectorStorage storage("detectors");
-
-	for (int i = 0; i < 5; i++)
-	{
-		uuid id;
-		uuid_generate(id.bytes);
-
-		char buffer[256];
-		uuid_unparse(id.bytes, buffer);
-
-		printf("%s\n", buffer);
-
-		char data[256];
-		sprintf(data, "Test Data %d", i);
-
-		storage.AddDetector(id, data, strlen(data) + 1);
-	}
-
-	int idCount;
-	uuid *ids = storage.ListDetectors(&idCount);
-
-	printf("---\n");
-
-	for (int i = 0; i < idCount; i++)
-	{
-		char buffer[256];
-		uuid_unparse(ids[i].bytes, buffer);
-
-		printf("%s = %s\n", buffer, storage.GetDetector(ids[i])->data);
-		//printf("%s = ??\n", buffer);
-	}
 
 	return 0;
 

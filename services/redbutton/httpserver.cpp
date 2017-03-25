@@ -13,6 +13,7 @@
 HttpServer::HttpServer(HttpRequestHandler *requestHandler)
 {
 	this->requestHandler = requestHandler;
+	isRunning = false;
 }
 
 HttpServer::~HttpServer()
@@ -28,6 +29,7 @@ void HttpServer::Start(uint32_t port)
 	MHD_set_panic_func(OnFatalError, NULL);
 
 	daemon = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION, port, NULL, NULL, HandleRequest, this, 
+	// TODO increase 
 		MHD_OPTION_CONNECTION_TIMEOUT, 1u,
 		MHD_OPTION_NOTIFY_COMPLETED, PostProcessRequest, NULL,
 		MHD_OPTION_END);
@@ -63,21 +65,19 @@ int HttpServer::HandleRequest(void *param, MHD_Connection *connection, const cha
 	{
 		if (!strcmp(method, "POST"))
 		{
-			HttpStateData *userData = NULL;
-			PostIterator postIterator = NULL;
-			PostFinalizer postFinalizer = NULL;
+			HttpPostProcessor *postProcessor = NULL;
 
-			HttpResponse response = self->requestHandler->HandlePost(HttpRequest(url, method, connection), &userData, &postIterator, &postFinalizer);
+			HttpResponse response = self->requestHandler->HandlePost(HttpRequest(url, method, connection), &postProcessor);
 
-			if (!postFinalizer)
+			if (!postProcessor)
 			{
 				SendResponse(connection, response);
 				return MHD_YES;
 			}
 
-			HttpRequestState *state = new HttpRequestState(HttpRequest(url, method, connection), self->requestHandler, postIterator, postFinalizer, userData);
+			postProcessor->CreateMhdProcessor();
 
-			*context = state;
+			*context = postProcessor;
 
 			return MHD_YES;
 		}
@@ -92,16 +92,25 @@ int HttpServer::HandleRequest(void *param, MHD_Connection *connection, const cha
 
 	if (!strcmp (method, "POST"))
 	{
-		HttpRequestState *state = (HttpRequestState *)*context;
+		HttpPostProcessor *postProcessor = (HttpPostProcessor *)*context;
+
+		int result = MHD_YES;
 
 		if (*uploadDataSize != 0)
 		{
-			MHD_post_process(state->postProcessor, uploadData, *uploadDataSize);
+			result = MHD_post_process(postProcessor->mhdProcessor, uploadData, *uploadDataSize);
 
 			*uploadDataSize = 0;
 		}
+		else
+		{
+			HttpResponse response;
+			if (postProcessor->TryGetResponse(&response))
+				SendResponse(connection, response);
+		}
 
-		return MHD_YES;
+
+		return result;
 	}
 
 	SendResponse(connection, HttpResponse(MHD_HTTP_NOT_IMPLEMENTED));
@@ -109,22 +118,22 @@ int HttpServer::HandleRequest(void *param, MHD_Connection *connection, const cha
 
 void HttpServer::PostProcessRequest(void *param, MHD_Connection *connection, void **context, MHD_RequestTerminationCode toe)
 {
-	HttpRequestState *state = (HttpRequestState *)*context;
+	printf(":: post process request started\n");
 
-	if (!state)
+	HttpPostProcessor *postProcessor = (HttpPostProcessor *)*context;
+
+	if (!postProcessor)
 		return;
 
-	HttpResponse response = (state->requestHandler->*state->postFinalizer)(state);
-
-	SendResponse(connection, response);
-
-	delete state;
+	delete postProcessor;
 	*context = NULL;
 }
 
 int HttpServer::SendResponse(MHD_Connection *connection, HttpResponse response)
 {
-	MHD_Response *mhdResponse = MHD_create_response_from_buffer(response.contentLength, response.content, MHD_RESPMEM_PERSISTENT);
+	printf(":: send response: %.*s", (int)response.contentLength, response.content);
+
+	MHD_Response *mhdResponse = MHD_create_response_from_buffer(response.contentLength, response.content, MHD_RESPMEM_MUST_COPY);
 
 	if (!mhdResponse)
 		return MHD_NO;
@@ -144,40 +153,56 @@ void HttpServer::OnFatalError(void *param, const char *file, uint32_t line, cons
 	exit(1);
 }
 
-HttpRequestState::HttpRequestState(HttpRequest request, HttpRequestHandler *requestHandler, PostIterator postIterator, PostFinalizer postFinalizer, HttpStateData *userData)
+HttpPostProcessor::HttpPostProcessor(HttpRequest request)
 {
 	this->request = request;
-	this->requestHandler = requestHandler;
-	this->postIterator = postIterator;
-	this->postFinalizer = postFinalizer;
-	this->userData = userData;
-
-	postProcessor = MHD_create_post_processor(request.connection, POSTBUFFERSIZE, IteratePostData, (void *)this);
+	isCompleted = false;
 }
 
-HttpRequestState::~HttpRequestState()
+void HttpPostProcessor::CreateMhdProcessor()
 {
-	if (postProcessor)
-	{
-		MHD_destroy_post_processor(postProcessor);
-		postProcessor = NULL;
-	}
+	mhdProcessor = MHD_create_post_processor(request.connection, POSTBUFFERSIZE, IteratePostDataBase, (void *)this);
+}
 
-	if (userData)
+bool HttpPostProcessor::TryGetResponse(HttpResponse *response)
+{
+	if (!isCompleted)
+		return false;
+
+	*response = this->response;
+
+	isCompleted = false;
+
+	return true;
+}
+
+void HttpPostProcessor::Complete(HttpResponse response)
+{
+	if (isCompleted)
+		return;
+
+	this->response = response;
+
+	isCompleted = true;
+}
+
+HttpPostProcessor::~HttpPostProcessor()
+{
+	if (mhdProcessor)
 	{
-		delete userData;
-		userData = NULL;
+		MHD_destroy_post_processor(mhdProcessor);
+		mhdProcessor = NULL;
 	}
 }
 
-int HttpRequestState::IteratePostData(void *context, MHD_ValueKind kind, const char *key, const char *filename, const char *contentType, const char *transferEncoding, const char *data, uint64_t offset, size_t size)
+int HttpPostProcessor::IteratePostDataBase(void *context, MHD_ValueKind kind, const char *key, const char *filename, const char *contentType, const char *transferEncoding, const char *data, uint64_t offset, size_t size)
 {
-	HttpRequestState *state = (HttpRequestState *)context;
+	HttpPostProcessor *self = (HttpPostProcessor *)context;
 
-	if (!state)
+	if (!self)
 		return MHD_NO;
 
-	return (state->requestHandler->*state->postIterator)(state, kind, key, filename, contentType, transferEncoding, data, offset, size);
+	return self->IteratePostData(kind, key, filename, contentType, transferEncoding, data, offset, size);
 }
 
 HttpRequest::HttpRequest()
@@ -194,11 +219,12 @@ HttpRequest::HttpRequest(const char *url, const char *method, MHD_Connection *co
 	this->connection = connection;
 };
 
-HttpResponse::HttpResponse(uint32_t code)
+HttpResponse::HttpResponse() : HttpResponse(0, NULL, 0)
 {
-	this->code = code;
-	this->content = NULL;
-	this-> contentLength = 0;
+}
+
+HttpResponse::HttpResponse(uint32_t code) : HttpResponse(code, NULL, 0)
+{
 }
 
 HttpResponse::HttpResponse(uint32_t code, char *content, size_t contentLength)
@@ -206,4 +232,70 @@ HttpResponse::HttpResponse(uint32_t code, char *content, size_t contentLength)
 	this->code = code;
 	this->content = content;
 	this->contentLength = contentLength;
+}
+
+bool HttpRequestHandler::ParseUrl(const char *url, int parts, ...)
+{
+	if (url[0] != '/')
+		return false;
+
+	va_list args;
+
+	va_start(args, parts);
+
+	bool result = true;
+
+	const char *position = url + 1;
+	for (int i = 0; i < parts; i++)
+	{
+		const char *nextSlash = strchr(position, '/');
+
+		if (!nextSlash)
+		{
+			if (i != parts - 1)
+			{
+				result = false;
+				break;
+			}
+
+			nextSlash = strchr(position, '\0');
+		}
+
+		int partLength = nextSlash - position;
+
+		const char *part = va_arg(args, const char *);
+
+		if (!part)
+		{
+			size_t size = va_arg(args, size_t);
+
+			if (partLength >= size)
+			{
+				result = false;
+				break;
+			}
+
+			strncpy(va_arg(args, char *), position, partLength);
+		}
+		else
+		{
+			if (strlen(part) != partLength)
+			{
+				result = false;
+				break;
+			}
+
+			if (strncmp(part, position, partLength))
+			{
+				result = false;
+				break;
+			}
+		}
+
+		position = nextSlash + 1;
+	}
+
+	va_end(args);
+
+	return result;
 }

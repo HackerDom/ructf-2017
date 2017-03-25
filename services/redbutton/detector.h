@@ -44,7 +44,7 @@ private:
 
 	FILE *backingFile;
 
-	pthread_mutex_t sync;
+	pthread_mutex_t sync = PTHREAD_MUTEX_INITIALIZER;
 
 	void AddDetectorInternal(uuid name, const char *data, size_t length);
 };
