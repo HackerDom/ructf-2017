@@ -1,6 +1,7 @@
 import $ from "jquery";
 import md5 from "md5";
 import * as THREE from "three";
+import * as THREE_particle from "./particle"
 import Stats from "stats.js";
 
 
@@ -92,10 +93,12 @@ export default class View {
 		let camera, scene;
 		let renderer;
 		let planetGroup;
+		let particleSystem;
 
 		const clock = new THREE.Clock();
 		let lon = 0, lat = 0;
 		let phi = 0, theta = 0;
+		let tick = 0;
 
 		let onPointerDownPointerX, onPointerDownPointerY, onPointerDownLon, onPointerDownLat;
 
@@ -159,6 +162,11 @@ export default class View {
 				spritey.position.set(nodes_points[i][0] * 50, nodes_points[i][1] * 50, nodes_points[i][2] * 50);
 				planetGroup.add(spritey);
 			}
+
+			particleSystem = new THREE_particle.GPUParticleSystem({
+				maxParticles: 250000
+			});
+			scene.add(particleSystem);
 
 			scene.add(planetGroup);
 
@@ -398,7 +406,44 @@ export default class View {
 			camera.position.z = 100 * Math.sin(phi) * Math.sin(theta);
 			camera.lookAt(scene.position);
 			const delta = clock.getDelta();
-			planetGroup.rotateY(delta / 3);
+			//planetGroup.rotateY(delta / 3);
+
+			tick += delta;
+			if (tick < 0) tick = 0;
+
+			const options = {
+				position: new THREE.Vector3(),
+				positionRandomness: .3,
+				velocity: new THREE.Vector3(),
+				velocityRandomness: .5,
+				color: 0xaa88ff,
+				colorRandomness: .2,
+				turbulence: .5,
+				lifetime: 2,
+				size: 5,
+				sizeRandomness: 1
+			};
+
+			const spawnerOptions = {
+				spawnRate: 15000,
+				horizontalSpeed: 1.5,
+				verticalSpeed: 1.33,
+				timeScale: 1
+			};
+
+			if (delta > 0) {
+				options.position.x = 47;
+				options.position.y = 47;
+				options.position.z = Math.sin(tick * spawnerOptions.horizontalSpeed + spawnerOptions.verticalSpeed) * 5;
+				for (let x = 0; x < spawnerOptions.spawnRate * delta; x++) {
+					// Yep, that's really it.	Spawning particles is super cheap, and once you spawn them, the rest of
+					// their lifecycle is handled entirely on the GPU, driven by a time uniform updated below
+					particleSystem.spawnParticle(options);
+				}
+			}
+
+			particleSystem.update(tick);
+
 			renderer.render(scene, camera);
 		}
 	}
