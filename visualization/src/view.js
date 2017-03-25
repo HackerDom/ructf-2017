@@ -163,8 +163,7 @@ export default class View {
 			const pos1 = new THREE.Vector3();
 			pos1.setFromMatrixPosition(nodes[1].matrixWorld);
 			const spline_points = getSplinePoints(pos0.normalize().multiplyScalar(44), pos1.normalize().multiplyScalar(44));
-			const line = getLine(spline_points);
-			planetGroup.add(line);
+			getLine(spline_points);
 
 			const axes = new THREE.AxisHelper(100);
 			scene.add(axes);
@@ -240,8 +239,27 @@ export default class View {
 				colors[i].setHSL(1.0, 1.0, index);
 			}
 			geometry.colors = colors;
-			const material = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 1, linewidth: 3, vertexColors: THREE.VertexColors });
-			return new THREE.Line(geometry, material);
+
+			const customMaterial = new THREE.ShaderMaterial(
+				{
+					uniforms:
+						{
+							"c":   { type: "f", value: 0 },
+							"p":   { type: "f", value: 0.2 },
+							glowColor: { type: "c", value: new THREE.Color(0x78782f) },
+							viewVector: { type: "v3", value: camera.position }
+						},
+					vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
+					fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+					side: THREE.FrontSide,
+					blending: THREE.AdditiveBlending,
+					transparent: true
+				});
+
+			const lineGlow = new THREE.Mesh(new THREE.TubeBufferGeometry(spline, 200, 0.4, 5, false), customMaterial.clone() );
+			planetGroup.add(lineGlow);
+
+			window.lineGlow = lineGlow;
 		}
 
 		function getSplinePoints(pos0, pos1) {
@@ -284,7 +302,7 @@ export default class View {
 
 		function onDocumentMouseWheel(event) {
 			const newFov = camera.fov + (event.deltaY * 0.05);
-			if(newFov > 60 && newFov < 100)
+			//if(newFov > 60 && newFov < 100)
 				camera.fov = newFov;
 			camera.updateProjectionMatrix();
 		}
@@ -303,7 +321,7 @@ export default class View {
 			camera.position.z = 100 * Math.sin(phi) * Math.sin(theta);
 			camera.lookAt(scene.position);
 			const delta = clock.getDelta();
-			planetGroup.rotateY(delta / 3);
+			//planetGroup.rotateY(delta / 3);
 			renderer.render(scene, camera);
 		}
 	}
