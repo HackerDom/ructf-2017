@@ -129,11 +129,7 @@ export const GPUParticleSystem = function(options) {
 
 			'gl_PointSize = ( uScale * particleVelColSizeLife.z ) * lifeLeft;',
 
-			'velocity.x = ( velocity.x - .5 ) * 3.;',
-			'velocity.y = ( velocity.y - .5 ) * 3.;',
-			'velocity.z = ( velocity.z - .5 ) * 3.;',
-
-			'newPosition = particlePositionsStartTime.xyz + ( velocity * 10. ) * ( uTime - particlePositionsStartTime.a );',
+			'newPosition = particlePositionsStartTime.xyz;',
 
 			'vec3 noise = texture2D( tNoise, vec2( newPosition.x * .015 + (uTime * .05), newPosition.y * .02 + (uTime * .015) )).rgb;',
 			'vec3 noiseVel = ( noise.rgb - .5 ) * 30.;',

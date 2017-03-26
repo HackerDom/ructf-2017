@@ -93,19 +93,35 @@ export default class View {
 		let camera, scene;
 		let renderer;
 		let planetGroup;
-		let particleSystem;
 
 		const clock = new THREE.Clock();
 		let lon = 0, lat = 0;
 		let phi = 0, theta = 0;
-		let tick = 0;
-		let engine;
 
 		let onPointerDownPointerX, onPointerDownPointerY, onPointerDownLon, onPointerDownLat;
 
 		const textureLoader = new THREE.TextureLoader();
 		const particleNoiseTex = textureLoader.load("static/img/perlin-512.png");
 		const particleSpriteTex = textureLoader.load("static/img/particle2.png");
+
+		const options = {
+			position: new THREE.Vector3(),
+			positionRandomness: .94,
+			velocityRandomness: 0.43,
+			color: 0xaa88ff,
+			colorRandomness: 0,
+			turbulence: 0,
+			lifetime: 0.3,
+			size: 5,
+			sizeRandomness: 3
+		};
+
+		const spawnerOptions = {
+			spawnRate: 1500
+		};
+
+		let arrows = [];
+		let nodes = [];
 
 		init();
 		animate();
@@ -149,7 +165,7 @@ export default class View {
 			if (nodes_points.length > teams.length)
 				nodes_points = nodes_points.slice(0, teams.length);
 
-			const nodes = [];
+
 			for(let i=0; i<nodes_points.length; i++) {
 				const node = genNode();
 				node.castShadow = true;
@@ -159,32 +175,30 @@ export default class View {
 				let mx = new THREE.Matrix4().lookAt(new THREE.Vector3(0,0,0), myDirectionVector, new THREE.Vector3(0,1,0));
 				let qt = new THREE.Quaternion().setFromRotationMatrix(mx);
 				node.quaternion.copy(qt);
-				nodes.push(node);
+				nodes.push({node, vector: myDirectionVector});
 				planetGroup.add(node);
 
-				const spritey = makeTextSprite( " c00kies@venice ",
+				const spritey = makeTextSprite( " " + i + " ",
 					{ fontsize: 24, borderColor: {r:255, g:0, b:0, a:1.0}, backgroundColor: {r:255, g:100, b:100, a:0.8} } );
 				spritey.position.set(nodes_points[i][0] * 50, nodes_points[i][1] * 50, nodes_points[i][2] * 50);
 				planetGroup.add(spritey);
 			}
 
-			particleSystem = new THREE_particle.GPUParticleSystem({
-				maxParticles: 250000,
-				particleNoiseTex,
-				particleSpriteTex
-			});
-			particleSystem.position.set(47, 0, 0);
-			planetGroup.add(particleSystem);
-
 			scene.add(planetGroup);
 
-			scene.updateMatrixWorld(true); // Координаты вершин должны рассчитаться для рассчета координат стрелок
-			const pos0 = new THREE.Vector3();
-			pos0.setFromMatrixPosition(nodes[0].matrixWorld);
-			const pos1 = new THREE.Vector3();
-			pos1.setFromMatrixPosition(nodes[1].matrixWorld);
-			const spline_points = getSplinePoints(pos0.normalize().multiplyScalar(44), pos1.normalize().multiplyScalar(44));
-			getLine(spline_points);
+			for(let i=6; i<7; i++) {
+				for(let j=0; j<nodes.length; j++) {
+					if (i === j)
+						continue;
+					scene.updateMatrixWorld(true); // Координаты вершин должны рассчитаться для рассчета координат стрелок
+					const pos0 = new THREE.Vector3();
+					pos0.setFromMatrixPosition(nodes[i].node.matrixWorld);
+					const pos1 = new THREE.Vector3();
+					pos1.setFromMatrixPosition(nodes[j].node.matrixWorld);
+					const spline_points = getSplinePoints(pos0.normalize().multiplyScalar(44), pos1.normalize().multiplyScalar(44));
+					createArrow(spline_points, nodes[i].vector);
+				}
+			}
 
 			const axes = new THREE.AxisHelper(100);
 			scene.add(axes);
@@ -197,6 +211,22 @@ export default class View {
 			window.addEventListener('resize', onWindowResized, false);
 			document.addEventListener('mousedown', onDocumentMouseDown, false);
 			document.addEventListener('wheel', onDocumentMouseWheel, false);
+		}
+
+		function createArrow(points) {
+			const particleSystem = new THREE_particle.GPUParticleSystem({
+				maxParticles: 25000,
+				particleNoiseTex,
+				particleSpriteTex
+			});
+			const spline = new THREE.CatmullRomCurve3(points);
+			planetGroup.add(particleSystem);
+			const arrow = {
+				particleSystem,
+				spline,
+				timer: 0,
+			};
+			arrows.push(arrow);
 		}
 
 		function genNode() {
@@ -416,39 +446,25 @@ export default class View {
 			const delta = clock.getDelta();
 			//planetGroup.rotateY(delta / 3);
 
-			tick += delta;
-			if (tick < 0) tick = 0;
-
-			const options = {
-				position: new THREE.Vector3(),
-				positionRandomness: .94,
-				velocity: new THREE.Vector3(0, 0, 0),
-				velocityRandomness: 0.43,
-				color: 0xaa88ff,
-				colorRandomness: 0,
-				turbulence: 0,
-				lifetime: 0.3,
-				size: 5,
-				sizeRandomness: 3
-			};
-
-			const spawnerOptions = {
-				spawnRate: 15000
-			};
-
-			if (delta > 0) {
-				options.position.x = 0;
-				options.position.y = 0;
-				options.position.z = 0;
-				for (let x = 0; x < spawnerOptions.spawnRate * delta; x++) {
-					// Yep, that's really it.	Spawning particles is super cheap, and once you spawn them, the rest of
-					// their lifecycle is handled entirely on the GPU, driven by a time uniform updated below
-					particleSystem.spawnParticle(options);
+			arrows = arrows.filter(function(a) {
+				if(a.timer > 1) {
+					a.timer = 0;
 				}
+				return true;
+				/*planetGroup.add(a.particleSystem);
+				return false;*/
+			});
+			for (let i = 0; i < arrows.length; i++) {
+				const arrow = arrows[i];
+				arrow.timer += delta * 0.15;
+				if (delta > 0) {
+					options.position = arrow.spline.getPoint(arrow.timer);
+					for (let x = 0; x < spawnerOptions.spawnRate * delta; x++) {
+						arrow.particleSystem.spawnParticle(options);
+					}
+				}
+				arrow.particleSystem.update(arrow.timer);
 			}
-			particleSystem.rotateY(delta*1);
-
-			particleSystem.update(tick);
 
 			renderer.render(scene, camera);
 		}
