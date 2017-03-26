@@ -103,7 +103,6 @@ export const GPUParticleSystem = function(options) {
 
 			'uniform float uTime;',
 			'uniform float uScale;',
-			'uniform sampler2D tNoise;',
 
 			'attribute vec4 particlePositionsStartTime;',
 			'attribute vec4 particleVelColSizeLife;',
@@ -130,11 +129,6 @@ export const GPUParticleSystem = function(options) {
 			'gl_PointSize = ( uScale * particleVelColSizeLife.z ) * lifeLeft;',
 
 			'newPosition = particlePositionsStartTime.xyz;',
-
-			'vec3 noise = texture2D( tNoise, vec2( newPosition.x * .015 + (uTime * .05), newPosition.y * .02 + (uTime * .015) )).rgb;',
-			'vec3 noiseVel = ( noise.rgb - .5 ) * 30.;',
-
-			'newPosition = mix(newPosition, newPosition + vec3(noiseVel * ( turbulence * 5. ) ), (timeElapsed / particleVelColSizeLife.a) );',
 
 			'if( velocity.y > 0. && velocity.y < .05 ) {',
 			'lifeLeft = 0.;',
@@ -200,9 +194,6 @@ export const GPUParticleSystem = function(options) {
 		return ++i >= self.rand.length ? self.rand[i = 1] : self.rand[i];
 	};
 
-	self.particleNoiseTex = self.PARTICLE_NOISE_TEXTURE;
-	self.particleNoiseTex.wrapS = self.particleNoiseTex.wrapT = THREE.RepeatWrapping;
-
 	self.particleSpriteTex = self.PARTICLE_SPRITE_TEXTURE;
 	self.particleSpriteTex.wrapS = self.particleSpriteTex.wrapT = THREE.RepeatWrapping;
 
@@ -215,9 +206,6 @@ export const GPUParticleSystem = function(options) {
 			},
 			"uScale": {
 				value: 1.0
-			},
-			"tNoise": {
-				value: self.particleNoiseTex
 			},
 			"tSprite": {
 				value: self.particleSpriteTex

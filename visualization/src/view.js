@@ -101,8 +101,8 @@ export default class View {
 		let onPointerDownPointerX, onPointerDownPointerY, onPointerDownLon, onPointerDownLat;
 
 		const textureLoader = new THREE.TextureLoader();
-		const particleNoiseTex = textureLoader.load("static/img/perlin-512.png");
 		const particleSpriteTex = textureLoader.load("static/img/particle2.png");
+		const planetTex = textureLoader.load("static/img/planet.jpg");
 
 		const options = {
 			position: new THREE.Vector3(),
@@ -117,11 +117,15 @@ export default class View {
 		};
 
 		const spawnerOptions = {
-			spawnRate: 1500
+			spawnRate: 1300
 		};
 
 		let arrows = [];
 		let nodes = [];
+
+		const stats = new Stats();
+		stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+		document.body.appendChild( stats.dom );
 
 		init();
 		animate();
@@ -149,7 +153,7 @@ export default class View {
 
 			planetGroup = new THREE.Object3D();
 
-			const sphere = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40, 5), new THREE.MeshLambertMaterial({color: 0xFF0000}));
+			const sphere = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40, 3), new THREE.MeshLambertMaterial({map: planetTex}));
 			sphere.castShadow = true;
 			sphere.position.set(0, 0, 0);
 			sphere.receiveShadow = true;
@@ -215,8 +219,7 @@ export default class View {
 
 		function createArrow(points) {
 			const particleSystem = new THREE_particle.GPUParticleSystem({
-				maxParticles: 25000,
-				particleNoiseTex,
+				maxParticles: 5000,
 				particleSpriteTex
 			});
 			const spline = new THREE.CatmullRomCurve3(points);
@@ -431,8 +434,10 @@ export default class View {
 		}
 
 		function animate() {
-			requestAnimationFrame(animate);
+			stats.begin();
 			render();
+			stats.end();
+			requestAnimationFrame(animate);
 		}
 
 		function render() {
@@ -444,7 +449,7 @@ export default class View {
 			camera.position.z = 100 * Math.sin(phi) * Math.sin(theta);
 			camera.lookAt(scene.position);
 			const delta = clock.getDelta();
-			//planetGroup.rotateY(delta / 3);
+			planetGroup.rotateY(delta / 3);
 
 			arrows = arrows.filter(function(a) {
 				if(a.timer > 1) {
