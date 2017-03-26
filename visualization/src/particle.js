@@ -204,12 +204,10 @@ export const GPUParticleSystem = function(options) {
 		return ++i >= self.rand.length ? self.rand[i = 1] : self.rand[i];
 	};
 
-	var textureLoader = new THREE.TextureLoader();
-
-	self.particleNoiseTex = self.PARTICLE_NOISE_TEXTURE || textureLoader.load("static/img/perlin-512.png");
+	self.particleNoiseTex = self.PARTICLE_NOISE_TEXTURE;
 	self.particleNoiseTex.wrapS = self.particleNoiseTex.wrapT = THREE.RepeatWrapping;
 
-	self.particleSpriteTex = self.PARTICLE_SPRITE_TEXTURE || textureLoader.load("static/img/particle2.png");
+	self.particleSpriteTex = self.PARTICLE_SPRITE_TEXTURE;
 	self.particleSpriteTex.wrapS = self.particleSpriteTex.wrapT = THREE.RepeatWrapping;
 
 	self.particleShaderMat = new THREE.ShaderMaterial({

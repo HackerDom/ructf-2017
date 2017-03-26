@@ -99,8 +99,13 @@ export default class View {
 		let lon = 0, lat = 0;
 		let phi = 0, theta = 0;
 		let tick = 0;
+		let engine;
 
 		let onPointerDownPointerX, onPointerDownPointerY, onPointerDownLon, onPointerDownLat;
+
+		const textureLoader = new THREE.TextureLoader();
+		const particleNoiseTex = textureLoader.load("static/img/perlin-512.png");
+		const particleSpriteTex = textureLoader.load("static/img/particle2.png");
 
 		init();
 		animate();
@@ -164,9 +169,12 @@ export default class View {
 			}
 
 			particleSystem = new THREE_particle.GPUParticleSystem({
-				maxParticles: 250000
+				maxParticles: 250000,
+				particleNoiseTex,
+				particleSpriteTex
 			});
-			scene.add(particleSystem);
+			particleSystem.position.set(47, 0, 0);
+			planetGroup.add(particleSystem);
 
 			scene.add(planetGroup);
 
@@ -413,34 +421,32 @@ export default class View {
 
 			const options = {
 				position: new THREE.Vector3(),
-				positionRandomness: .3,
-				velocity: new THREE.Vector3(),
-				velocityRandomness: .5,
+				positionRandomness: .94,
+				velocity: new THREE.Vector3(0, 0, 0),
+				velocityRandomness: 0.43,
 				color: 0xaa88ff,
-				colorRandomness: .2,
-				turbulence: .5,
-				lifetime: 2,
+				colorRandomness: 0,
+				turbulence: 0,
+				lifetime: 0.3,
 				size: 5,
-				sizeRandomness: 1
+				sizeRandomness: 3
 			};
 
 			const spawnerOptions = {
-				spawnRate: 15000,
-				horizontalSpeed: 1.5,
-				verticalSpeed: 1.33,
-				timeScale: 1
+				spawnRate: 15000
 			};
 
 			if (delta > 0) {
-				options.position.x = 47;
-				options.position.y = 47;
-				options.position.z = Math.sin(tick * spawnerOptions.horizontalSpeed + spawnerOptions.verticalSpeed) * 5;
+				options.position.x = 0;
+				options.position.y = 0;
+				options.position.z = 0;
 				for (let x = 0; x < spawnerOptions.spawnRate * delta; x++) {
 					// Yep, that's really it.	Spawning particles is super cheap, and once you spawn them, the rest of
 					// their lifecycle is handled entirely on the GPU, driven by a time uniform updated below
 					particleSystem.spawnParticle(options);
 				}
 			}
+			particleSystem.rotateY(delta*1);
 
 			particleSystem.update(tick);
 
