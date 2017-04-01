@@ -106,8 +106,6 @@ int AddDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key, c
 		memcpy(this->data, data + offset, size);
 
 		dataSize = size;
-
-		FinalizeRequest();
 	}
 
 	return MHD_YES;
@@ -202,9 +200,6 @@ int CheckDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key,
 
 		height = atoi(buffer);
 	}
-
-	if (data)
-		FinalizeRequest();
 
 	return MHD_YES;
 }

@@ -43,10 +43,11 @@ public:
 	size_t dataSize;
 	char *data;
 
+protected:
+	virtual void FinalizeRequest();
+
 private:
 	DetectorStorage *detectors;
-
-	void FinalizeRequest();
 };
 
 
@@ -63,6 +64,9 @@ public:
 	Detector *detector;
 	uint32_t width;
 	uint32_t height;
+
+protected:
+	virtual void FinalizeRequest();
 
 private:
 	GLContexts* contexts;

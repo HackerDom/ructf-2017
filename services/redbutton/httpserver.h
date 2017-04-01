@@ -65,6 +65,7 @@ protected:
 	HttpPostProcessor(HttpRequest request);
 
 	void Complete(HttpResponse response);
+	virtual void FinalizeRequest() = 0;
 
 private:
 	bool isCompleted;

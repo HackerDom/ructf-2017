@@ -174,6 +174,9 @@ void HttpPostProcessor::CreateMhdProcessor()
 
 bool HttpPostProcessor::TryGetResponse(HttpResponse *response)
 {
+	if (!this->response.code)
+		FinalizeRequest();
+
 	if (!isCompleted)
 		return false;
 
