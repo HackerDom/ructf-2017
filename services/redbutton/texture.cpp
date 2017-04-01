@@ -156,6 +156,35 @@ Texture2D::Texture2D( const void* pngData, uint32_t size )
 
 	png_read_end( png, info );
 	png_destroy_read_struct( &png, &info, NULL );
+
+	//
+	glGenTextures( 1, &m_texture );
+	glBindTexture( GL_TEXTURE_2D, m_texture );
+
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+ 
+
+	TextureFormat fmt = g_mapFormatToTextureFormat[ m_format ];
+
+	glTexImage2D( GL_TEXTURE_2D, 0, fmt.internalFormat, m_width, m_height, 0, fmt.format, fmt.type, m_shadowCopy );
+
+	if( !CheckError( "Failed to create texture" ) ) {
+		glDeleteTextures( 1, &m_texture );
+		m_texture = 0;
+	}
+
+	glGenFramebuffers( 1, &m_framebuffer );
+	glBindFramebuffer( GL_FRAMEBUFFER, m_framebuffer );
+	glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture, 0 );
+	glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+
+	if( !CheckError( "Failed to create framebuffer" ) ) {
+		glDeleteTextures( 1, &m_texture );
+		glDeleteFramebuffers( 1, &m_framebuffer );
+		m_texture = 0;
+		m_framebuffer = 0;
+	}
 }
 
 
