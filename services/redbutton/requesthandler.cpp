@@ -289,6 +289,8 @@ void CheckDetectorProcessor::FinalizeRequest()
     target.ReadBack();
     save_png( "output.png", target.GetRGBA(), target.GetWidth(), target.GetHeight() );
 
+    printf( ":: done\n" );
+
 	Complete(HttpResponse(MHD_HTTP_OK));
 
 	MakeCurrentNullCtx();

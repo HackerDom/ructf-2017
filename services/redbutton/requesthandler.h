@@ -70,6 +70,4 @@ protected:
 
 private:
 	GLContexts* contexts;
-
-	void FinalizeRequest();
 };
