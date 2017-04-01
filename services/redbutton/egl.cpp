@@ -112,11 +112,10 @@ bool InitEGL()
 
     //
     EGLint numConfigs;
-    EGLConfig eglCfg;
-    eglChooseConfig( g_context.display, configAttribs, &eglCfg, 1, &numConfigs );
+    eglChooseConfig( g_context.display, configAttribs, &g_context.eglCfg, 1, &numConfigs );
 
     //
-    g_context.surface = eglCreatePbufferSurface( g_context.display, eglCfg, pbufferAttribs );
+    g_context.surface = eglCreatePbufferSurface( g_context.display, g_context.eglCfg, pbufferAttribs );
     if( g_context.surface == EGL_NO_SURFACE ){
         printf( "eglCreatePbufferSurface failed 0x%X\n", eglGetError() );
         return false;
@@ -126,7 +125,7 @@ bool InitEGL()
     //eglBindAPI(EGL_OPENGL_API);
 
     //
-    g_context.context = eglCreateContext( g_context.display, eglCfg, EGL_NO_CONTEXT, context_attribute_list );
+    g_context.context = eglCreateContext( g_context.display, g_context.eglCfg, EGL_NO_CONTEXT, context_attribute_list );
     if( g_context.context == EGL_NO_CONTEXT ){
         printf( "eglCreateContext failed 0x%X\n", eglGetError() );
         return false;
@@ -161,7 +160,28 @@ void ShutdownEGL()
 //
 EGLContext CreateLocalContext()
 {
-	return EGL_NO_CONTEXT; //eglCreateContext(m_Display, m_Config, m_Context, contextAttrs);
+	return eglCreateContext( g_context.display, g_context.eglCfg, g_context.context, context_attribute_list );
+}
+
+
+void MakeCurrentGlobalCtx()
+{
+	if( !eglMakeCurrent( g_context.display, g_context.surface, g_context.surface, g_context.context ) )
+		printf( "eglMakeCurrent failed 0x%X\n", eglGetError() );
+}
+
+
+//
+void MakeCurrentLocalCtx( EGLContext localCtx )
+{
+	eglMakeCurrent( g_context.display, g_context.surface, g_context.surface, localCtx );
+}
+
+
+//
+void MakeCurrentNullCtx()
+{
+	eglMakeCurrent( g_context.display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
 }
 
 
