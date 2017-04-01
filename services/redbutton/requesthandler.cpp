@@ -214,7 +214,7 @@ void CheckDetectorProcessor::FinalizeRequest()
 		return;
 	}
 
-	EGLContext ctx = EGL_NO_CONTEXT;
+	Context ctx;
 	{
 		pthread_mutex_lock( &contexts->sync );
 		pthread_t tid = pthread_self();
@@ -226,7 +226,7 @@ void CheckDetectorProcessor::FinalizeRequest()
 				exit( 1 );
 			}
 
-			EGLContext ctx = contexts->freeContexts.back();
+			ctx = contexts->freeContexts.back();
 			contexts->freeContexts.pop_back();
 
 			contexts->threadToCtx[ tid ] = ctx;
@@ -239,10 +239,7 @@ void CheckDetectorProcessor::FinalizeRequest()
 		pthread_mutex_unlock( &contexts->sync );
 	}
 
-	//EGLContext ctx = CreateLocalContext();
 	MakeCurrentLocalCtx( ctx );
-	//InitEGL();
-	//MakeCurrentGlobalCtx();
 
 	static GLfloat vVertices[] = {  -1.0f,  1.0f, 0.0f,
                                  1.0f,  1.0f, 0.0f,
@@ -251,7 +248,18 @@ void CheckDetectorProcessor::FinalizeRequest()
                                  1.0f, -1.0f, 0.0f,
                                 -1.0f, -1.0f, 0.0f };
 
-    Texture2D texture( data, dataSize );
+    GLfloat vUv[] = {   0.0f, 1.0f,
+                    1.0f, 1.0f,
+                    1.0f, 0.0f,
+                    0.0f, 1.0f,
+                    1.0f, 0.0f,
+                    0.0f, 0.0f
+					};
+
+
+
+	Texture2D texture( data, dataSize );
+    save_png( "input.png", texture.GetRGBA(), texture.GetWidth(), texture.GetHeight() );
 
     VertexShader vs( "shaders/simple.vert", false );
     //FragmentShader fs( detector->data, detector->length );
@@ -266,6 +274,7 @@ void CheckDetectorProcessor::FinalizeRequest()
 
     pr.SetTexture( "tex", texture );
     pr.SetAttribute( "v_pos", 3, GL_FLOAT, GL_FALSE, 0, vVertices, 6 * 3 * sizeof( GLfloat ) );
+    pr.SetAttribute( "v_uv", 2, GL_FLOAT, GL_FALSE, 0, vUv, 6 * 2 * sizeof( GLfloat ) );
 
     int w = width > 0 ? width : 4;
     int h = height > 0 ? height : 1;

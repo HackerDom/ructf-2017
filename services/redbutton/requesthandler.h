@@ -9,9 +9,9 @@
 
 struct GLContexts
 {
-	EGLContext contexts[ 4 ];
-	std::list< EGLContext > freeContexts;
-	std::map< pthread_t, EGLContext > threadToCtx;
+	Context contexts[ 4 ];
+	std::list< Context > freeContexts;
+	std::map< pthread_t, Context > threadToCtx;
 	pthread_mutex_t sync = PTHREAD_MUTEX_INITIALIZER;
 };
 
