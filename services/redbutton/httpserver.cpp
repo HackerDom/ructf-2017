@@ -7,6 +7,7 @@
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <microhttpd.h>
+#include <pthread.h>
 
 #define POSTBUFFERSIZE  65536
 
@@ -28,7 +29,10 @@ void HttpServer::Start(uint32_t port)
 
 	MHD_set_panic_func(OnFatalError, NULL);
 
-	daemon = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION, port, NULL, NULL, HandleRequest, this, 
+	daemon = MHD_start_daemon(
+		MHD_USE_SELECT_INTERNALLY,
+		port, NULL, NULL, HandleRequest, this, 
+		MHD_OPTION_THREAD_POOL_SIZE, 64, 
 	// TODO increase 
 		MHD_OPTION_CONNECTION_TIMEOUT, 1u,
 		MHD_OPTION_NOTIFY_COMPLETED, PostProcessRequest, NULL,
@@ -39,6 +43,8 @@ void HttpServer::Start(uint32_t port)
 		printf("Failed to start MHD_Daemon!\n");
 		exit(1);
 	}
+
+	printf(":: current thread id = %ld\n", pthread_self());
 
 	printf("Listening on port %d...\n", port);
 
@@ -58,6 +64,8 @@ void HttpServer::Stop()
 int HttpServer::HandleRequest(void *param, MHD_Connection *connection, const char *url, const char *method, const char *version, const char *uploadData, size_t *uploadDataSize, void **context)
 {
 	HttpServer *self = (HttpServer *)param;
+
+	printf(":: current thread id = %ld\n", pthread_self());
 
 	printf("Received request: %s %s\n", method, url);
 
