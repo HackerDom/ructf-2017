@@ -1,0 +1,9 @@
+Test template.
+
+{{hello}}
+
+Some text...
+
+{{footer}}
+
+some more text

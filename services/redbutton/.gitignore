@@ -1,2 +1,7 @@
 *.png
+detectors
 
+*.o
+*.so
+*.so.*
+*.a

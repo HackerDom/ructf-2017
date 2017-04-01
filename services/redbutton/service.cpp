@@ -2,6 +2,9 @@
 #include <string.h>
 #include "glwrap.h"
 
+#include "httpserver.h"
+#include "requesthandler.h"
+
 
 static GLfloat vVertices[] = {  -1.0f,  1.0f, 0.0f,
                                  1.0f,  1.0f, 0.0f,
@@ -18,10 +21,29 @@ GLfloat vUv[] = {   0.0f, 1.0f,
                     0.0f, 0.0f
 };
 
-
 //
 int main(int argc, char *argv[])
 {
+	TemplateStorage templates("templates");
+	DetectorStorage detectors("detectors");
+
+	RequestHandler handler(&detectors, &templates);
+	HttpServer server(&handler);
+
+	server.Start(16780);
+
+	getchar();
+
+	server.Stop();
+
+	/*TemplateStorage templates("templates");
+
+	printf("%s\n", templates.GetTemplate("test")->Fill("hello", "Hello, world!", "footer", "-- footer --"));*/
+
+
+	return 0;
+
+
     Context ctx;
     InitEGL( ctx );
 
