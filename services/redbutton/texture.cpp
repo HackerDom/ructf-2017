@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <png.h>
 #include "glwrap.h"
 
 
@@ -12,6 +13,31 @@ struct TextureFormat
 	{ GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE },
 	{ GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE },
 };
+
+
+//
+void PNGAPI error_function( png_structp png, png_const_charp dummy );
+
+
+//
+struct ReadStruct
+{
+	const uint8_t* pngData = nullptr;
+	uint32_t offset = 0;
+};
+
+
+//
+void PngReadFn( png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToRead )
+{
+	png_voidp io_ptr = png_get_io_ptr( png_ptr );
+	if( !io_ptr )
+		return;
+	
+	ReadStruct* rs = ( ReadStruct* )io_ptr;
+	memcpy( outBytes, rs->pngData + rs->offset, byteCountToRead );
+	rs->offset += byteCountToRead;
+}
 
 
 //
@@ -45,6 +71,86 @@ Texture2D::Texture2D( int width, int height, Format format, void* initData )
 		m_texture = 0;
 		m_framebuffer = 0;
 	}
+}
+
+
+//
+Texture2D::Texture2D( const void* pngData, uint32_t size )
+{
+	png_structp png = nullptr;
+	auto errorHandler = [&]() {
+		png_destroy_read_struct( &png, NULL, NULL );
+	};
+
+	png = png_create_read_struct( PNG_LIBPNG_VER_STRING, 0, 0, 0 );
+	if( png == NULL ) {
+		errorHandler();
+		return;
+	}
+
+	png_set_error_fn( png, 0, error_function, NULL );
+	if( setjmp( png_jmpbuf( png ) ) ) {
+		errorHandler();
+		return;
+	}
+
+	ReadStruct rs;
+	rs.pngData = ( const uint8_t* )pngData;
+	png_set_read_fn( png, &rs, PngReadFn );
+
+	png_infop info = png_create_info_struct( png );
+	if ( info == nullptr ){
+		errorHandler();
+		return;
+	}
+
+	png_read_info( png, info );
+
+	int color_type, bit_depth;
+	png_uint_32 width, height;
+	if( !png_get_IHDR( png, info, &width, &height, &bit_depth, &color_type, nullptr, nullptr, nullptr ) ){
+		errorHandler();
+		return;
+	}
+
+	if( color_type == PNG_COLOR_TYPE_PALETTE && bit_depth <= 8 ) 
+		png_set_expand( png );
+
+    if(color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8 ) 
+    	png_set_expand( png );
+
+    if( png_get_valid( png, info, PNG_INFO_tRNS ) ) 
+    	png_set_expand( png );
+
+    if( bit_depth == 16 )
+		png_set_strip_16( png );
+
+	if( bit_depth < 8 )
+		png_set_packing( png );
+
+	if( color_type == PNG_COLOR_TYPE_RGB )
+		png_set_filler( png, 255, PNG_FILLER_AFTER );
+
+	if( color_type == PNG_COLOR_TYPE_RGB_ALPHA )
+		printf( "PNG_COLOR_TYPE_RGB_ALPHA\n");
+
+	png_read_update_info( png, info );
+
+	m_width = width;
+	m_height = height;
+	m_format = FORMAT_RGBA;
+
+	m_shadowCopy = new RGBA[ width * height ];
+	RGBA* rows[ height ];
+	RGBA* p = m_shadowCopy;
+	for( uint32_t i = 0; i < height; i++ ){
+		rows[ i ] = p;
+		p += width;
+	}
+	png_read_image( png, ( png_bytepp )rows );
+
+	png_read_end( png, info );
+	png_destroy_read_struct( &png, &info, NULL );
 }
 
 
@@ -91,4 +197,20 @@ int Texture2D::GetWidth() const
 int Texture2D::GetHeight() const
 {
 	return m_height;
+}
+
+
+//
+const RGBA* Texture2D::GetRGBA() const
+{
+	return m_shadowCopy;
+}
+
+
+//
+void Texture2D::ReadBack()
+{
+	glPixelStorei( GL_PACK_ALIGNMENT, 1 );
+    glReadPixels( 0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, ( GLvoid* )m_shadowCopy );
+    CheckError( "glReadPixels failed" );
 }

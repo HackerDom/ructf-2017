@@ -58,3 +58,4 @@ struct Image
 //
 bool read_png( const char* file_name, Image& image );
 bool save_png( const char* file_name, const Image& image );
+bool save_png( const char* file_name, const RGBA* rgba, uint32_t width, uint32_t height );
