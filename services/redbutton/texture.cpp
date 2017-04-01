@@ -42,7 +42,7 @@ void PngReadFn( png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToR
 
 //
 Texture2D::Texture2D( int width, int height, Format format, void* initData )
-	: m_width( width ), m_height( height ), m_format( format )
+	: m_width( width ), m_height( height ), m_format( format ), m_shadowCopy( nullptr )
 {
 	glGenTextures( 1, &m_texture );
 	glBindTexture( GL_TEXTURE_2D, m_texture );
@@ -71,11 +71,16 @@ Texture2D::Texture2D( int width, int height, Format format, void* initData )
 		m_texture = 0;
 		m_framebuffer = 0;
 	}
+
+	m_shadowCopy = new RGBA[ width * height ];
+	if( initData )
+		memcpy( m_shadowCopy, initData, width * height * sizeof( RGBA ) );
 }
 
 
 //
 Texture2D::Texture2D( const void* pngData, uint32_t size )
+	: m_width( 0 ), m_height( 0 ), m_format( FORMAT_COUNT ), m_shadowCopy( nullptr )
 {
 	png_structp png = nullptr;
 	auto errorHandler = [&]() {
@@ -169,6 +174,7 @@ Texture2D::~Texture2D()
 	glDeleteFramebuffers( 1, &m_framebuffer );
 	m_texture = 0;
 	m_framebuffer = 0;
+	delete[] m_shadowCopy;
 }
 
 
