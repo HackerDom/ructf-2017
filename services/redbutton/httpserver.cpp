@@ -32,7 +32,7 @@ void HttpServer::Start(uint32_t port)
 	daemon = MHD_start_daemon(
 		MHD_USE_SELECT_INTERNALLY,
 		port, NULL, NULL, HandleRequest, this, 
-		MHD_OPTION_THREAD_POOL_SIZE, 4, 
+		MHD_OPTION_THREAD_POOL_SIZE, THREADPOOL_SIZE, 
 	// TODO increase 
 		MHD_OPTION_CONNECTION_TIMEOUT, 1u,
 		MHD_OPTION_NOTIFY_COMPLETED, PostProcessRequest, NULL,

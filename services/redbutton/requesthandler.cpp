@@ -230,10 +230,10 @@ void CheckDetectorProcessor::FinalizeRequest()
 			contexts->freeContexts.pop_back();
 
 			contexts->threadToCtx[ tid ] = ctx;
-			printf( "::new thread %x ctx %x\n", tid, ctx );
+			printf( ":: new thread %lx ctx %x\n", tid, *(uint32_t *)&ctx );
 		} else {
 			ctx = iter->second;
-			printf( "::new thread %x ctx %x\n", tid, ctx );
+			printf( ":: old thread %lx ctx %x\n", tid, *(uint32_t *)&ctx );
 		}
 
 		pthread_mutex_unlock( &contexts->sync );
@@ -262,8 +262,11 @@ void CheckDetectorProcessor::FinalizeRequest()
     save_png( "input.png", texture.GetRGBA(), texture.GetWidth(), texture.GetHeight() );
 
     VertexShader vs( "shaders/simple.vert", false );
+    char buffer[64 * 1024];
+    memset(buffer, 0, sizeof(buffer));
+    memcpy(buffer, detector->data, min(sizeof(buffer), detector->length));
     //FragmentShader fs( detector->data, detector->length );
-    FragmentShader fs( ( const char* )detector->data );
+    FragmentShader fs( buffer );
     Program pr( vs, fs );
 
     if( pr.GetProgram() == 0 ){

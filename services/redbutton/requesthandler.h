@@ -7,9 +7,11 @@
 #include <list>
 #include <map>
 
+#define min(a, b) ((a) <= (b) ? (a) : (b))
+
 struct GLContexts
 {
-	Context contexts[ 4 ];
+	Context contexts[ THREADPOOL_SIZE ];
 	std::list< Context > freeContexts;
 	std::map< pthread_t, Context > threadToCtx;
 	pthread_mutex_t sync = PTHREAD_MUTEX_INITIALIZER;

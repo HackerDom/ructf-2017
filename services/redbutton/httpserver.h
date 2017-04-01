@@ -2,9 +2,11 @@
 
 #include <microhttpd.h>
 
+
+#define THREADPOOL_SIZE 4
+
 class HttpRequestState;
 class HttpRequestHandler;
-
 
 struct HttpRequest
 {
