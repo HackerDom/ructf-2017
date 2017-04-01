@@ -7,6 +7,11 @@ RequestHandler::RequestHandler(DetectorStorage *detectors, TemplateStorage *temp
 {
 	this->detectors = detectors;
 	this->templates = templates;
+
+	for( size_t i = 0; i < 4; i++ ){
+		contexts.contexts[ i ] = CreateLocalContext();
+		contexts.freeContexts.push_back( contexts.contexts[ i ] );
+	}
 }
 
 HttpResponse RequestHandler::HandleGet(HttpRequest request)
@@ -51,6 +56,7 @@ HttpResponse RequestHandler::HandlePost(HttpRequest request, HttpPostProcessor *
 	}
 
 	char idBuffer[64];
+	memset(idBuffer, 0, sizeof(idBuffer));
 	if (ParseUrl(request.url, 3, "detectors", OUT(idBuffer), "check"))
 	{
 		uuid id;
@@ -65,7 +71,7 @@ HttpResponse RequestHandler::HandlePost(HttpRequest request, HttpPostProcessor *
 
 		printf(":: setting up CheckDetectorProcessor\n");
 
-		*postProcessor = new CheckDetectorProcessor(request, detector);
+		*postProcessor = new CheckDetectorProcessor(request, detector, &contexts );
 
 		return HttpResponse();
 	}
@@ -133,10 +139,11 @@ void AddDetectorProcessor::FinalizeRequest()
 	Complete(HttpResponse(MHD_HTTP_OK, responseData, strlen(responseData)));
 }
 
-CheckDetectorProcessor::CheckDetectorProcessor(HttpRequest request, Detector *detector) : HttpPostProcessor(request)
+CheckDetectorProcessor::CheckDetectorProcessor(HttpRequest request, Detector *detector, GLContexts* contexts ) : HttpPostProcessor(request)
 {
 	this->detector = detector;
 	this->data = NULL;
+	this->contexts = contexts;
 
 	width = 0;
 	height = 0;
@@ -212,6 +219,36 @@ void CheckDetectorProcessor::FinalizeRequest()
 		return;
 	}
 
+	EGLContext ctx = EGL_NO_CONTEXT;
+	{
+		pthread_mutex_lock( &contexts->sync );
+		pthread_t tid = pthread_self();
+
+		auto iter = contexts->threadToCtx.find( tid );
+		if( iter == contexts->threadToCtx.end() ){
+			if( contexts->freeContexts.size() == 0 ){
+				printf( ":: ERROR: NO AVAILABLE CONTEXT" );
+				exit( 1 );
+			}
+
+			EGLContext ctx = contexts->freeContexts.back();
+			contexts->freeContexts.pop_back();
+
+			contexts->threadToCtx[ tid ] = ctx;
+			printf( "::new thread %x ctx %x\n", tid, ctx );
+		} else {
+			ctx = iter->second;
+			printf( "::new thread %x ctx %x\n", tid, ctx );
+		}
+
+		pthread_mutex_unlock( &contexts->sync );
+	}
+
+	//EGLContext ctx = CreateLocalContext();
+	MakeCurrentLocalCtx( ctx );
+	//InitEGL();
+	//MakeCurrentGlobalCtx();
+
 	static GLfloat vVertices[] = {  -1.0f,  1.0f, 0.0f,
                                  1.0f,  1.0f, 0.0f,
                                  1.0f, -1.0f, 0.0f,
@@ -235,7 +272,7 @@ void CheckDetectorProcessor::FinalizeRequest()
     pr.SetTexture( "tex", texture );
     pr.SetAttribute( "v_pos", 3, GL_FLOAT, GL_FALSE, 0, vVertices, 6 * 3 * sizeof( GLfloat ) );
 
-   	int w = width > 0 ? width : 4;
+    int w = width > 0 ? width : 4;
     int h = height > 0 ? height : 1;
     Texture2D target( w, h, FORMAT_RGBA );
 
@@ -249,4 +286,6 @@ void CheckDetectorProcessor::FinalizeRequest()
     save_png( "output.png", target.GetRGBA(), target.GetWidth(), target.GetHeight() );
 
 	Complete(HttpResponse(MHD_HTTP_OK));
+
+	MakeCurrentNullCtx();
 }
