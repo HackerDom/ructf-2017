@@ -24,6 +24,8 @@ GLfloat vUv[] = {   0.0f, 1.0f,
 //
 int main(int argc, char *argv[])
 {
+    InitEGL();
+
 	TemplateStorage templates("templates");
 	DetectorStorage detectors("detectors");
 
@@ -36,19 +38,11 @@ int main(int argc, char *argv[])
 
 	server.Stop();
 
-	/*TemplateStorage templates("templates");
-
-	printf("%s\n", templates.GetTemplate("test")->Fill("hello", "Hello, world!", "footer", "-- footer --"));*/
-
-
+    ShutdownEGL();
 	return 0;
 
-
-    Context ctx;
-    InitEGL( ctx );
-
-    VertexShader vs( "shaders/simple.vert" );
-    FragmentShader fs( "shaders/checkboard.frag" );
+    VertexShader vs( "shaders/simple.vert", false );
+    FragmentShader fs( "shaders/checkboard.frag", false );
     Program pr( vs, fs );
     pr.SetAttribute( "v_pos", 3, GL_FLOAT, GL_FALSE, 0, vVertices, 6 * 3 * sizeof( GLfloat ) );
     pr.SetAttribute( "v_uv", 2, GL_FLOAT, GL_FALSE, 0, vUv, 6 * 2 * sizeof( GLfloat ) );
@@ -125,7 +119,7 @@ int main(int argc, char *argv[])
         read_png( "crosses.png", cr );
         Texture2D crTex( cr );
 
-        VertexShader vs( "shaders/simple.vert" );
+        VertexShader vs( "shaders/simple.vert", false );
         FragmentShader fs_flag( "shaders/flag.bin.non-prerotate", true );
         Program pr_flag( vs, fs_flag );
         pr_flag.SetTexture( "tex", crTex );
@@ -158,6 +152,6 @@ int main(int argc, char *argv[])
         printf( "\n" );
     }
 
-    ShutdownEGL( ctx );
+    ShutdownEGL();
     return 0;
 }

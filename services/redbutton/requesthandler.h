@@ -34,3 +34,22 @@ private:
 
 	void FinalizeRequest();
 };
+
+
+class CheckDetectorProcessor : public HttpPostProcessor
+{
+public:
+	CheckDetectorProcessor(HttpRequest request, Detector *detector);
+	virtual ~CheckDetectorProcessor();
+
+	virtual int IteratePostData(MHD_ValueKind kind, const char *key, const char *filename, const char *contentType, const char *transferEncoding, const char *data, uint64_t offset, size_t size);
+
+	size_t dataSize;
+	char *data;
+	Detector *detector;
+	uint32_t width;
+	uint32_t height;
+
+private:
+	void FinalizeRequest();
+};

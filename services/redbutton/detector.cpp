@@ -6,6 +6,7 @@
 Detector::Detector(uuid name, const char *data, size_t length, Detector *previousDetector)
 {
 	this->data = new char[length];
+	this->length = length;
 
 	memcpy(this->data, data, length);
 

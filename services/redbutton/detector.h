@@ -18,6 +18,7 @@ public:
 
 	uuid name;
 	char *data;
+	size_t length;
 
 	Detector *previousDetector;
 };
