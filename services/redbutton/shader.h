@@ -8,7 +8,8 @@ class Shader
 public:
 	//
 	Shader() = delete;
-	Shader( GLuint type, const char* fileName, bool isBinary = false );
+	Shader( GLuint type, const char* fileName, bool isBinary );
+	Shader( GLuint type, const char* shader );
 	Shader( GLuint type, const void* binary, uint32_t binarySize );
 	Shader( const Shader& ) = delete;
     Shader( const Shader&& ) = delete;
@@ -29,7 +30,7 @@ class VertexShader : public Shader
 {
 public:
 	VertexShader() = delete;
-	VertexShader( const char* fileName, bool isBinary = false );
+	VertexShader( const char* fileName, bool isBinary );
 	VertexShader( const void* binary, uint32_t binarySize );
 	VertexShader( const VertexShader& ) = delete;
     VertexShader( const VertexShader&& ) = delete;
@@ -42,7 +43,8 @@ class FragmentShader : public Shader
 {
 public:
 	FragmentShader() = delete;
-	FragmentShader( const char* fileName, bool isBinary = false );
+	FragmentShader( const char* fileName, bool isBinary );
+	FragmentShader( const char* shader );
 	FragmentShader( const void* binary, uint32_t binarySize );
 	FragmentShader( const FragmentShader& ) = delete;
     FragmentShader( const FragmentShader&& ) = delete;

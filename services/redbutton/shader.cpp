@@ -59,6 +59,39 @@ Shader::Shader( GLuint type, const char* fileName, bool isBinary )
 
 
 //
+Shader::Shader( GLuint type, const char* shader )
+{
+	m_shader = glCreateShader( type );
+	if( !m_shader ) {
+		fprintf( stderr, "Error: glCreateShader failed: 0x%08X\n", glGetError());
+		return;
+	}
+
+	glShaderSource( m_shader, 1, &shader, NULL );
+	glCompileShader( m_shader );
+
+	GLint ret;
+	glGetShaderiv( m_shader, GL_COMPILE_STATUS, &ret );
+	if( !ret ) {
+		char *log;
+
+		fprintf( stderr, "Error: shader compilation failed!\n" );
+		glGetShaderiv( m_shader, GL_INFO_LOG_LENGTH, &ret );
+
+		if( ret > 1 ) {
+			log = new char[ ret ];
+			glGetShaderInfoLog( m_shader, ret, NULL, log );
+			fprintf( stderr, "%s\n", log );
+			delete[] log;
+		}
+
+		glDeleteShader( m_shader );
+		m_shader = 0;
+	}
+}
+
+
+//
 Shader::Shader( GLuint type, const void* binary, uint32_t binarySize )
 {
 	m_shader = glCreateShader( type );
@@ -115,6 +148,14 @@ VertexShader::VertexShader( const void* binary, uint32_t binarySize )
 //
 FragmentShader::FragmentShader( const char* fileName, bool isBinary )
 	: Shader( GL_FRAGMENT_SHADER, fileName, isBinary )
+{
+
+}
+
+
+//
+FragmentShader::FragmentShader( const char* shader )
+	: Shader( GL_FRAGMENT_SHADER, shader )
 {
 
 }
