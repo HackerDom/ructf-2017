@@ -141,7 +141,7 @@ def parse_args():
     parser.add_argument('-s', '--services', type=int, help='services count',
                         default=6)
     parser.add_argument('-q', '--frequency', type=int, help='attack frequency',
-                        default=3)
+                        default=6)
     return parser.parse_args()
 
 
@@ -173,7 +173,7 @@ async def create_attacks():
         }
         json_str = json.dumps(event)
         await write_to_websocket(json_str)
-        await asyncio.sleep(1)
+        await asyncio.sleep(1/args.frequency)
 
 
 async def create_states():

@@ -85,36 +85,19 @@ export const GPUParticleSystem = function(options) {
 			'return c / 255.0;',
 			'}',
 
-			'vec4 pack(const in float depth)',
-			'{',
-			'const vec4 bit_shift = vec4(256.0*256.0*256.0, 256.0*256.0, 256.0, 1.0);',
-			'const vec4 bit_mask	= vec4(0.0, 1.0/256.0, 1.0/256.0, 1.0/256.0);',
-			'vec4 res = mod(depth*bit_shift*vec4(255), vec4(256))/vec4(255);',
-			'res -= res.xxyz * bit_mask;',
-			'return res;',
-			'}',
-
-			'float unpack(const in vec4 rgba_depth)',
-			'{',
-			'const vec4 bit_shift = vec4(1.0/(256.0*256.0*256.0), 1.0/(256.0*256.0), 1.0/256.0, 1.0);',
-			'float depth = dot(rgba_depth, bit_shift);',
-			'return depth;',
-			'}',
-
 			'uniform float uTime;',
 			'uniform float uScale;',
 
 			'attribute vec4 particlePositionsStartTime;',
 			'attribute vec4 particleVelColSizeLife;',
+			'attribute vec4 particleColor;',
 
 			'varying vec4 vColor;',
 			'varying float lifeLeft;',
 
 			'void main() {',
 
-			'// unpack things from our attributes',
-			'vColor = encode_float( particleVelColSizeLife.y );',
-
+			'vColor = particleColor / 255.0;',
 			'// convert our velocity back into a value we can use',
 			'vec4 velTurb = encode_float( particleVelColSizeLife.x );',
 			'vec3 velocity = vec3( velTurb.xyz );',
@@ -219,6 +202,7 @@ export const GPUParticleSystem = function(options) {
 	// define defaults for all values
 	self.particleShaderMat.defaultAttributeValues.particlePositionsStartTime = [0, 0, 0, 0];
 	self.particleShaderMat.defaultAttributeValues.particleVelColSizeLife = [0, 0, 0, 0];
+	self.particleShaderMat.defaultAttributeValues.particleColor = [0, 0, 0, 0];
 
 	self.particleContainers = [];
 
@@ -329,6 +313,7 @@ export const GPUParticleContainer = function(maxParticles, particleSystem) {
 	self.particleVertices = new Float32Array(self.PARTICLE_COUNT * 3); // position
 	self.particlePositionsStartTime = new Float32Array(self.PARTICLE_COUNT * 4); // position
 	self.particleVelColSizeLife = new Float32Array(self.PARTICLE_COUNT * 4);
+	self.particleColor = new Float32Array(self.PARTICLE_COUNT * 4);
 
 	for (var i = 0; i < self.PARTICLE_COUNT; i++) {
 		self.particlePositionsStartTime[i * 4 + 0] = 100; //x
@@ -341,17 +326,24 @@ export const GPUParticleContainer = function(maxParticles, particleSystem) {
 		self.particleVertices[i * 3 + 2] = 0.0; //z
 
 		self.particleVelColSizeLife[i * 4 + 0] = decodeFloat(128, 128, 0, 0); //vel
-		self.particleVelColSizeLife[i * 4 + 1] = decodeFloat(0, 254, 0, 254); //color
+		self.particleVelColSizeLife[i * 4 + 1] = 0;
 		self.particleVelColSizeLife[i * 4 + 2] = 1.0; //size
 		self.particleVelColSizeLife[i * 4 + 3] = 0.0; //lifespan
+
+		self.particleColor[i * 4 + 0] = 0;
+		self.particleColor[i * 4 + 1] = 0;
+		self.particleColor[i * 4 + 2] = 0;
+		self.particleColor[i * 4 + 3] = 0;
 	}
 
 	self.particleShaderGeo.addAttribute('position', new THREE.BufferAttribute(self.particleVertices, 3));
 	self.particleShaderGeo.addAttribute('particlePositionsStartTime', new THREE.BufferAttribute(self.particlePositionsStartTime, 4).setDynamic(true));
 	self.particleShaderGeo.addAttribute('particleVelColSizeLife', new THREE.BufferAttribute(self.particleVelColSizeLife, 4).setDynamic(true));
+	self.particleShaderGeo.addAttribute('particleColor', new THREE.BufferAttribute(self.particleColor, 4).setDynamic(true));
 
 	self.posStart = self.particleShaderGeo.getAttribute('particlePositionsStartTime');
 	self.velCol = self.particleShaderGeo.getAttribute('particleVelColSizeLife');
+	self.color = self.particleShaderGeo.getAttribute('particleColor');
 
 	self.particleShaderMat = self.GPUParticleSystem.particleShaderMat;
 
@@ -425,15 +417,11 @@ export const GPUParticleContainer = function(maxParticles, particleSystem) {
 
 		self.velCol.array[i * 4 + 0] = decodeFloat(velX, velY, velZ, turbulence); //vel
 
-		var rgb = hexToRgb(color);
+		const rgb = hexToRgb(color);
+		self.color.array[i * 4 + 0] = rgb[0];
+		self.color.array[i * 4 + 1] = rgb[1];
+		self.color.array[i * 4 + 2] = rgb[2];
 
-		for (var c = 0; c < rgb.length; c++) {
-			rgb[c] = Math.floor(rgb[c] + ((particleSystem.random()) * colorRandomness) * 254);
-			if (rgb[c] > 254) rgb[c] = 254;
-			if (rgb[c] < 0) rgb[c] = 0;
-		}
-
-		self.velCol.array[i * 4 + 1] = decodeFloat(rgb[0], rgb[1], rgb[2], 254); //color
 		self.velCol.array[i * 4 + 2] = size + (particleSystem.random()) * sizeRandomness; //size
 		self.velCol.array[i * 4 + 3] = lifetime; //lifespan
 
@@ -477,6 +465,7 @@ export const GPUParticleContainer = function(maxParticles, particleSystem) {
 
 			self.posStart.needsUpdate = true;
 			self.velCol.needsUpdate = true;
+			self.color.needsUpdate = true;
 
 			self.offset = 0;
 			self.count = 0;

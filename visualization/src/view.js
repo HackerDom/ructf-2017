@@ -81,15 +81,17 @@ export default class View {
 	}
 
 	showArrow(arrowData) {
+		if(!arrowData.svc.visible)
+			return;
 		const posFrom = arrowData.from.pos.clone();
 		const posTo = arrowData.to.pos.clone();
 		const spline_points = View.getSplinePoints(posFrom.normalize().multiplyScalar(44), posTo.normalize().multiplyScalar(44));
-		this.createArrow(spline_points);
+		this.createArrow(spline_points, arrowData.svc.color);
 	}
 
-	createArrow(points) {
+	createArrow(points, color) {
 		const particleSystem = new THREE_particle.GPUParticleSystem({
-			maxParticles: 5000,
+			maxParticles: 10000,
 			particleSpriteTex: this.particleSpriteTex
 		});
 		const spline = new THREE.CatmullRomCurve3(points);
@@ -98,7 +100,7 @@ export default class View {
 			particleSystem,
 			spline,
 			timer: 0,
-			color: 0xaa88ff
+			color: new THREE.Color(color)
 		};
 		this.arrows.push(arrow);
 	}
@@ -138,17 +140,17 @@ export default class View {
 
 		const options = {
 			position: new THREE.Vector3(),
-			positionRandomness: .94,
+			positionRandomness: 1.2,
 			velocityRandomness: 0.43,
 			colorRandomness: 0,
-			turbulence: 0,
-			lifetime: 0.3,
-			size: 5,
+			turbulence: 0.5,
+			lifetime: 0.5,
+			size: 6,
 			sizeRandomness: 3
 		};
 
 		const spawnerOptions = {
-			spawnRate: 1300
+			spawnRate: 4000
 		};
 
 		this.arrows = [];
@@ -156,7 +158,7 @@ export default class View {
 
 		const stats = new Stats();
 		stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-		document.body.appendChild( stats.dom );
+		$("#stats-container").append(stats.dom);
 
 		init();
 		animate();
@@ -412,7 +414,7 @@ export default class View {
 			camera.position.z = 100 * Math.sin(phi) * Math.sin(theta);
 			camera.lookAt(scene.position);
 			const delta = clock.getDelta();
-			planetGroup.rotateY(delta / 3);
+			planetGroup.rotateY(delta / 10);
 
 			_this.arrows = _this.arrows.filter(function(a) {
 				if(a.timer <= 1)
@@ -422,10 +424,10 @@ export default class View {
 			});
 			for (let i = 0; i < _this.arrows.length; i++) {
 				const arrow = _this.arrows[i];
-				arrow.timer += delta * 0.15;
+				arrow.timer += delta / 3;
 				if (delta > 0) {
 					options.position = arrow.spline.getPoint(arrow.timer);
-					options.color = arrow.color;
+					options.color = arrow.color.getHex();
 					for (let x = 0; x < spawnerOptions.spawnRate * delta; x++) {
 						arrow.particleSystem.spawnParticle(options);
 					}
