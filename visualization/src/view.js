@@ -32,10 +32,6 @@ export default class View {
 	init() {
 		this.createFilterPanel();
 
-		$("#find-team-wrapper").find("input").on("keyup paste", function () {
-			const text = $(this).val().toLowerCase();
-		});
-
 		this.initThree(this.model.teams);
 	}
 
