@@ -19,7 +19,7 @@ def registration(user_type, action):
 
 #@cron(-1, -1, -1, -1, -1)
 #def dynamically_load_config_changes(_):
-#    config.update_config()
+#    __config.update_config()
 
 
 def get_request_json():

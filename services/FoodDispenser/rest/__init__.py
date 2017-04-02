@@ -1,2 +1,2 @@
 from rest import rest_hub
-from rest.actions import register, auth as _
+from rest.actions import register, token as _
