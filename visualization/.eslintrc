@@ -18,7 +18,7 @@
     "quotes": 0,
     "no-console": 0,
     "no-debugger": 1,
-    "no-var": 1,
+    "no-var": 0,
     "semi": [1, "always"],
     "no-trailing-spaces": 0,
     "eol-last": 0,

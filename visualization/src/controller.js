@@ -29,9 +29,9 @@ export default class Controller extends EventEmitter {
 		};
 		ws.onmessage = (e) => {
 			let event = JSON.parse(e.data);
-			if (event.type == "attack")
+			if (event.type === "attack")
 				this.processAttack(event.value);
-			else if (event.type == "state")
+			else if (event.type === "state")
 				this.processState(event.value);
 		};
 		ws.onerror = (e) => {

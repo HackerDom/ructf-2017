@@ -291,7 +291,7 @@ export const GPUParticleContainer = function(maxParticles, particleSystem) {
 		UINT8_VIEW[1] = Math.floor(z);
 		UINT8_VIEW[2] = Math.floor(y);
 		UINT8_VIEW[3] = Math.floor(x);
-		return FLOAT_VIEW[0]
+		return FLOAT_VIEW[0];
 	}
 
 	function componentToHex(c) {

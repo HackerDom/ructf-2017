@@ -1,7 +1,7 @@
 import $ from "jquery";
 import md5 from "md5";
 import * as THREE from "three";
-import * as THREE_particle from "./particle"
+import * as THREE_particle from "./particle";
 import Stats from "stats.js";
 
 
@@ -16,10 +16,10 @@ export default class View {
 			this.init();
 		});
 		controller.on('showArrow', arrowData => {
-			//this.showArrow(arrowData);
+			this.showArrow(arrowData);
 		});
 		controller.on('score', () => {
-			//this.updateOpenedTooltip();
+			// NONE
 		});
 		controller.on('servicesStatuses', () => {
 			this.drawServicesStatusesAndStat();
@@ -32,7 +32,7 @@ export default class View {
 	init() {
 		this.createFilterPanel();
 
-		this.initThree(this.model.teams);
+		this.initThree();
 	}
 
 	drawServicesStatusesAndStat() {
@@ -80,15 +80,51 @@ export default class View {
 		}
 	}
 
-	initThree(teams) {
+	showArrow(arrowData) {
+		const posFrom = arrowData.from.pos.clone();
+		const posTo = arrowData.to.pos.clone();
+		const spline_points = View.getSplinePoints(posFrom.normalize().multiplyScalar(44), posTo.normalize().multiplyScalar(44));
+		this.createArrow(spline_points);
+	}
+
+	createArrow(points) {
+		const particleSystem = new THREE_particle.GPUParticleSystem({
+			maxParticles: 5000,
+			particleSpriteTex: this.particleSpriteTex
+		});
+		const spline = new THREE.CatmullRomCurve3(points);
+		this.planetGroup.add(particleSystem);
+		const arrow = {
+			particleSystem,
+			spline,
+			timer: 0,
+			color: 0xaa88ff
+		};
+		this.arrows.push(arrow);
+	}
+
+	static getSplinePoints(pos0, pos1) {
+		const result = [pos0];
+		result.push(pos0.clone().normalize().multiplyScalar(46).add(pos1.clone().normalize()));
+		result.push(new THREE.Vector3(0.01, 0, 0).add(pos0).add(pos1).normalize().multiplyScalar(46));
+		result.push(pos1.clone().normalize().multiplyScalar(46).add(pos0.clone().normalize()));
+		result.push(pos1);
+		return result;
+	}
+
+	initThree() {
+		const teams = this.model.teams;
 		const $container = $("#container");
 		let SCREEN_WIDTH = $container.width();
 		let SCREEN_HEIGHT = $container.height();
 		let aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 
-		let camera, scene;
+		let camera;
 		let renderer;
-		let planetGroup;
+		const planetGroup = new THREE.Object3D();
+		this.planetGroup = planetGroup;
+		const scene = new THREE.Scene();
+		this.scene = scene;
 
 		const clock = new THREE.Clock();
 		let lon = 0, lat = 0;
@@ -97,14 +133,13 @@ export default class View {
 		let onPointerDownPointerX, onPointerDownPointerY, onPointerDownLon, onPointerDownLat;
 
 		const textureLoader = new THREE.TextureLoader();
-		const particleSpriteTex = textureLoader.load("static/img/particle2.png");
+		this.particleSpriteTex = textureLoader.load("static/img/particle2.png");
 		const planetTex = textureLoader.load("static/img/planet.jpg");
 
 		const options = {
 			position: new THREE.Vector3(),
 			positionRandomness: .94,
 			velocityRandomness: 0.43,
-			color: 0xaa88ff,
 			colorRandomness: 0,
 			turbulence: 0,
 			lifetime: 0.3,
@@ -116,8 +151,8 @@ export default class View {
 			spawnRate: 1300
 		};
 
-		let arrows = [];
-		let nodes = [];
+		this.arrows = [];
+		const _this = this;
 
 		const stats = new Stats();
 		stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -129,8 +164,6 @@ export default class View {
 		function init() {
 			camera = new THREE.PerspectiveCamera(60, aspect, 1, 1000);
 			camera.position.set(0, 0, 100);
-
-			scene = new THREE.Scene();
 
 			const light = new THREE.DirectionalLight(0xdfebff, 1);
 			light.position.set(75, 20, 60);
@@ -147,58 +180,37 @@ export default class View {
 
 			scene.add(new THREE.AmbientLight(0x666666));
 
-			planetGroup = new THREE.Object3D();
-
 			const sphere = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40, 3), new THREE.MeshLambertMaterial({map: planetTex}));
 			sphere.castShadow = true;
 			sphere.position.set(0, 0, 0);
 			sphere.receiveShadow = true;
 			planetGroup.add(sphere);
 
-			let nodes_points = [];
-			let samplesCount = teams.length;
-			while (nodes_points.length < teams.length) {
-				nodes_points = fibonacci_sphere(samplesCount);
-				nodes_points = nodes_points.filter(p => p[1] >= -0.5 && p[1] <= 0.5);
-				samplesCount++;
-			}
-			if (nodes_points.length > teams.length)
-				nodes_points = nodes_points.slice(0, teams.length);
+			calculateNodesPositions();
 
-
-			for(let i=0; i<nodes_points.length; i++) {
+			for(let i=0; i<teams.length; i++) {
+				const team = teams[i];
 				const node = genNode();
 				node.castShadow = true;
 				node.receiveShadow = true;
-				node.position.set(nodes_points[i][0] * 43, nodes_points[i][1] * 43, nodes_points[i][2] * 43);
-				let myDirectionVector = new THREE.Vector3(nodes_points[i][0], nodes_points[i][1], nodes_points[i][2]);
+				const myDirectionVector = new THREE.Vector3(team.point[0], team.point[1], team.point[2]);
+				const nodePosition = myDirectionVector.clone().multiplyScalar(43);
+				node.position.set(nodePosition.x, nodePosition.y, nodePosition.z);
 				let mx = new THREE.Matrix4().lookAt(new THREE.Vector3(0,0,0), myDirectionVector, new THREE.Vector3(0,1,0));
 				let qt = new THREE.Quaternion().setFromRotationMatrix(mx);
 				node.quaternion.copy(qt);
-				nodes.push({node, vector: myDirectionVector});
+				team.node = node;
+				team.pos = nodePosition;
 				planetGroup.add(node);
 
-				const spritey = makeTextSprite( " " + i + " ",
+				const spritey = makeTextSprite( " " + team.name + " ",
 					{ fontsize: 24, borderColor: {r:255, g:0, b:0, a:1.0}, backgroundColor: {r:255, g:100, b:100, a:0.8} } );
-				spritey.position.set(nodes_points[i][0] * 50, nodes_points[i][1] * 50, nodes_points[i][2] * 50);
+				const spriteyPosition = myDirectionVector.clone().multiplyScalar(50);
+				spritey.position.set(spriteyPosition.x, spriteyPosition.y, spriteyPosition.z);
 				planetGroup.add(spritey);
 			}
 
 			scene.add(planetGroup);
-
-			for(let i=6; i<7; i++) {
-				for(let j=0; j<nodes.length; j++) {
-					if (i === j)
-						continue;
-					scene.updateMatrixWorld(true); // Координаты вершин должны рассчитаться для рассчета координат стрелок
-					const pos0 = new THREE.Vector3();
-					pos0.setFromMatrixPosition(nodes[i].node.matrixWorld);
-					const pos1 = new THREE.Vector3();
-					pos1.setFromMatrixPosition(nodes[j].node.matrixWorld);
-					const spline_points = getSplinePoints(pos0.normalize().multiplyScalar(44), pos1.normalize().multiplyScalar(44));
-					createArrow(spline_points, nodes[i].vector);
-				}
-			}
 
 			const axes = new THREE.AxisHelper(100);
 			scene.add(axes);
@@ -213,19 +225,18 @@ export default class View {
 			document.addEventListener('wheel', onDocumentMouseWheel, false);
 		}
 
-		function createArrow(points) {
-			const particleSystem = new THREE_particle.GPUParticleSystem({
-				maxParticles: 5000,
-				particleSpriteTex
-			});
-			const spline = new THREE.CatmullRomCurve3(points);
-			planetGroup.add(particleSystem);
-			const arrow = {
-				particleSystem,
-				spline,
-				timer: 0,
-			};
-			arrows.push(arrow);
+		function calculateNodesPositions() {
+			let nodes_points = [];
+			let samplesCount = teams.length;
+			while (nodes_points.length < teams.length) {
+				nodes_points = fibonacci_sphere(samplesCount);
+				nodes_points = nodes_points.filter(p => p[1] >= -0.5 && p[1] <= 0.5);
+				samplesCount++;
+			}
+			if (nodes_points.length > teams.length)
+				nodes_points = nodes_points.slice(0, teams.length);
+			for(let i=0; i<nodes_points.length; i++)
+				teams[i].point = nodes_points[i];
 		}
 
 		function genNode() {
@@ -276,78 +287,34 @@ export default class View {
 			return points;
 		}
 
-		function getLine(points) {
-			const spline = new THREE.CatmullRomCurve3(points);
-			const geometry = new THREE.Geometry();
-			const colors = [];
-			const stepsCount = 100;
-			for (let i = 0; i < stepsCount; i++) {
-				const index = i / stepsCount;
-				const position = spline.getPoint(index);
-				geometry.vertices[i] = new THREE.Vector3(position.x, position.y, position.z);
-				colors[i] = new THREE.Color(0xffffff);
-				colors[i].setHSL(1.0, 1.0, index);
-			}
-			geometry.colors = colors;
-
-			const customMaterial = new THREE.ShaderMaterial(
-				{
-					uniforms:
-						{
-							"c":   { type: "f", value: 0 },
-							"p":   { type: "f", value: 0.2 },
-							glowColor: { type: "c", value: new THREE.Color(0x78782f) },
-							viewVector: { type: "v3", value: camera.position }
-						},
-					vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
-					fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-					side: THREE.FrontSide,
-					blending: THREE.AdditiveBlending,
-					transparent: true
-				});
-
-			const lineGlow = new THREE.Mesh(new THREE.TubeBufferGeometry(spline, 200, 0.4, 5, false), customMaterial.clone() );
-			planetGroup.add(lineGlow);
-
-			window.lineGlow = lineGlow;
-		}
-
-		function getSplinePoints(pos0, pos1) {
-			const result = [pos0];
-			result.push(pos0.clone().normalize().multiplyScalar(46).add(pos1.clone().normalize()));
-			result.push(new THREE.Vector3(0.01, 0, 0).add(pos0).add(pos1).normalize().multiplyScalar(46));
-			result.push(pos1.clone().normalize().multiplyScalar(46).add(pos0.clone().normalize()));
-			result.push(pos1);
-			return result;
-		}
 
 		function makeTextSprite( message, parameters )
 		{
 			if ( parameters === undefined ) parameters = {};
 
-			var fontface = parameters.hasOwnProperty("fontface") ?
+			const fontface = parameters.hasOwnProperty("fontface") ?
 				parameters["fontface"] : "Arial";
 
-			var fontsize = parameters.hasOwnProperty("fontsize") ?
+			const fontsize = parameters.hasOwnProperty("fontsize") ?
 				parameters["fontsize"] : 18;
 
-			var borderThickness = parameters.hasOwnProperty("borderThickness") ?
+			const borderThickness = parameters.hasOwnProperty("borderThickness") ?
 				parameters["borderThickness"] : 4;
 
-			var borderColor = parameters.hasOwnProperty("borderColor") ?
+			const borderColor = parameters.hasOwnProperty("borderColor") ?
 				parameters["borderColor"] : { r:0, g:0, b:0, a:1.0 };
 
-			var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
+			const backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
 				parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
 
 
-			var canvas = document.createElement('canvas');
-			var context = canvas.getContext('2d');
+			const canvas = document.createElement('canvas');
+			const context = canvas.getContext('2d');
 			context.font = "Bold " + fontsize + "px " + fontface;
 
 			// get size data (height depends only on font size)
-			var metrics = context.measureText( message );
-			var textWidth = metrics.width;
+			const metrics = context.measureText( message );
+			const textWidth = metrics.width;
 
 			// background color
 			context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
@@ -366,12 +333,12 @@ export default class View {
 			context.fillText( message, borderThickness, fontsize + borderThickness);
 
 			// canvas contents will be used for a texture
-			var texture = new THREE.Texture(canvas);
+			const texture = new THREE.Texture(canvas);
 			texture.needsUpdate = true;
 
-			var spriteMaterial = new THREE.SpriteMaterial(
+			const spriteMaterial = new THREE.SpriteMaterial(
 				{ map: texture } );
-			var sprite = new THREE.Sprite( spriteMaterial );
+			const sprite = new THREE.Sprite( spriteMaterial );
 			sprite.scale.set(15,8,1.0);
 			return sprite;
 		}
@@ -447,19 +414,18 @@ export default class View {
 			const delta = clock.getDelta();
 			planetGroup.rotateY(delta / 3);
 
-			arrows = arrows.filter(function(a) {
-				if(a.timer > 1) {
-					a.timer = 0;
-				}
-				return true;
-				/*planetGroup.add(a.particleSystem);
-				return false;*/
+			_this.arrows = _this.arrows.filter(function(a) {
+				if(a.timer <= 1)
+					return true;
+				planetGroup.remove(a.particleSystem);
+				return false;
 			});
-			for (let i = 0; i < arrows.length; i++) {
-				const arrow = arrows[i];
+			for (let i = 0; i < _this.arrows.length; i++) {
+				const arrow = _this.arrows[i];
 				arrow.timer += delta * 0.15;
 				if (delta > 0) {
 					options.position = arrow.spline.getPoint(arrow.timer);
+					options.color = arrow.color;
 					for (let x = 0; x < spawnerOptions.spawnRate * delta; x++) {
 						arrow.particleSystem.spawnParticle(options);
 					}
