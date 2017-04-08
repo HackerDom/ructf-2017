@@ -205,11 +205,12 @@ export default class View {
 				team.pos = nodePosition;
 				planetGroup.add(node);
 
-				const spritey = makeTextSprite( " " + team.name + " ",
-					{ fontsize: 24, borderColor: {r:255, g:0, b:0, a:1.0}, backgroundColor: {r:255, g:100, b:100, a:0.8} } );
-				const spriteyPosition = myDirectionVector.clone().multiplyScalar(50);
-				spritey.position.set(spriteyPosition.x, spriteyPosition.y, spriteyPosition.z);
-				planetGroup.add(spritey);
+				const sprite = makeTextSprite( " " + team.name + " ",
+					{ fontsize: 48, borderColor: {r:255, g:0, b:0, a:1.0}, backgroundColor: {r:255, g:100, b:100, a:0.8} } );
+				const spritePosition = myDirectionVector.clone().multiplyScalar(52);
+				sprite.position.set(spritePosition.x, spritePosition.y, spritePosition.z);
+				teams[i].sprite = sprite;
+				planetGroup.add(sprite);
 			}
 
 			scene.add(planetGroup);
@@ -298,7 +299,7 @@ export default class View {
 				parameters["fontface"] : "Arial";
 
 			const fontsize = parameters.hasOwnProperty("fontsize") ?
-				parameters["fontsize"] : 18;
+				parameters["fontsize"] : 36;
 
 			const borderThickness = parameters.hasOwnProperty("borderThickness") ?
 				parameters["borderThickness"] : 4;
@@ -309,17 +310,20 @@ export default class View {
 			const backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
 				parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
 
+			const tmp_canvas = document.createElement('canvas');
+			const tmp_context = tmp_canvas.getContext('2d');
+			tmp_context.font = "Bold " + fontsize + "px " + fontface;
+			const tmp_metrics = tmp_context.measureText(message);
+			const textWidth = tmp_metrics.width;
 
 			const canvas = document.createElement('canvas');
+			const width = textWidth + borderThickness * 2;
+			canvas.width = width;
 			const context = canvas.getContext('2d');
 			context.font = "Bold " + fontsize + "px " + fontface;
 
-			// get size data (height depends only on font size)
-			const metrics = context.measureText( message );
-			const textWidth = metrics.width;
-
 			// background color
-			context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
+			context.fillStyle = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
 				+ backgroundColor.b + "," + backgroundColor.a + ")";
 			// border color
 			context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + ","
@@ -332,7 +336,7 @@ export default class View {
 			// text color
 			context.fillStyle = "rgba(0, 0, 0, 1.0)";
 
-			context.fillText( message, borderThickness, fontsize + borderThickness);
+			context.fillText(message, borderThickness, fontsize + borderThickness * 2);
 
 			// canvas contents will be used for a texture
 			const texture = new THREE.Texture(canvas);
@@ -341,7 +345,7 @@ export default class View {
 			const spriteMaterial = new THREE.SpriteMaterial(
 				{ map: texture } );
 			const sprite = new THREE.Sprite( spriteMaterial );
-			sprite.scale.set(15,8,1.0);
+			sprite.scale.set(0.03*width*0.9,4*0.9,1.0);
 			return sprite;
 		}
 
