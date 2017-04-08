@@ -39,4 +39,6 @@ private:
 	int		m_height = 0;
 	Format 	m_format = FORMAT_COUNT;
 	RGBA*	m_shadowCopy = nullptr;
+
+    bool Init( int width, int height, Format format, void* initData );
 };

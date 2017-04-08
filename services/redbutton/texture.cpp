@@ -42,45 +42,15 @@ void PngReadFn( png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToR
 
 //
 Texture2D::Texture2D( int width, int height, Format format, void* initData )
-	: m_width( width ), m_height( height ), m_format( format ), m_shadowCopy( nullptr )
+    : m_width( 0 ), m_height( 0 ), m_format( FORMAT_COUNT ), m_shadowCopy( nullptr )
 {
-	glGenTextures( 1, &m_texture );
-	glBindTexture( GL_TEXTURE_2D, m_texture );
-
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
- 
-
-	TextureFormat fmt = g_mapFormatToTextureFormat[ m_format ];
-
-	glTexImage2D( GL_TEXTURE_2D, 0, fmt.internalFormat, m_width, m_height, 0, fmt.format, fmt.type, initData );
-
-	if( !CheckError( "Failed to create texture" ) ) {
-		glDeleteTextures( 1, &m_texture );
-		m_texture = 0;
-	}
-
-	glGenFramebuffers( 1, &m_framebuffer );
-	glBindFramebuffer( GL_FRAMEBUFFER, m_framebuffer );
-	glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture, 0 );
-	glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-
-	if( !CheckError( "Failed to create framebuffer" ) ) {
-		glDeleteTextures( 1, &m_texture );
-		glDeleteFramebuffers( 1, &m_framebuffer );
-		m_texture = 0;
-		m_framebuffer = 0;
-	}
-
-	m_shadowCopy = new RGBA[ width * height ];
-	if( initData )
-		memcpy( m_shadowCopy, initData, width * height * sizeof( RGBA ) );
+    Init( width, height, format, initData );
 }
 
 
 //
 Texture2D::Texture2D( const void* pngData, uint32_t size )
-	: m_width( 0 ), m_height( 0 ), m_format( FORMAT_COUNT ), m_shadowCopy( nullptr )
+    : m_width( 0 ), m_height( 0 ), m_format( FORMAT_COUNT ), m_shadowCopy( nullptr )
 {
 	png_structp png = nullptr;
 	auto errorHandler = [&]() {
@@ -93,11 +63,11 @@ Texture2D::Texture2D( const void* pngData, uint32_t size )
 		return;
 	}
 
-	png_set_error_fn( png, 0, error_function, NULL );
+    png_set_error_fn( png, 0, error_function, NULL );
 	if( setjmp( png_jmpbuf( png ) ) ) {
 		errorHandler();
 		return;
-	}
+    }
 
 	ReadStruct rs;
 	rs.pngData = ( const uint8_t* )pngData;
@@ -141,50 +111,22 @@ Texture2D::Texture2D( const void* pngData, uint32_t size )
 
 	png_read_update_info( png, info );
 
-	m_width = width;
-	m_height = height;
-	m_format = FORMAT_RGBA;
+    Init( width, height, FORMAT_RGBA, nullptr );
 
-	m_shadowCopy = new RGBA[ width * height ];
 	RGBA* rows[ height ];
 	RGBA* p = m_shadowCopy;
 	for( uint32_t i = 0; i < height; i++ ){
 		rows[ i ] = p;
 		p += width;
 	}
+
 	png_read_image( png, ( png_bytepp )rows );
 
 	png_read_end( png, info );
 	png_destroy_read_struct( &png, &info, NULL );
 
-	//
-	glGenTextures( 1, &m_texture );
-	glBindTexture( GL_TEXTURE_2D, m_texture );
-
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
- 
-
-	TextureFormat fmt = g_mapFormatToTextureFormat[ m_format ];
-
-	glTexImage2D( GL_TEXTURE_2D, 0, fmt.internalFormat, m_width, m_height, 0, fmt.format, fmt.type, m_shadowCopy );
-
-	if( !CheckError( "Failed to create texture" ) ) {
-		glDeleteTextures( 1, &m_texture );
-		m_texture = 0;
-	}
-
-	glGenFramebuffers( 1, &m_framebuffer );
-	glBindFramebuffer( GL_FRAMEBUFFER, m_framebuffer );
-	glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture, 0 );
-	glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-
-	if( !CheckError( "Failed to create framebuffer" ) ) {
-		glDeleteTextures( 1, &m_texture );
-		glDeleteFramebuffers( 1, &m_framebuffer );
-		m_texture = 0;
-		m_framebuffer = 0;
-	}
+    TextureFormat fmt = g_mapFormatToTextureFormat[ m_format ];
+    glTexImage2D( GL_TEXTURE_2D, 0, fmt.internalFormat, m_width, m_height, 0, fmt.format, fmt.type, m_shadowCopy );
 }
 
 
@@ -204,6 +146,50 @@ Texture2D::~Texture2D()
 	m_texture = 0;
 	m_framebuffer = 0;
 	delete[] m_shadowCopy;
+}
+
+
+//
+bool Texture2D::Init(int width, int height, Format format, void* initData)
+{
+    glGenTextures( 1, &m_texture );
+    glBindTexture( GL_TEXTURE_2D, m_texture );
+
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+
+
+    TextureFormat fmt = g_mapFormatToTextureFormat[ format ];
+    glTexImage2D( GL_TEXTURE_2D, 0, fmt.internalFormat, width, height, 0, fmt.format, fmt.type, initData );
+
+    if( !CheckError( "Failed to create texture" ) ) {
+        glDeleteTextures( 1, &m_texture );
+        m_texture = 0;
+        return false;
+    }
+
+    glGenFramebuffers( 1, &m_framebuffer );
+    glBindFramebuffer( GL_FRAMEBUFFER, m_framebuffer );
+    glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture, 0 );
+    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+
+    if( !CheckError( "Failed to create framebuffer" ) ) {
+        glDeleteTextures( 1, &m_texture );
+        glDeleteFramebuffers( 1, &m_framebuffer );
+        m_texture = 0;
+        m_framebuffer = 0;
+        return false;
+    }
+
+    m_shadowCopy = new RGBA[ width * height ];
+    if( initData )
+        memcpy( m_shadowCopy, initData, width * height * sizeof( RGBA ) );
+
+    m_width = width;
+    m_height = height;
+    m_format = format;
+
+    return true;
 }
 
 
