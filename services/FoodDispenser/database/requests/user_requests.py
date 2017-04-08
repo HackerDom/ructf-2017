@@ -43,8 +43,8 @@ def check_user_password(username, password):
 
 def get_user_groups_list_by_user_id(user_id):
     with db_request("User") as User:
-        user_row = User.select.where(User.id == user_id).first()
-    return loads(user_row.ticket_groups_available)
+        user_row = User.select().where(User.id == user_id).first()
+    return loads(user_row.user_groups)
 
 
 def add_user_to_group(user_id, group_name):
