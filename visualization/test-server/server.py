@@ -148,7 +148,7 @@ def parse_args():
 def websocket_server_run():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    start_server = websockets.serve(websockets_handler, 'localhost', 8080)
+    start_server = websockets.serve(websockets_handler, '0.0.0.0', 8080)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(start_server)
     asyncio.ensure_future(create_states(), loop=loop)

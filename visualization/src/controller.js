@@ -23,7 +23,7 @@ export default class Controller extends EventEmitter {
 	}
 
 	connectWebSocket() {
-		const ws = new WebSocket("ws://127.0.0.1:8080//apiws/events");
+		const ws = new WebSocket("ws://" + window.location.hostname + ":8080/apiws/events");
 		ws.onopen = (e) => {
 			console.log('WebSocket opened.');
 		};
