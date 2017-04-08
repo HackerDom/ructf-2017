@@ -1,7 +1,9 @@
-from playhouse.pool import PooledMySQLDatabase
 from contextlib import contextmanager
-from database.models.user import init_models
+
+from playhouse.pool import PooledMySQLDatabase
+
 from config import config as config_object
+from database.models import init_models
 
 config = config_object.config
 
@@ -14,7 +16,7 @@ db = PooledMySQLDatabase(
     host=config.connections["mysql_address"],
     port=int(config.connections["mysql_port"]),
 )
-User, init_db = init_models(db)
+User, TicketStorage, init_db = init_models(db)
 init_db()
 
 
@@ -24,6 +26,8 @@ def db_request(request_type):
         db.connect()
         if request_type == "User":
             yield User
+        elif request_type == "TicketStorage":
+            yield TicketStorage
         else:
             raise ValueError("Expected something model")
     finally:

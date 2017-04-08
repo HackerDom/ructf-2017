@@ -1,11 +1,11 @@
-from rest.rest_hub import rest_handler
+from api.api_hub import api_handler
 from database.requests.user_requests import register_user
 
 
 json_schema = {"username": str, "password": str}
 
 
-@rest_handler.register_action("register", "all", json_schema)
+@api_handler.register_action("register", "all", json_schema)
 def register_service_user(json_object):
     json_object = json_object.raw
     food_provider = json_object["user_type"] == "food_service"

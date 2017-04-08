@@ -3,16 +3,16 @@ from copy import deepcopy
 from json import dumps
 
 
-class RestHub:
+class ApiHub:
     users_registered_actions = {"food_service": {}, "consumer": {}}
 
     def handle_action(self, user_type, action, json_data):
-        if user_type not in RestHub.users_registered_actions:
+        if user_type not in ApiHub.users_registered_actions:
             return {
                 "error": "Api doesn't have such user types (\"{}\")!"
                 .format(user_type)
             }
-        current_actions_dict = RestHub.users_registered_actions[user_type]
+        current_actions_dict = ApiHub.users_registered_actions[user_type]
 
         if action not in current_actions_dict:
             return {
@@ -27,8 +27,8 @@ class RestHub:
             }
 
         data = deepcopy(config)
-        data.update(json_data)
-        data.update({"user_type": user_type})
+        data.add(json_data)
+        data.add({"user_type": user_type})
         if not self.correct_json_schema(data.raw, json_schema):
             return {
                 "error": "Incorrect json schema, expected: {}"
@@ -74,7 +74,7 @@ class RestHub:
                           .format(action)
                           )
                 else:
-                    actions_dict = RestHub.users_registered_actions
+                    actions_dict = ApiHub.users_registered_actions
                     if destination in actions_dict:
                         actions_dict[destination][action] = \
                             (function, json_schema)
@@ -95,4 +95,4 @@ class RestHub:
         return wrapper
 
 
-rest_handler = RestHub()
+api_handler = ApiHub()
