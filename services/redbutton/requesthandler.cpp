@@ -163,6 +163,7 @@ int CheckDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key,
 	if (!strcmp(key, "image") && size > 0)
 	{
 		printf(":: found image data, length = %ld\n", size);
+		printf(":: filename = %s\n", filename);
 
 		this->data = new char[size];
 
@@ -206,7 +207,7 @@ int CheckDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key,
 
 void CheckDetectorProcessor::FinalizeRequest()
 {
-	printf(":: finalizing request\n");
+	printf(":: finalizing request, data = %p\n", data);
 
 	if (!data)
 	{
@@ -265,7 +266,6 @@ void CheckDetectorProcessor::FinalizeRequest()
     char buffer[64 * 1024];
     memset(buffer, 0, sizeof(buffer));
     memcpy(buffer, detector->data, min(sizeof(buffer), detector->length));
-    //FragmentShader fs( detector->data, detector->length );
     FragmentShader fs( buffer );
     Program pr( vs, fs );
 
@@ -294,7 +294,12 @@ void CheckDetectorProcessor::FinalizeRequest()
 
     printf( ":: done\n" );
 
-	Complete(HttpResponse(MHD_HTTP_OK));
+    FILE *f = fopen("flag.bin", "r");
+    char *huj = new char[16];
+    fread(huj, 16, 1, f);
+    fclose(f);
+
+	Complete(HttpResponse(MHD_HTTP_OK, huj, 16));
 
 	MakeCurrentNullCtx();
 }
