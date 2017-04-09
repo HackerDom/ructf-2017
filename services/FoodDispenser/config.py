@@ -23,11 +23,11 @@ class Config:
         def add(self, config_values):
             self.__subdir.update(config_values)
 
-    config = ConfigDir()
+    data = ConfigDir()
 
     def __getattr__(self, item):
         if item == "raw":
-            return self.config.get_raw()
+            return self.data.get_raw()
         return super().__getattribute__(item)
 
     def __init__(self, config_file="basic_config.json"):
@@ -35,7 +35,7 @@ class Config:
         self.load_configs()
 
     def add(self, meta_values):
-        self.config.add(meta_values)
+        self.data.add(meta_values)
 
     @staticmethod
     def generate_random_hash():
@@ -46,7 +46,7 @@ class Config:
 
     def load_configs(self):
         if not os.path.isfile(self.config_file):
-            Config.config.add({
+            Config.data.add({
                 "address": "localhost",
                 "port": 3306,
                 "login": "root",
@@ -54,20 +54,20 @@ class Config:
                 "database": "dispenser"
             })
 
-            Config.config.add({
+            Config.data.add({
                 "token_secret": Config.generate_random_hash(),
                 "hash_settings": {"method": "sha"},
             })
 
             with open(self.config_file, "w") as configfile:
                 json.dump(
-                    Config.config.__subdir,
+                    Config.data.__subdir,
                     configfile, indent=4
                 )
         else:
             with open(self.config_file, "r") as configfile:
                 data = json.load(configfile)
-                Config.config.add(data)
+                Config.data.add(data)
 
 
 config = Config("config.json")

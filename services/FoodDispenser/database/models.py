@@ -22,10 +22,18 @@ def init_models(db):
         ticket_content = CharField(max_length=32)
         ticket_target_group = CharField(max_length=32)
 
+    class Ratings(AbstractTable):
+        food_service_id = IntegerField()
+        client_id = IntegerField()
+        stars_amount = IntegerField()
+        comment_content = TextField()
+
     def init_db():
         if not User.table_exists():
             User.create_table()
         if not TicketStorage.table_exists():
             TicketStorage.create_table()
+        if not Ratings.table_exists():
+            Ratings.create_table()
 
-    return User, TicketStorage, init_db
+    return User, TicketStorage, Ratings, init_db

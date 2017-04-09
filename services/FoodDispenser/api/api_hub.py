@@ -26,10 +26,10 @@ class ApiHub:
                 # You've got non-callable object in actions dict!
             }
 
-        data = deepcopy(config)
-        data.add(json_data)
-        data.add({"user_type": user_type})
-        if not self.correct_json_schema(data.raw, json_schema):
+        config_object = deepcopy(config)
+        config_object.add(json_data)
+        config_object.add({"user_type": user_type})
+        if not self.correct_json_schema(config_object.raw, json_schema):
             return {
                 "error": "Incorrect json schema, expected: {}"
                 .format(dumps(
@@ -38,11 +38,19 @@ class ApiHub:
                 ))
             }
 
-        return {
-            "result": callable_action(data),
+        try:
+            result = {"result": callable_action(config_object.data)}
+        except ValueError as e:
+            result = {"error": str(e)}
+        except Exception as e:
+            print("Uncaught exception:\n{}".format(e))
+            result = {"error": "Internal server error!"}
+
+        result.update({
             "requested_action": action,
             "requested_user_type": user_type
-        }
+        })
+        return result
 
     def correct_json_schema(self, data, json_schema):
         for json_key, json_value in json_schema.items():

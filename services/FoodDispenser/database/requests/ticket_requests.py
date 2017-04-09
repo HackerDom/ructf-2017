@@ -7,7 +7,7 @@ def get_tickets_by_user_id(user_id):
     with db_request("TicketStorage") as TicketStorage:
         rows = TicketStorage.select().where(
             TicketStorage.ticket_target_group << user_groups
-        )
+        ).execute()
 
     return [{
         "provider": row.ticket_provider,
@@ -20,7 +20,7 @@ def create_ticket(provider_name, code, content, target_group):
     with db_request("TicketStorage") as TicketStorage:
         TicketStorage.insert(
             ticket_provider=provider_name,
-            ticket_code=provider_name,
-            ticket_content=provider_name,
+            ticket_code=code,
+            ticket_content=content,
             ticket_target_group=target_group
         ).execute()

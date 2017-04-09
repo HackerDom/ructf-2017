@@ -38,7 +38,7 @@ def check_user_password(username, password):
         ).first()
         if row is None:
             raise ValueError("Bad user credentials")
-        return row.id
+        return row.id, row.username, row.is_food_service
 
 
 def get_user_groups_list_by_user_id(user_id):

@@ -1,44 +1,41 @@
 from api.api_hub import api_handler
 from database.requests.tokenizer import verify_token
-from database.requests.ticket_requests import create_ticket, get_tickets_by_user_id
-from database.requests.user_requests import user_id_to_username
+from database.requests.ticket_requests import \
+    create_ticket, get_tickets_by_user_id
 
 
-schema = {
+food_service_schema = {
     "token": str,
     "ticket_code": str,
     "ticket_content": str,
     "ticket_target_group": str
 }
 
+consumer_schema = {
+    "token": str
+}
 
-@api_handler.register_action("tickets.add", "food_service", json_schema=schema)
+
+@api_handler.register_action(
+    "tickets.add", "food_service", json_schema=food_service_schema)
 def tickets_handler(json_data):
-    json_data = json_data.raw
-    try:
-        user_id = verify_token(json_data["token"])
-    except ValueError as e:
-        return str(e)
+    user_id, username = verify_token(json_data.token)
 
-    serivce_name = user_id_to_username(user_id)
+    service_name = username
     create_ticket(
-        serivce_name,
-        json_data["ticket_code"],
-        json_data["ticket_content"],
-        json_data["ticket_target_group"]
+        service_name,
+        json_data.ticket_code,
+        json_data.ticket_content,
+        json_data.ticket_target_group
+    )
+    return "Ticket \"{}\" added to \"{}\" group".format(
+        json_data.ticket_code, json_data.ticket_target_group
     )
 
 
 @api_handler.register_action(
-    "tickets.get", "consumer", json_schema={"token": str})
+    "tickets.get", "consumer", json_schema=consumer_schema)
 def get_tickets(json_data):
-    json_data = json_data.raw
-    try:
-        user_id = verify_token(json_data["token"])
-    except ValueError as e:
-        return str(e)
-    return get_tickets_by_user_id(user_id)
-
-
-
-
+    user_id, _ = verify_token(json_data.token)
+    tickets_list = get_tickets_by_user_id(user_id)
+    return {"count": len(tickets_list), "ticket_objects": tickets_list}

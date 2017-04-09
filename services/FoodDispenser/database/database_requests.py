@@ -5,7 +5,7 @@ from playhouse.pool import PooledMySQLDatabase
 from config import config as config_object
 from database.models import init_models
 
-config = config_object.config
+config = config_object.data
 
 db = PooledMySQLDatabase(
     config.connections["mysql_database"],
@@ -16,7 +16,7 @@ db = PooledMySQLDatabase(
     host=config.connections["mysql_address"],
     port=int(config.connections["mysql_port"]),
 )
-User, TicketStorage, init_db = init_models(db)
+User, TicketStorage, Ratings, init_db = init_models(db)
 init_db()
 
 
@@ -28,7 +28,9 @@ def db_request(request_type):
             yield User
         elif request_type == "TicketStorage":
             yield TicketStorage
+        elif request_type == "Ratings":
+            yield Ratings
         else:
-            raise ValueError("Expected something model")
+            raise ValueError("Expected something like existing model!")
     finally:
         db.close()
