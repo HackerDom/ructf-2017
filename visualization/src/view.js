@@ -429,12 +429,15 @@ export default class View {
 			});
 			for (let i = 0; i < _this.arrows.length; i++) {
 				const arrow = _this.arrows[i];
-				arrow.timer += delta / 3;
 				if (delta > 0) {
-					options.position = arrow.spline.getPoint(arrow.timer);
 					options.color = arrow.color.getHex();
-					for (let x = 0; x < spawnerOptions.spawnRate * delta; x++) {
-						arrow.particleSystem.spawnParticle(options);
+					const steps = 3;
+					for (let step = 0; step < steps; step++) {
+						arrow.timer += delta / 3 / steps;
+						options.position = arrow.spline.getPoint(arrow.timer);
+						for (let x = 0; x < spawnerOptions.spawnRate * delta / steps; x++) {
+							arrow.particleSystem.spawnParticle(options);
+						}
 					}
 				}
 				arrow.particleSystem.update(arrow.timer);
