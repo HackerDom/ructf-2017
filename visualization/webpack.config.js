@@ -23,6 +23,7 @@ export default {
 		filename: 'app.js',
 	},
 	plugins: [
+		new webpack.DefinePlugin({PRODUCTION: JSON.stringify(false),}),
 		new webpack.optimize.CommonsChunkPlugin("vendor", "vendor.js"),
 		/*new webpack.optimize.OccurenceOrderPlugin(),
 		new webpack.optimize.DedupePlugin(),

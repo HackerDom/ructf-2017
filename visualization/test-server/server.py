@@ -81,16 +81,6 @@ def update_events():
         scores[team_(attacker)] += 1
 
 
-@route('/api/events')
-@tojson
-def events_page():
-    update_events()
-    rnd = int(request.params['from'])
-
-    return json.dumps(
-        events[bisect.bisect_left(events, [rnd, 0, '', '', '']):]
-    )
-
 
 @route('/scoreboard.json')
 @tojson
