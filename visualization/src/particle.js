@@ -243,6 +243,11 @@ export const GPUParticleSystem = function(options) {
 		}
 	};
 
+	this.dispose = function() {
+		for(let i=0; i<self.PARTICLE_CONTAINERS; i++)
+			self.particleContainers[i].dispose();
+	};
+
 	this.init();
 
 };
@@ -448,6 +453,11 @@ export const GPUParticleContainer = function(maxParticles, particleSystem) {
 
 		this.geometryUpdate();
 
+	};
+
+	this.dispose = function() {
+		self.particleShaderMat.dispose();
+		self.particleShaderGeo.dispose();
 	};
 
 	this.geometryUpdate = function() {

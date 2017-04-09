@@ -424,6 +424,7 @@ export default class View {
 				if(a.timer <= 1)
 					return true;
 				planetGroup.remove(a.particleSystem);
+				a.particleSystem.dispose();
 				return false;
 			});
 			for (let i = 0; i < _this.arrows.length; i++) {
