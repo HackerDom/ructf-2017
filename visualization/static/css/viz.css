@@ -136,3 +136,9 @@ body,
   bottom: 0;
   top: initial !important;
 }
+#scoreboard-container {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  color: #b7e99b;
+}

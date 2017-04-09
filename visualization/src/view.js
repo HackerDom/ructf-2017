@@ -10,6 +10,7 @@ export default class View {
 	constructor(controller) {
 		this.controller = controller;
 		this.model = null;
+		this.scoreboardContainer = $("#scoreboard-container");
 
 		controller.on('start', m => {
 			this.model = m;
@@ -19,7 +20,7 @@ export default class View {
 			this.showArrow(arrowData);
 		});
 		controller.on('score', () => {
-			// NONE
+			this.drawScoreboard();
 		});
 		controller.on('servicesStatuses', () => {
 			this.drawServicesStatusesAndStat();
@@ -31,8 +32,17 @@ export default class View {
 
 	init() {
 		this.createFilterPanel();
-
 		this.initThree();
+	}
+
+	drawScoreboard() {
+		this.scoreboardContainer.empty();
+		const table = $("<table></table>");
+		for (let i=0; i<this.model.teams.length; i++) {
+			const team = this.model.teams[i];
+			table.append(`'<tr><td>${team.name}</td><td>${team.score}</td></tr>`);
+		}
+		this.scoreboardContainer.append(table);
 	}
 
 	drawServicesStatusesAndStat() {
@@ -289,7 +299,6 @@ export default class View {
 			}
 			return points;
 		}
-
 
 		function makeTextSprite( message, parameters )
 		{

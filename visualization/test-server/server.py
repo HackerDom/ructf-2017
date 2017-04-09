@@ -173,6 +173,7 @@ async def create_states():
 
 
 async def create_state():
+    update_events();
     container = {
         "type": "state",
         "value": gen_state()
