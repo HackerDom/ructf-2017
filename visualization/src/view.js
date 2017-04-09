@@ -110,6 +110,7 @@ export default class View {
 			particleSystem,
 			spline,
 			timer: 0,
+			creationTime: new Date().getTime(),
 			color: new THREE.Color(color)
 		};
 		this.arrows.push(arrow);
@@ -171,6 +172,7 @@ export default class View {
 		$("#stats-container").append(stats.dom);
 
 		init();
+		asyncEvents();
 		animate();
 
 		function init() {
@@ -418,6 +420,21 @@ export default class View {
 			requestAnimationFrame(animate);
 		}
 
+		function removeParticleSystemsIfNeeded() {
+			const now = new Date().getTime();
+			_this.arrows = _this.arrows.filter(function(a) {
+				if(now - a.creationTime < 3 * 1000)
+					return true;
+				planetGroup.remove(a.particleSystem);
+				a.particleSystem.dispose();
+				return false;
+			});
+		}
+
+		function asyncEvents() {
+			setInterval(removeParticleSystemsIfNeeded, 1000);
+		}
+
 		function render() {
 			lat = Math.max(-89, Math.min(89, lat));
 			phi = THREE.Math.degToRad(lat - 90);
@@ -429,13 +446,7 @@ export default class View {
 			const delta = clock.getDelta();
 			planetGroup.rotateY(delta / 10);
 
-			_this.arrows = _this.arrows.filter(function(a) {
-				if(a.timer <= 1)
-					return true;
-				planetGroup.remove(a.particleSystem);
-				a.particleSystem.dispose();
-				return false;
-			});
+			removeParticleSystemsIfNeeded();
 			for (let i = 0; i < _this.arrows.length; i++) {
 				const arrow = _this.arrows[i];
 				if (delta > 0) {

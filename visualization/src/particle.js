@@ -26,7 +26,6 @@ export const GPUParticleSystem = function(options) {
 	self.PARTICLE_COUNT = options.maxParticles || 1000000;
 	self.PARTICLE_CONTAINERS = options.containerCount || 1;
 
-	self.PARTICLE_NOISE_TEXTURE = options.particleNoiseTex || null;
 	self.PARTICLE_SPRITE_TEXTURE = options.particleSpriteTex || null;
 
 	self.PARTICLES_PER_CONTAINER = Math.ceil(self.PARTICLE_COUNT / self.PARTICLE_CONTAINERS);
@@ -244,8 +243,11 @@ export const GPUParticleSystem = function(options) {
 	};
 
 	this.dispose = function() {
-		for(let i=0; i<self.PARTICLE_CONTAINERS; i++)
-			self.particleContainers[i].dispose();
+		this.particleShaderMat.dispose();
+		this.particleSpriteTex.dispose();
+
+		for (let i = 0; i < this.PARTICLE_CONTAINERS; i++)
+			this.particleContainers[ i ].dispose();
 	};
 
 	this.init();
@@ -456,8 +458,7 @@ export const GPUParticleContainer = function(maxParticles, particleSystem) {
 	};
 
 	this.dispose = function() {
-		self.particleShaderMat.dispose();
-		self.particleShaderGeo.dispose();
+		this.particleShaderGeo.dispose();
 	};
 
 	this.geometryUpdate = function() {
