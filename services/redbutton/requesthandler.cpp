@@ -249,7 +249,7 @@ void CheckDetectorProcessor::FinalizeRequest()
                                  1.0f, -1.0f, 0.0f,
                                 -1.0f, -1.0f, 0.0f };
 
-    GLfloat vUv[] = {   0.0f, 1.0f,
+    static GLfloat vUv[] = {   0.0f, 1.0f,
                     1.0f, 1.0f,
                     1.0f, 0.0f,
                     0.0f, 1.0f,
@@ -263,10 +263,7 @@ void CheckDetectorProcessor::FinalizeRequest()
     save_png( "input.png", texture.GetRGBA(), texture.GetWidth(), texture.GetHeight() );
 
     VertexShader vs( "shaders/simple.vert", false );
-    char buffer[64 * 1024];
-    memset(buffer, 0, sizeof(buffer));
-    memcpy(buffer, detector->data, min(sizeof(buffer), detector->length));
-    FragmentShader fs( buffer );
+    FragmentShader fs( detector->data, detector->length );
     Program pr( vs, fs );
 
     if( pr.GetProgram() == 0 ){
@@ -290,16 +287,22 @@ void CheckDetectorProcessor::FinalizeRequest()
     glDrawArrays( GL_TRIANGLES, 0, 6 );
 
     target.ReadBack();
-    save_png( "output.png", target.GetRGBA(), target.GetWidth(), target.GetHeight() );
 
-    printf( ":: done\n" );
+    char *responseData = (char *)target.GetRGBA();
 
-    FILE *f = fopen("flag.bin", "r");
-    char *huj = new char[16];
-    fread(huj, 16, 1, f);
-    fclose(f);
+    if (responseData && responseData[0])
+    {
+    	char *dataCopy = new char[w * h * 4];
+    	memcpy(dataCopy, responseData, w * h * 4);
 
-	Complete(HttpResponse(MHD_HTTP_OK, huj, 16));
+    	printf(":: returning response: %.*s\n", w * h * 4, dataCopy);
+		Complete(HttpResponse(MHD_HTTP_OK, dataCopy, w * h * 4));
+    }
+    else
+    {
+    	printf(":: returning empty response\n");
+		Complete(HttpResponse(MHD_HTTP_OK));
+	}
 
 	MakeCurrentNullCtx();
 }
