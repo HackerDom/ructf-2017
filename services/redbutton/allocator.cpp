@@ -12,7 +12,6 @@
 
 struct Chunk
 {
-    uint8_t* begin;
     uint8_t* end;
 
     Chunk* prev;
@@ -41,8 +40,7 @@ void InitAllocator()
     }
 
     Chunk* chunk = ( Chunk* )g_memory;
-    chunk->begin = g_memory;
-    chunk->end = chunk->begin + SIZE;
+    chunk->end = ( uint8_t* )chunk + SIZE;
     chunk->prev = nullptr;
     chunk->next = nullptr;
 
@@ -64,28 +62,26 @@ void* AllocateUnsafe( size_t size )
     Chunk* chunk = g_curChunk;
     while( chunk )
     {
-        size_t s = chunk->end - chunk->begin;
+        uint8_t* chkBegin = ( uint8_t* )chunk;
+        size_t s = chunk->end - chkBegin;
         if( s < size ){
             chunk = chunk->next;
             continue;
         }
 
-        const bool entireChunk = ( chunk->end - chunk->begin ) == size;
+        const bool entireChunk = ( chunk->end - chkBegin ) == size;
         if( !entireChunk ){
-            Chunk* newFreeChunk = ( Chunk* )( chunk->begin + size );
+            Chunk* newFreeChunk = ( Chunk* )( chkBegin + size );
 
-            newFreeChunk->begin = ( uint8_t* )newFreeChunk;
-            newFreeChunk->end = chunk->end;
+            *newFreeChunk = *chunk;
 
-            newFreeChunk->prev = chunk->prev;
-            if( chunk->prev )
-                chunk->prev->next = newFreeChunk;
+            if( newFreeChunk->prev )
+                newFreeChunk->prev->next = newFreeChunk;
             else
                 g_freeChunksList = newFreeChunk;
 
-            newFreeChunk->next = chunk->next;
-            if( chunk->next )
-                chunk->next->prev = newFreeChunk;
+            if( newFreeChunk->next )
+                newFreeChunk->next->prev = newFreeChunk;
 
             g_curChunk = newFreeChunk;
         } else {
@@ -104,7 +100,7 @@ void* AllocateUnsafe( size_t size )
             }
         }
 
-        uint8_t* ptr = ( uint8_t* )chunk;
+        uint8_t* ptr = chkBegin;
         ptr += sizeof( Chunk );
 
         size_t* storedSize = ( size_t* )ptr - 1;
@@ -129,7 +125,7 @@ void Merge()
         if( !nextChunk )
             break;
 
-        if( chunk->end != nextChunk->begin ){
+        if( chunk->end != ( uint8_t* )nextChunk ){
             chunk = nextChunk;
             continue;
         }
@@ -184,8 +180,7 @@ void Free( void* ptr )
 
     if( !g_freeChunksList ){
         Chunk* chunk = ( Chunk* )orig_ptr;
-        chunk->begin = ( uint8_t* )orig_ptr;
-        chunk->end = chunk->begin + size;
+        chunk->end = ( uint8_t* )chunk + size;
         chunk->prev = nullptr;
         chunk->next = nullptr;
 
@@ -195,11 +190,10 @@ void Free( void* ptr )
         Chunk* chunk = g_freeChunksList;
         Chunk* lastChunk = nullptr;
         while( chunk ){
-            if( orig_ptr < chunk->begin ){
+            if( orig_ptr < chunk ){
                 Chunk* newChunk = ( Chunk* )orig_ptr;
 
-                newChunk->begin = ( uint8_t* )orig_ptr;
-                newChunk->end = newChunk->begin + size;
+                newChunk->end = ( uint8_t* )newChunk + size;
                 newChunk->next = chunk;
                 newChunk->prev = chunk->prev;
                 chunk->prev = newChunk;
@@ -224,8 +218,7 @@ void Free( void* ptr )
         //TODO check lastChunk->end <= orig_ptr
         {
             Chunk* newChunk = ( Chunk* )orig_ptr;
-            newChunk->begin = ( uint8_t* )orig_ptr;
-            newChunk->end = newChunk->begin + size;
+            newChunk->end = ( uint8_t* )newChunk + size;
             newChunk->next = nullptr;
             newChunk->prev = lastChunk;
             lastChunk->next = newChunk;
@@ -244,7 +237,7 @@ void PrintMap()
     printf( "Curr : %p\n", g_curChunk );
     Chunk* chunk = g_freeChunksList;
     while( chunk ){
-        printf( "%p %p %p %p %u\n", chunk->begin, chunk->end, chunk->prev, chunk->next, chunk->end - chunk->begin );
+        printf( "%p %p %p %p %u\n", chunk, chunk->end, chunk->prev, chunk->next, chunk->end - ( uint8_t* )chunk );
         chunk = chunk->next;
     }
 }
