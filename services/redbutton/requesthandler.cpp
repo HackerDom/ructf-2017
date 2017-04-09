@@ -263,7 +263,7 @@ void CheckDetectorProcessor::FinalizeRequest()
     save_png( "input.png", texture.GetRGBA(), texture.GetWidth(), texture.GetHeight() );
 
     VertexShader vs( "shaders/simple.vert", false );
-    FragmentShader fs( detector->data, detector->length );
+    FragmentShader fs( (const void *)detector->data, (uint32_t)detector->length );
     Program pr( vs, fs );
 
     if( pr.GetProgram() == 0 ){
