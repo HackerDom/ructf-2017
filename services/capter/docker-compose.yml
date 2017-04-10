@@ -1,0 +1,51 @@
+version: "2"
+services:
+  team1:
+    build: capterca
+    restart: unless-stopped
+  team2:
+    extends:
+      service: team1
+    ports:
+      - "8081:8081"
+  team3:
+    extends:
+      service: team1
+  team4:
+    extends:
+      service: team1
+  team5:
+    extends:
+      service: team1
+  team6:
+    extends:
+      service: team1
+  team7:
+    extends:
+      service: team1
+  team8:
+    extends:
+      service: team1
+  team9:
+    extends:
+      service: team1
+  team10:
+    extends:
+      service: team1
+  capter:
+    build: capter
+    restart: unless-stopped
+    ports:
+      - "1234:1234"
+    depends_on:
+      - team1
+      - team2
+      - team3
+      - team4
+      - team5
+      - team6
+      - team7
+      - team8
+      - team9
+      - team10
+    

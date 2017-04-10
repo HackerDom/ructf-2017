@@ -20,8 +20,8 @@ union RGBA
 struct Image
 {
     RGBA*		rgba;
-    uint16_t 	width;
-    uint16_t 	height;
+    uint32_t 	width;
+    uint32_t 	height;
 
     Image()
     	: rgba( nullptr ), width( 0 ), height( 0 )
@@ -56,9 +56,6 @@ struct Image
 
 
 //
-int read_png( const char* file_name, Image& image );
-int save_png( const char* file_name, const Image& image );
-uint8_t* ALPHA( const uint32_t & argb );
-uint8_t* RED( const uint32_t & argb );
-uint8_t* GREEN( const uint32_t & argb );
-uint8_t* BLUE( const uint32_t & argb );
+bool read_png( const char* file_name, Image& image );
+bool save_png( const char* file_name, const Image& image );
+bool save_png( const char* file_name, const RGBA* rgba, uint32_t width, uint32_t height );

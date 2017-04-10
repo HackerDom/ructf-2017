@@ -4,7 +4,7 @@
 
 
 //
-Shader::Shader( GLuint type, const char* fileName )
+Shader::Shader( GLuint type, const char* fileName, bool isBinary )
 {
 	printf( "Create shader %s\n", fileName );
 	FILE* f = fopen( fileName, "r" );
@@ -14,9 +14,9 @@ Shader::Shader( GLuint type, const char* fileName )
 	fseek( f, 0, SEEK_END );
 	size_t fileSize = ftell( f );
 	fseek( f, 0, SEEK_SET );
-	char* shaderSource = new char[ fileSize + 1 ];
-	memset( shaderSource, 0, fileSize + 1 );
-	fread( shaderSource, 1, fileSize, f );
+	char* fileData = new char[ fileSize + 1 ];
+	memset( fileData, 0, fileSize + 1 );
+	fread( fileData, 1, fileSize, f );
 	fclose( f );
 
 	m_shader = glCreateShader( type );
@@ -25,7 +25,49 @@ Shader::Shader( GLuint type, const char* fileName )
 		return;
 	}
 
-	glShaderSource( m_shader, 1, &shaderSource, NULL );
+	if( isBinary ){
+		glShaderBinary( 1, &m_shader, GL_MALI_SHADER_BINARY_ARM, fileData, fileSize );
+		if( !CheckError( "Failed to create shader from binary" ) ) {
+			glDeleteShader( m_shader );
+			m_shader = 0;
+	}
+	}
+	else {
+		glShaderSource( m_shader, 1, &fileData, NULL );
+		glCompileShader( m_shader );
+
+		GLint ret;
+		glGetShaderiv( m_shader, GL_COMPILE_STATUS, &ret );
+		if( !ret ) {
+			char *log;
+
+			fprintf( stderr, "Error: %s shader compilation failed!\n", fileName );
+			glGetShaderiv( m_shader, GL_INFO_LOG_LENGTH, &ret );
+
+			if( ret > 1 ) {
+				log = new char[ ret ];
+				glGetShaderInfoLog( m_shader, ret, NULL, log );
+				fprintf( stderr, "%s\n", log );
+				delete[] log;
+			}
+
+			glDeleteShader( m_shader );
+			m_shader = 0;
+		}
+	}
+}
+
+
+//
+Shader::Shader( GLuint type, const char* shader )
+{
+	m_shader = glCreateShader( type );
+	if( !m_shader ) {
+		fprintf( stderr, "Error: glCreateShader failed: 0x%08X\n", glGetError());
+		return;
+	}
+
+	glShaderSource( m_shader, 1, &shader, NULL );
 	glCompileShader( m_shader );
 
 	GLint ret;
@@ -33,7 +75,7 @@ Shader::Shader( GLuint type, const char* fileName )
 	if( !ret ) {
 		char *log;
 
-		fprintf( stderr, "Error: %s shader compilation failed!\n", fileName );
+		fprintf( stderr, "Error: shader compilation failed!\n" );
 		glGetShaderiv( m_shader, GL_INFO_LOG_LENGTH, &ret );
 
 		if( ret > 1 ) {
@@ -43,6 +85,23 @@ Shader::Shader( GLuint type, const char* fileName )
 			delete[] log;
 		}
 
+		glDeleteShader( m_shader );
+		m_shader = 0;
+	}
+}
+
+
+//
+Shader::Shader( GLuint type, const void* binary, uint32_t binarySize )
+{
+	m_shader = glCreateShader( type );
+	if( !m_shader ) {
+		fprintf( stderr, "Error: glCreateShader failed: 0x%08X\n", glGetError());
+		return;
+	}
+
+	glShaderBinary( 1, &m_shader, GL_MALI_SHADER_BINARY_ARM, binary, binarySize );
+	if( !CheckError( "Failed to create shader from binary" ) ) {
 		glDeleteShader( m_shader );
 		m_shader = 0;
 	}
@@ -71,16 +130,40 @@ bool Shader::IsValid() const
 
 
 //
-VertexShader::VertexShader( const char* fileName )
-	: Shader( GL_VERTEX_SHADER, fileName )
+VertexShader::VertexShader( const char* fileName, bool isBinary )
+	: Shader( GL_VERTEX_SHADER, fileName, isBinary )
 {
 
 }
 
 
 //
-FragmentShader::FragmentShader( const char* fileName )
-	: Shader( GL_FRAGMENT_SHADER, fileName )
+VertexShader::VertexShader( const void* binary, uint32_t binarySize )
+	: Shader( GL_VERTEX_SHADER, binary, binarySize )
+{
+
+}
+
+
+//
+FragmentShader::FragmentShader( const char* fileName, bool isBinary )
+	: Shader( GL_FRAGMENT_SHADER, fileName, isBinary )
+{
+
+}
+
+
+//
+FragmentShader::FragmentShader( const char* shader )
+	: Shader( GL_FRAGMENT_SHADER, shader )
+{
+
+}
+
+
+//
+FragmentShader::FragmentShader( const void* binary, uint32_t binarySize )
+	: Shader( GL_FRAGMENT_SHADER, binary, binarySize )
 {
 
 }

@@ -17,6 +17,7 @@ public:
 	//
 	Texture2D() = delete;
 	Texture2D( int width, int height, Format format, void* initData = nullptr );
+	Texture2D( const void* png, uint32_t size );
 	Texture2D( const Image& image );
 	~Texture2D();
 
@@ -26,6 +27,9 @@ public:
 	GLuint GetFramebuffer() const;
 	int GetWidth() const;
 	int GetHeight() const;
+	const RGBA* GetRGBA() const;
+
+	void ReadBack();
 
 private:
 	//
@@ -34,4 +38,7 @@ private:
 	int 	m_width = 0;
 	int		m_height = 0;
 	Format 	m_format = FORMAT_COUNT;
+	RGBA*	m_shadowCopy = nullptr;
+
+    bool Init( int width, int height, Format format, void* initData );
 };

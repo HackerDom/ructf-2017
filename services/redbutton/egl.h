@@ -11,8 +11,12 @@ struct Context
 
 
 //
-bool InitEGL( Context& ctx );
-void ShutdownEGL( const Context& ctx );
+bool InitEGL();
+void ShutdownEGL();
+Context CreateLocalContext();
+void MakeCurrentGlobalCtx();
+void MakeCurrentLocalCtx( Context localCtx );
+void MakeCurrentNullCtx();
 
 //
 bool CheckError( const char* errorMsgPrefix );

@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RedButton control panel</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row" style="margin-top: 50px">
+        <div class="col-sm-4">
+          <form action="#" id="newForm">
+            <div class="form-group">
+              <label for="detector">Upload new detector:</label>
+              <input class="form-control" type="file" name="detector" id="detector">
+            </div>
+            <button type="submit" class="btn btn-default">Upload</button>
+          </form>
+          <div id="newResult"></div>
+          <div style="margin-top: 50px"></div>
+          <form action="#" id="checkForm">
+            <div class="form-group">
+              <label for="image">Check image for threats:</label>
+              <input class="form-control" type="file" name="image" id="image">
+              <label for="detectorId">Detector ID</label>
+              <select class="form-control" name="detector" id="detectorId"></select>
+              <input type="hidden" name="w" value="8">
+              <input type="hidden" name="h" value="1">
+            </div>
+            <button type="submit" class="btn btn-default">Check</button>
+          </form>
+          <div id="checkResult"></div>
+        </div>
+      </div>
+    </div>
+    <script>
+    $(function () {
+      updateDetectors();
+    });
+
+    function updateDetectors() {
+      var request = $.get( "/detectors" );
+
+      request.done(function(data) {
+
+        var list = $("#detectorId");
+
+        $(list).empty();
+
+        var lines = data.match(/[^\r\n]+/g);
+
+        $(lines).each(function () {
+          $(list).append('<option value="' + this + '">' + this + '</option>');
+        });
+
+      });
+    }
+
+    $("#newForm").submit(function(event) {
+
+      event.preventDefault();
+     
+      var posting = $.ajax({
+          url: "/detectors/add",
+          type: "POST",
+          data: new FormData($("#newForm")[0]),
+          cache: false,
+          contentType: false,
+          processData: false
+      });
+
+      posting.done(function(data) {
+
+        $("#newResult").html("Success, new detector saved with ID " + data);
+        updateDetectors();
+
+      }).fail(function(xhr, status, error) {
+
+        $("#newResult").html("Failed to upload detector: " + error);
+
+      });
+    });
+
+    $("#checkForm").submit(function(event) {
+
+      event.preventDefault();
+     
+      var posting = $.ajax({
+          url: "/detectors/" + $("#detectorId").val() + "/check",
+          type: "POST",
+          data: new FormData($("#checkForm")[0]),
+          cache: false,
+          contentType: false,
+          processData: false,
+      });
+
+      posting.done(function(data) {
+
+        if (data.length == 32)
+          $("#checkResult").html("Missile lauch is approved, code: " + data);
+        else
+          $("#checkResult").html("No threats detected.");
+
+      }).fail(function(xhr, status, error) {
+
+        $("#checkResult").html("Failed to check image: " + error);
+        
+      });
+    });
+    </script>
+  </body>
+</html>

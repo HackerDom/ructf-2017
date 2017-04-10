@@ -37,6 +37,10 @@ static const EGLint context_attribute_list[] = {
 
 
 //
+Context g_context;
+
+
+//
 void EGLAPIENTRY DebugOutput( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const GLvoid *userParam )
 {
 	// const char* debSource = "";
@@ -88,32 +92,32 @@ void EGLAPIENTRY DebugOutput( GLenum source, GLenum type, GLuint id, GLenum seve
 
 
 //
-bool InitEGL( Context& ctx )
+bool InitEGL()
 {
-    ctx.display = eglGetDisplay( EGL_DEFAULT_DISPLAY );
-    if( ctx.display == EGL_NO_DISPLAY ) {
+    g_context.display = eglGetDisplay( EGL_DEFAULT_DISPLAY );
+    if( g_context.display == EGL_NO_DISPLAY ) {
         printf( "Error: No display found! 0x%X\n", eglGetError() );
         return false;
     }
 
     EGLint major, minor;
-    if( !eglInitialize( ctx.display, &major, &minor ) ) {
+    if( !eglInitialize( g_context.display, &major, &minor ) ) {
         printf( "eglInitialize failed 0x%X\n", eglGetError() );
         return false;
     }
 
-    printf( "EGL Version: \"%s\"\n", eglQueryString( ctx.display, EGL_VERSION ));
-    printf( "EGL Vendor: \"%s\"\n", eglQueryString( ctx.display, EGL_VENDOR ));
-    printf( "EGL Extensions: \"%s\"\n", eglQueryString( ctx.display, EGL_EXTENSIONS ));
+    printf( "EGL Version: \"%s\"\n", eglQueryString( g_context.display, EGL_VERSION ));
+    printf( "EGL Vendor: \"%s\"\n", eglQueryString( g_context.display, EGL_VENDOR ));
+    printf( "EGL Extensions: \"%s\"\n", eglQueryString( g_context.display, EGL_EXTENSIONS ));
 
     //
     EGLint numConfigs;
     EGLConfig eglCfg;
-    eglChooseConfig( ctx.display, configAttribs, &eglCfg, 1, &numConfigs );
+    eglChooseConfig( g_context.display, configAttribs, &eglCfg, 1, &numConfigs );
 
     //
-    ctx.surface = eglCreatePbufferSurface( ctx.display, eglCfg, pbufferAttribs );
-    if( ctx.surface == EGL_NO_SURFACE ){
+    g_context.surface = eglCreatePbufferSurface( g_context.display, eglCfg, pbufferAttribs );
+    if( g_context.surface == EGL_NO_SURFACE ){
         printf( "eglCreatePbufferSurface failed 0x%X\n", eglGetError() );
         return false;
     }
@@ -122,13 +126,13 @@ bool InitEGL( Context& ctx )
     //eglBindAPI(EGL_OPENGL_API);
 
     //
-    ctx.context = eglCreateContext( ctx.display, eglCfg, EGL_NO_CONTEXT, context_attribute_list );
-    if( ctx.context == EGL_NO_CONTEXT ){
+    g_context.context = eglCreateContext( g_context.display, eglCfg, EGL_NO_CONTEXT, context_attribute_list );
+    if( g_context.context == EGL_NO_CONTEXT ){
         printf( "eglCreateContext failed 0x%X\n", eglGetError() );
         return false;
     }
 
-    eglMakeCurrent( ctx.display, ctx.surface, ctx.surface, ctx.context );
+    eglMakeCurrent( g_context.display, g_context.surface, g_context.surface, g_context.context );
 
     printf("GL Vendor: \"%s\"\n", glGetString(GL_VENDOR));
 	printf("GL Renderer: \"%s\"\n", glGetString(GL_RENDERER));
@@ -148,9 +152,54 @@ bool InitEGL( Context& ctx )
 
 
 //
-void ShutdownEGL( const Context& ctx )
+void ShutdownEGL()
 {
-    eglTerminate( ctx.display );
+    eglTerminate( g_context.display );
+}
+
+
+//
+Context CreateLocalContext()
+{
+	Context ctx;
+	ctx.display = g_context.display;
+
+	EGLint numConfigs;
+    EGLConfig eglCfg;
+    eglChooseConfig( ctx.display, configAttribs, &eglCfg, 1, &numConfigs );
+
+    //
+    ctx.surface = eglCreatePbufferSurface( ctx.display, eglCfg, pbufferAttribs );
+    if( g_context.surface == EGL_NO_SURFACE ){
+        printf( "eglCreatePbufferSurface failed 0x%X\n", eglGetError() );
+        return Context();
+    }
+
+	ctx.context = eglCreateContext( ctx.display, eglCfg, g_context.context, context_attribute_list );
+
+	return ctx;
+}
+
+
+void MakeCurrentGlobalCtx()
+{
+	if( !eglMakeCurrent( g_context.display, g_context.surface, g_context.surface, g_context.context ) )
+		printf( "eglMakeCurrent failed 0x%X\n", eglGetError() );
+}
+
+
+//
+void MakeCurrentLocalCtx( Context ctx )
+{
+	if( !eglMakeCurrent( ctx.display, ctx.surface, ctx.surface, ctx.context ) )
+		printf( "eglMakeCurrent failed 0x%X\n", eglGetError() );
+}
+
+
+//
+void MakeCurrentNullCtx()
+{
+	eglMakeCurrent( g_context.display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
 }
 
 
