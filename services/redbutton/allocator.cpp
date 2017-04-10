@@ -6,8 +6,8 @@
 #include "spin_lock.h"
 #include "allocator.h"
 
-#if 1
-#define DEBUG 1
+#if 0
+    #define DEBUG 1
 #endif
 
 struct Chunk
@@ -17,11 +17,10 @@ struct Chunk
     Chunk* prev;
     Chunk* next;
 };
-//static_assert( sizeof( Chunk ) == 32, "" );
 
 Chunk* g_freeChunksList;
 Chunk* g_curChunk;
-const size_t SIZE = 192;// * 1024 * 1024;
+const size_t SIZE = 16 * 1024 * 1024;
 uint8_t* g_memory;
 uint8_t* g_memoryEnd;
 
