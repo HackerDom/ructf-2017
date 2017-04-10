@@ -1,16 +1,75 @@
 #include "requesthandler.h"
 #include "glwrap.h"
+#include "spin_lock.h"
 
 #include <string.h>
 
+//
+struct ContextInfo
+{
+	Context context;
+	pthread_t thread;
+};
+ContextInfo g_contexts[ THREADPOOL_SIZE ];
+SpinLock 	g_contextLock;
+
+
+//
+Context GetContext()
+{
+	AutoSpinLock autoLock( g_contextLock );
+
+	Context ctx;
+	pthread_t tid = pthread_self();
+
+	bool found = false;
+
+	for (int i = 0; i < THREADPOOL_SIZE; i++)
+	{
+		if (g_contexts[i].thread == tid)
+		{
+			ctx = g_contexts[i].context;
+			printf( ":: old thread %lx ctx %x\n", tid, *(uint32_t *)&ctx );
+			found = true;
+			break;
+		}
+	}
+
+	if (!found)
+	{
+		for (int i = 0; i < THREADPOOL_SIZE; i++)
+		{
+			if (g_contexts[i].thread == 0)
+			{
+				g_contexts[i].thread = tid;
+				ctx = g_contexts[i].context;
+				printf( ":: new thread %lx ctx %x\n", tid, *(uint32_t *)&ctx );
+				found = true;
+				break;
+			}
+		}
+	}
+
+	if (!found)
+	{
+		printf(":: FUCK\n");
+		exit(1);
+	}
+
+	return ctx;
+}
+
+
+//
 RequestHandler::RequestHandler(DetectorStorage *detectors, TemplateStorage *templates)
 {
 	this->detectors = detectors;
 	this->templates = templates;
 
-	for( size_t i = 0; i < 4; i++ ){
-		contexts.contexts[ i ] = CreateLocalContext();
-		contexts.freeContexts.push_back( contexts.contexts[ i ] );
+	for( int i = 0; i < THREADPOOL_SIZE; i++ )
+	{
+		g_contexts[ i ].context = CreateLocalContext();
+		g_contexts[ i ].thread = 0;
 	}
 }
 
@@ -71,7 +130,7 @@ HttpResponse RequestHandler::HandlePost(HttpRequest request, HttpPostProcessor *
 
 		printf(":: setting up CheckDetectorProcessor\n");
 
-		*postProcessor = new CheckDetectorProcessor(request, detector, &contexts );
+		*postProcessor = new CheckDetectorProcessor(request, detector);
 
 		return HttpResponse();
 	}
@@ -137,11 +196,10 @@ void AddDetectorProcessor::FinalizeRequest()
 	Complete(HttpResponse(MHD_HTTP_OK, responseData, strlen(responseData)));
 }
 
-CheckDetectorProcessor::CheckDetectorProcessor(HttpRequest request, Detector *detector, GLContexts* contexts ) : HttpPostProcessor(request)
+CheckDetectorProcessor::CheckDetectorProcessor(HttpRequest request, Detector *detector ) : HttpPostProcessor(request)
 {
 	this->detector = detector;
 	this->data = NULL;
-	this->contexts = contexts;
 
 	width = 0;
 	height = 0;
@@ -215,31 +273,13 @@ void CheckDetectorProcessor::FinalizeRequest()
 		return;
 	}
 
-	Context ctx;
-	{
-		pthread_mutex_lock( &contexts->sync );
-		pthread_t tid = pthread_self();
+	timespec tp;
+	double startTime, endTime;
+	clock_gettime( CLOCK_REALTIME, &tp );
+	startTime = tp.tv_sec + tp.tv_nsec / 1000000000.0;
 
-		auto iter = contexts->threadToCtx.find( tid );
-		if( iter == contexts->threadToCtx.end() ){
-			if( contexts->freeContexts.size() == 0 ){
-				printf( ":: ERROR: NO AVAILABLE CONTEXT" );
-				exit( 1 );
-			}
-
-			ctx = contexts->freeContexts.back();
-			contexts->freeContexts.pop_back();
-
-			contexts->threadToCtx[ tid ] = ctx;
-			printf( ":: new thread %lx ctx %x\n", tid, *(uint32_t *)&ctx );
-		} else {
-			ctx = iter->second;
-			printf( ":: old thread %lx ctx %x\n", tid, *(uint32_t *)&ctx );
-		}
-
-		pthread_mutex_unlock( &contexts->sync );
-	}
-
+	
+	Context ctx = GetContext();
 	MakeCurrentLocalCtx( ctx );
 
 	static GLfloat vVertices[] = {  -1.0f,  1.0f, 0.0f,
@@ -260,7 +300,6 @@ void CheckDetectorProcessor::FinalizeRequest()
 
 
 	Texture2D texture( data, dataSize );
-    save_png( "input.png", texture.GetRGBA(), texture.GetWidth(), texture.GetHeight() );
 
     VertexShader vs( "shaders/simple.vert", false );
     FragmentShader fs( (const void *)detector->data, (uint32_t)detector->length );
@@ -276,7 +315,7 @@ void CheckDetectorProcessor::FinalizeRequest()
     pr.SetAttribute( "v_pos", 3, GL_FLOAT, GL_FALSE, 0, vVertices, 6 * 3 * sizeof( GLfloat ) );
     pr.SetAttribute( "v_uv", 2, GL_FLOAT, GL_FALSE, 0, vUv, 6 * 2 * sizeof( GLfloat ) );
 
-    int w = width > 0 ? width : 4;
+    int w = width > 0 ? width : 8;
     int h = height > 0 ? height : 1;
     Texture2D target( w, h, FORMAT_RGBA );
 
@@ -287,6 +326,10 @@ void CheckDetectorProcessor::FinalizeRequest()
     glDrawArrays( GL_TRIANGLES, 0, 6 );
 
     target.ReadBack();
+
+    clock_gettime( CLOCK_REALTIME, &tp );
+	endTime = tp.tv_sec + tp.tv_nsec / 1000000000.0;
+	printf( ":: Time: %f\n", endTime - startTime );
 
     char *responseData = (char *)target.GetRGBA();
 
