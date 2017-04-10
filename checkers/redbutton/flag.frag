@@ -66,8 +66,6 @@ bool CheckCrossing( vec2 v11, vec2 v12, vec2 v21, vec2 v22 )
 //
 void main()
 {
-	const int w = 256;
-	const int h = 256;
 	ivec2 offset[ 8 ];
 	offset[ 0 ] = ivec2( -1, -1 );
 	offset[ 1 ] = ivec2(  0, -1 );
@@ -87,12 +85,12 @@ void main()
 	int pointsCounter = 0;
 	vec4 ret =  vec4( 0.0, 1.0, 0.0, 1.0 );
 	vec4 C =  vec4( 0.0, 0.0, 0.0, 0.0 );
-	for( int y = 0; y < h; y++ )
+	for( int y = 0; y < HEIGHT; y++ )
 	{
-		for( int x = 0; x < w; x++ )
+		for( int x = 0; x < WIDTH; x++ )
 		{
 			ivec2 iuv = ivec2( x, y );
-			vec2 uv = vec2( iuv ) / vec2( w, h );
+			vec2 uv = vec2( iuv ) / vec2( WIDTH, HEIGHT );
 			vec4 centerPixel = texture2D( tex, uv );
 			if( !CheckColor( centerPixel.rgb ) )
 				continue;
@@ -103,7 +101,7 @@ void main()
 			{
 
 				ivec2 iuv = ivec2( x, y ) + offset[ o ];
-				uv =  vec2( iuv ) / vec2( w, h );
+				uv =  vec2( iuv ) / vec2( WIDTH, HEIGHT );
 				vec4 pixel = texture2D( tex, uv );
 				if( CheckColor( pixel.rgb ) )
 					counter++;
@@ -161,7 +159,7 @@ void main()
 	/*ret.x = float( pointsCounter ) / 256.0;
 	ret.y = float( linesCounter ) / 256.0;
 	ret.z = float( crossingLinesCounter ) / 256.0;
-	ret.w = 0.0;
+	ret.WIDTH = 0.0;
 	if( sx == 1 )
 		ret = C;
 	if( sx >= 2){
@@ -192,6 +190,10 @@ void main()
 	flag[ 1 ] = vec4( F4,  F5,  F6,  F7 )  / 255.0;
 	flag[ 2 ] = vec4( F8,  F9,  F10, F11 ) / 255.0;
 	flag[ 3 ] = vec4( F12, F13, F14, F15 ) / 255.0;
+	flag[ 4 ] = vec4( F16, F17, F18, F19 ) / 255.0;
+	flag[ 5 ] = vec4( F20, F21, F22, F23 ) / 255.0;
+	flag[ 6 ] = vec4( F24, F25, F26, F27 ) / 255.0;
+	flag[ 7 ] = vec4( F28, F29, F30, F31 ) / 255.0;
 	
 	gl_FragColor = flag[ int( gl_FragCoord.x ) ];
 }
