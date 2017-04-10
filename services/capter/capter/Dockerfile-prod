@@ -1,0 +1,6 @@
+FROM alpine
+EXPOSE 1234
+ADD . /capter/
+RUN chmod +x /capter/capter
+WORKDIR /capter/
+CMD ["/capter/capter"]
