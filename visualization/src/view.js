@@ -155,8 +155,15 @@ export default class View {
 		let onPointerDownPointerX, onPointerDownPointerY, onPointerDownLon, onPointerDownLat;
 
 		const textureLoader = new THREE.TextureLoader();
-		this.particleSpriteTex = textureLoader.load("static/img/particle2.png");
-		const planetTex = textureLoader.load("static/img/planet.jpg");
+		this.particleSpriteTex = textureLoader.load("static/img/particle.png");
+		const planetBumpTex = textureLoader.load("static/img/planet/Bump.jpg");
+		const planetDiffuseTex = textureLoader.load("static/img/planet/Diffuse.jpg");
+		const planetGlossTex = textureLoader.load("static/img/planet/Gloss.jpg");
+
+		const stationBumpTex = textureLoader.load("static/img/station/Bump.png");
+		const stationDiffuseTex = textureLoader.load("static/img/station/Diffuse.png");
+		const stationOpacityTex = textureLoader.load("static/img/station/Opacity.png");
+		const stationSelfIlluminationTex = textureLoader.load("static/img/station/Self-Illumination.png");
 
 		const options = {
 			position: new THREE.Vector3(),
@@ -203,7 +210,12 @@ export default class View {
 
 			scene.add(new THREE.AmbientLight(0x666666));
 
-			const sphere = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40, 3), new THREE.MeshLambertMaterial({map: planetTex}));
+			const planetMaterial = new THREE.MeshPhongMaterial({
+				bumpMap: planetBumpTex,
+				map: planetDiffuseTex,
+				specularMap: planetGlossTex,
+			});
+			const sphere = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40, 4), planetMaterial);
 			sphere.castShadow = true;
 			sphere.position.set(0, 0, 0);
 			sphere.receiveShadow = true;
@@ -288,7 +300,46 @@ export default class View {
 			for (let i=0; i<borders.length; i++)
 				geometry.faces.push(new THREE.Face3(borders[i][0], borders[i][1], borders[i][2]));
 			geometry.computeVertexNormals();
-			return new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({color: 0x0000ff}));
+			const stationMaterial = new THREE.MeshPhongMaterial({
+				bumpMap: stationBumpTex,
+				map: stationDiffuseTex,
+				//alphaMap: stationOpacityTex,
+				//emissiveMap: stationSelfIlluminationTex,
+			});
+			return new THREE.Mesh(geometry, stationMaterial);
+		}
+
+		function genPlane() {
+			const geometry = new THREE.Geometry();
+			const ISLAND_WIDTH = 8;
+			const ISLAND_HEIGHT = ISLAND_WIDTH * 0.866; // sqrt(3)/2
+			const fig = [{x: ISLAND_WIDTH / 4 , y: 0},
+				{x: ISLAND_WIDTH * 3 / 4, y: 0},
+				{x: ISLAND_WIDTH, y: ISLAND_HEIGHT / 2},
+				{x: ISLAND_WIDTH * 3 / 4, y: ISLAND_HEIGHT},
+				{x: ISLAND_WIDTH / 4 , y: ISLAND_HEIGHT},
+				{x: 0, y: ISLAND_HEIGHT / 2}];
+			for (let i=0; i<fig.length; i++)
+				geometry.vertices.push(new THREE.Vector3(fig[i].x - ISLAND_WIDTH / 2, fig[i].y - ISLAND_HEIGHT / 2, -1));
+			for (let i=0; i<fig.length; i++)
+				geometry.vertices.push(new THREE.Vector3(fig[i].x  - ISLAND_WIDTH / 2, fig[i].y - ISLAND_HEIGHT / 2, 1));
+			const faces1 = [[0,5,1],[1,3,2],[3,5,4],[1,5,3]];
+			const faces2 = [[0,1,5],[1,2,3],[3,4,5],[1,3,5]];
+			for (let i=0; i<faces1.length; i++)
+				geometry.faces.push(new THREE.Face3(faces1[i][0], faces1[i][1], faces1[i][2]));
+			for (let i=0; i<faces2.length; i++)
+				geometry.faces.push(new THREE.Face3(faces2[i][0] + 6, faces2[i][1] + 6, faces2[i][2] + 6));
+			const borders = [[0,7,6],[1,8,7],[2,9,8],[3,10,9],[4,11,10],[5,6,11],
+				[0,1,7],[1,2,8],[2,3,9],[3,4,10],[4,5,11],[5,0,6]];
+			for (let i=0; i<borders.length; i++)
+				geometry.faces.push(new THREE.Face3(borders[i][0], borders[i][1], borders[i][2]));
+			geometry.computeVertexNormals();
+			const stationMaterial = new THREE.MeshPhongMaterial({
+				bumpMap: stationBumpTex,
+				map: stationDiffuseTex,
+				alphaMap: stationOpacityTex,
+				emissiveMap: stationSelfIlluminationTex,
+			});
 		}
 
 		function fibonacci_sphere(samples) { // http://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere
