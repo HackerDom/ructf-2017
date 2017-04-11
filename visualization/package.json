@@ -5,7 +5,8 @@
     "lint": "node_modules/.bin/eslint src/*.js || exit 0",
     "prebuild": "npm-run-all lint",
     "build": "babel-node tools/build.js",
-    "build-nl": "babel-node tools/build.js"
+    "build-nl": "babel-node tools/build.js",
+    "prod": "cross-env NODE_ENV=prod babel-node tools/build.js"
   },
   "dependencies": {
     "three": "^0.84.0",
@@ -24,6 +25,7 @@
     "eslint": "^3.14.0",
     "eslint-plugin-import": "^2.2.0",
     "npm-run-all": "^4.0.1",
-    "webpack": "^1.14.0"
+    "webpack": "^1.14.0",
+    "cross-env": "^4.0.0"
   }
 }

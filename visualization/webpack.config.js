@@ -1,10 +1,8 @@
 import webpack from 'webpack';
 import path from 'path';
 
-
-export default {
+const generalConfig =  {
 	debug: false,
-	devtool: 'source-map',
 	noInfo: false,
 	entry: {
 		app: ["./src/index.js"],
@@ -22,20 +20,32 @@ export default {
 		path: __dirname + '/static/js',
 		filename: 'app.js',
 	},
-	plugins: [
-		new webpack.DefinePlugin({PRODUCTION: JSON.stringify(false),}),
-		new webpack.optimize.CommonsChunkPlugin("vendor", "vendor.js"),
-		/*new webpack.optimize.OccurenceOrderPlugin(),
-		new webpack.optimize.DedupePlugin(),
-		new webpack.optimize.UglifyJsPlugin({
-			minimize: true,
-			mangle: true
-		})*/
-	],
-
 	module: {
 		loaders: [
 			{test: /\.js$/, include: path.join(__dirname, 'src'), loaders: ['babel']}
 		]
 	},
 };
+
+let devConfig =  {
+	devtool: 'source-map',
+	plugins: [
+		new webpack.DefinePlugin({PRODUCTION: JSON.stringify(false),}),
+		new webpack.optimize.CommonsChunkPlugin("vendor", "vendor.js"),
+	],
+};
+
+let prodConfig =  {
+	plugins: [
+		new webpack.DefinePlugin({PRODUCTION: JSON.stringify(true),}),
+		new webpack.optimize.CommonsChunkPlugin("vendor", "vendor.js"),
+		new webpack.optimize.OccurenceOrderPlugin(),
+		new webpack.optimize.DedupePlugin(),
+		new webpack.optimize.UglifyJsPlugin({minimize: true, mangle: true})
+	]
+};
+
+devConfig = Object.assign({}, generalConfig, devConfig);
+prodConfig = Object.assign({}, generalConfig, prodConfig);
+
+export {devConfig , prodConfig}
