@@ -1,12 +1,21 @@
 precision mediump float;
 uniform sampler2D tex;
 
+/*const float COLOR_R = 83.0;
+const float COLOR_G = 171.0;
+const float COLOR_B = 153.0;
+const float L0 = 11.952579280055215;
+const float L1 = 15.779421983487431;
+const float ANGLE = 80.33672063732777;
+const int WIDTH = 128;
+const int HEIGHT = 128;*/
+
 const vec3 COLOR = vec3( COLOR_R, COLOR_G, COLOR_B ) / 255.0;
 // L0, L1, ANGLE
 
 const float colorEpsilon = 8.0 / 255.0;
 const float Lepsilon = 1.0;
-const float angleEpsilon = 4.0 / 360.0 * 2.0 * 3.1415926;
+const float angleEpsilon = 8.0 / 360.0 * 2.0 * 3.1415926;
 
 
 //
@@ -33,8 +42,10 @@ float DegToRad( float deg )
 //
 bool CheckAngle( float cosA )
 {
-	float CosA = cos( DegToRad( ANGLE ) );
-	return abs( cosA - CosA ) < angleEpsilon;
+	float refAngle = DegToRad( ANGLE );
+	float angle0 = acos( cosA );
+	float angle1 = 3.1415926 - angle0;
+	return abs( refAngle - angle0 ) < angleEpsilon || abs( refAngle - angle1 ) < angleEpsilon;
 }
 
 
@@ -156,10 +167,10 @@ void main()
 		}
 
 
-	/*ret.x = float( pointsCounter ) / 256.0;
-	ret.y = float( linesCounter ) / 256.0;
-	ret.z = float( crossingLinesCounter ) / 256.0;
-	ret.WIDTH = 0.0;
+	/*ret.x = float( pointsCounter ) / 255.0;
+	ret.y = float( linesCounter ) / 255.0;
+	ret.z = float( crossingLinesCounter ) / 255.0;
+	ret.w = 0.0;
 	if( sx == 1 )
 		ret = C;
 	if( sx >= 2){
@@ -167,21 +178,22 @@ void main()
 		
 		int pi = sx - 2;
 		if( pi >= 0 && pi < pointsCounter ){
-			ret.x = float( points[ pi ].x ) / 256.0;
-			ret.y = float( points[ pi ].y ) / 256.0;
+			ret.x = float( points[ pi ].x ) / 255.0;
+			ret.y = float( points[ pi ].y ) / 255.0;
 		}
 		int li = sx - pointsCounter - 1;
 		if( li >= 0 && li < linesCounter ){
-			ret = lines[ li ] / 256.0;
+			ret = lines[ li ] / 255.0;
 		}
 		int cli = sx - pointsCounter - linesCounter - 1;
 		if( cli >= 0 && cli < crossingLinesCounter ){
-			ret.x = ( float( crossingLines[ cli ].x ) ) / 256.0;
-			ret.y = ( float( crossingLines[ cli ].y ) ) / 256.0;
+			ret.x = ( float( crossingLines[ cli ].x ) ) / 255.0;
+			ret.y = ( float( crossingLines[ cli ].y ) ) / 255.0;
 		}
 
 	}
 	gl_FragColor = ret;*/
+	
 	if( crossingLinesCounter == 0 )
 		discard;
 
