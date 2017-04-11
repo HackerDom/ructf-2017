@@ -38,9 +38,13 @@ export default class View {
 	drawScoreboard() {
 		this.scoreboardContainer.empty();
 		const table = $("<table></table>");
+		const $container = $("#container");
+		const img_height = Math.max(Math.ceil(($container.height() - 60) / this.model.teams.length - 10), 3);
+		const place_size = Math.max(img_height - 4, 3);
 		for (let i=0; i<this.model.teams.length; i++) {
 			const team = this.model.teams[i];
-			table.append(`'<tr><td>${team.name}</td><td>${team.score}</td></tr>`);
+			table.append($(`<tr><td><div class="place" style="width:${place_size}px;height:${place_size}px;">${i}</div></td>
+<td><img height='${img_height}' src='${View.getLogo()}'/></td><td></td><td>${View.escape(team.name)}</td><td>${team.score}</td></tr>`));
 		}
 		this.scoreboardContainer.append(table);
 	}
@@ -61,7 +65,12 @@ export default class View {
 	}
 
 	static getLogo(nodeData) {
-		return "<img src='https://ructfe.org/logos/" + md5(nodeData.name ) + ".png'/>";
+		//return "https://ructfe.org/logos/" + md5(nodeData.name) + ".png"; // TODO
+		return "https://ructfe.org/static/img/teams/a0d934499096790a8d0c50a6002164b7.png";
+	}
+
+	static escape(text) {
+		return $("<div>").text(text).html();
 	}
 
 	createFilterPanel() {
@@ -384,6 +393,7 @@ export default class View {
 			aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 			camera.aspect = aspect;
 			camera.updateProjectionMatrix();
+			_this.drawScoreboard();
 		}
 
 		function onDocumentMouseDown(event) {

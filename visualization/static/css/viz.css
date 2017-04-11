@@ -55,6 +55,7 @@ body,
   margin-right: 5px;
 }
 #filters-container {
+  display: none;
   position: absolute;
   left: 20px;
   top: 20px;
@@ -138,7 +139,23 @@ body,
 }
 #scoreboard-container {
   position: absolute;
-  right: 20px;
+  left: 20px;
   top: 20px;
-  color: #b7e99b;
+  color: #FFF;
+}
+#scoreboard-container img {
+  width: auto;
+}
+#scoreboard-container tr:nth-child(1) .place {
+  background-color: #FFBF1B;
+}
+#scoreboard-container tr:nth-child(2) .place {
+  background-color: #E4E4E4;
+}
+#scoreboard-container tr:nth-child(3) .place {
+  background-color: #EC8F47;
+}
+#scoreboard-container .place {
+  border-radius: 100px;
+  text-align: center;
 }

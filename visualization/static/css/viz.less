@@ -58,6 +58,7 @@ html, body, #container  {
 }
 
 #filters-container {
+	display: none;
 	position: absolute;
 	left: 20px;
 	top: 20px;
@@ -152,7 +153,23 @@ html, body, #container  {
 
 #scoreboard-container {
 	position: absolute;
-	right: 20px;
+	left: 20px;
 	top: 20px;
-	color: rgb(183, 233, 155);
+	color: #FFF;
+	img {
+		width: auto;
+	}
+	tr:nth-child(1) .place {
+		background-color: #FFBF1B;
+	}
+	tr:nth-child(2) .place {
+		background-color: #E4E4E4;
+	}
+	tr:nth-child(3) .place {
+		background-color: #EC8F47;
+	}
+	.place {
+		border-radius: 100px;
+		text-align: center;
+	}
 }
