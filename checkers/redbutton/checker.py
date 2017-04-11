@@ -37,8 +37,8 @@ def put(*args):
 	COLOR_R = int( random.random() * 255 )
 	COLOR_G = int( random.random() * 255 )
 	COLOR_B = int( random.random() * 255 )
-	L0 = random.uniform( 10.0, 50.0 )
-	L1 = random.uniform( 10.0, 50.0 )
+	L0 = random.uniform( 10.0, 30.0 )
+	L1 = random.uniform( 10.0, 30.0 )
 	ANGLE = random.uniform( 30.0, 90.0 )
 
 	flag_defs = ""
@@ -69,6 +69,8 @@ def put(*args):
 			close(DOWN, "Service is down", "Nginx 502")
 		if r.status_code != 200:
 			close( MUMBLE, "Submit error", "Invalid status code: %s %d" % ( url, r.status_code ) )	
+
+		# TODO check guid
 
 		try:
 			flag_id = json.dumps( { 'guid' : r.text[:-1], 'COLOR_R' : COLOR_R, 'COLOR_G' : COLOR_G, 'COLOR_B' : COLOR_B, 'L0' : L0, 'L1' : L1, 'ANGLE' : ANGLE } )
@@ -111,7 +113,9 @@ def get(*args):
 	except Exception as e:
 		 close(DOWN, "HTTP Error", "HTTP error: %s" % e)
 
-	print( r.text )
+	if flag != r.text:
+		close( CORRUPT, "Service corrupted", "Flag does not match: %s" % r.text )
+	close( OK )
 
 
 def info(*args):
