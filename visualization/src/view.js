@@ -192,7 +192,7 @@ export default class View {
 		animate();
 
 		function init() {
-			camera = new THREE.PerspectiveCamera(60, aspect, 1, 1000);
+			camera = new THREE.PerspectiveCamera(55, aspect, 1, 1000);
 			camera.position.set(0, 0, 100);
 
 			const light = new THREE.DirectionalLight(0xdfebff, 1);
@@ -200,13 +200,14 @@ export default class View {
 			light.shadow.mapSize.width = 2048; // default is 512
 			light.shadow.mapSize.height = 2048; // default is 512
 			light.castShadow = true;
-			light.shadow.camera.left = -80;
-			light.shadow.camera.right = 80;
-			light.shadow.camera.top = 80;
-			light.shadow.camera.bottom = -80;
+			light.shadow.camera.left = -50;
+			light.shadow.camera.right = 50;
+			light.shadow.camera.top = 50;
+			light.shadow.camera.bottom = -50;
 			light.shadowCameraHelper = new THREE.CameraHelper(light.shadow.camera);
 			scene.add(light);
 			scene.add(light.shadowCameraHelper);
+
 
 			scene.add(new THREE.AmbientLight(0x666666));
 
@@ -223,28 +224,41 @@ export default class View {
 
 			calculateNodesPositions();
 
-			for(let i=0; i<teams.length; i++) {
-				const team = teams[i];
-				const node = genNode();
-				node.castShadow = true;
-				node.receiveShadow = true;
-				const myDirectionVector = new THREE.Vector3(team.point[0], team.point[1], team.point[2]);
-				const nodePosition = myDirectionVector.clone().multiplyScalar(43);
-				node.position.set(nodePosition.x, nodePosition.y, nodePosition.z);
-				let mx = new THREE.Matrix4().lookAt(new THREE.Vector3(0,0,0), myDirectionVector, new THREE.Vector3(0,1,0));
-				let qt = new THREE.Quaternion().setFromRotationMatrix(mx);
-				node.quaternion.copy(qt);
-				team.node = node;
-				team.pos = nodePosition;
-				planetGroup.add(node);
+			const loader = new THREE.JSONLoader();
+			loader.load( 'static/img/station/station.json', function ( geometry, materials ) {
+				for (let i = 0; i < teams.length; i++) {
+					const team = teams[i];
+					const material = materials[0];
+					material.map = stationDiffuseTex;
+					material.bumpMap = stationBumpTex;
+					material.emissiveMap = stationSelfIlluminationTex;
+					const node = new THREE.Mesh( geometry, material );
+					node.scale.set( 1.2, 1.2, 1.2 );
+					node.castShadow = true;
+					node.receiveShadow = true;
+					const myDirectionVector = new THREE.Vector3(team.point[0], team.point[1], team.point[2]);
+					const nodePosition = myDirectionVector.clone().multiplyScalar(43);
+					node.position.set(nodePosition.x, nodePosition.y, nodePosition.z);
+					let mx = new THREE.Matrix4().lookAt(new THREE.Vector3(0, 0, 0), myDirectionVector, new THREE.Vector3(0, 1, 0));
+					let qt = new THREE.Quaternion().setFromRotationMatrix(mx);
+					node.rotateY((90 * Math.PI)/180);
+					node.quaternion.copy(qt);
+					team.node = node;
+					team.pos = nodePosition;
+					planetGroup.add(node);
 
-				const sprite = makeTextSprite( " " + team.name + " ",
-					{ fontsize: 48, borderColor: {r:255, g:0, b:0, a:1.0}, backgroundColor: {r:255, g:100, b:100, a:0.8} } );
-				const spritePosition = myDirectionVector.clone().multiplyScalar(52);
-				sprite.position.set(spritePosition.x, spritePosition.y, spritePosition.z);
-				teams[i].sprite = sprite;
-				planetGroup.add(sprite);
-			}
+					const sprite = makeTextSprite(" " + team.name + " ",
+						{
+							fontsize: 48,
+							borderColor: {r: 255, g: 0, b: 0, a: 1.0},
+							backgroundColor: {r: 255, g: 100, b: 100, a: 0.8}
+						});
+					const spritePosition = myDirectionVector.clone().multiplyScalar(52);
+					sprite.position.set(spritePosition.x, spritePosition.y, spritePosition.z);
+					teams[i].sprite = sprite;
+					planetGroup.add(sprite);
+				}
+			});
 
 			scene.add(planetGroup);
 
