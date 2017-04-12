@@ -16,9 +16,12 @@
 
        01 buffers-pool.
          02 buffers occurs 1024 times indexed by buffer-number.
-           03 buffer picture x(65536).
-           03 buffer-length binary-long unsigned.
-           03 buffer-sended binary-long unsigned.
+           03 read-buffer picture x(1024).
+           03 read-buffer-length binary-long unsigned.
+           03 read-buffer-used binary-long unsigned.
+           03 write-buffer picture x(1024).
+           03 write-buffer-length binary-long unsigned.
+           03 write-buffer-used binary-long unsigned.
            03 socket binary-int value -1.
 
        01 flag binary-int unsigned.
@@ -106,7 +109,19 @@
                exit perform
              end-if
 
-             call 'addRead' using
+             set buffer-number to 1
+             search buffers
+               when socket(buffer-number) is equal to -1
+               perform perform-buffer
+             end-search
+
+      D      display 'new connection from '
+      D        peer-ip-address ':' peer-port end-display
+
+           end-perform.
+
+       perform-buffer.
+            call 'addRead' using
                by value peer-descriptor
              end-call
              if return-code is less than zero
@@ -114,12 +129,17 @@
                  by content ADD_POLL_ERROR
                  by content 0
                end-call
-             end-if
+               call 'close' using
+                 by reference peer-descriptor
+               end-call
+             else
+               move spaces to read-buffer(buffer-number)
+               move 1 to read-buffer-used(buffer-number)
+               move function length(read-buffer(buffer-number))
+                 to read-buffer-length(buffer-number)
+               move peer-descriptor to socket(buffer-number)
+             end-if.
 
-      D      display 'new connection from ' 
-      D        peer-ip-address ':' peer-port end-display
-
-           end-perform.
 
        recv.
       D    display 'recv fdesc:' fdesc end-display
@@ -128,19 +148,21 @@
            end-call
            set buffer-number to 1
            search buffers 
-             when socket(buffer-number) is equal to -1
+             when socket(buffer-number) is equal to fdesc
              perform recv-to-buffer
            end-search.
 
 
        recv-to-buffer.
-           move spaces to buffer(buffer-number)
       D    display 'buffer num: ' buffer-number ' buffer size: ' 
       D      function length(buffer(buffer-number)) end-display
            call 'recv' using 
              by value fdesc
-             by reference buffer(buffer-number)
-             by value function length(buffer(buffer-number))
+             by reference read-buffer(buffer-number)(
+                 read-buffer-used(buffer-number)
+                 :read-buffer-length(buffer-number)
+               )
+             by value read-buffer-length(buffer-number)
              by value 0
            end-call
            evaluate return-code
@@ -155,21 +177,15 @@
              when 0
                perform close-connection
              when other
-               set buffer-length(buffer-number) to return-code
+               add return-code
+                 to read-buffer-used(buffer-number) end-add
+               subtract return-code
+                 from read-buffer-length(buffer-number) end-subtract
                set socket(buffer-number) to fdesc
-               set buffer-sended(buffer-number) to 1
-           end-evaluate
-           if buffer-length(buffer-number) is less than or equal to zero
-             call 'addRead' using
-               by value fdesc
-             end-call
-      D      display 'add read ' fdesc end-display
-           else
-             call 'addWrite' using
-               by value fdesc
-             end-call
-      D      display 'add write ' fdesc end-display
-           end-if.
+               call 'process-request' using
+                  by reference buffers(buffer-number)
+               end-call
+           end-evaluate.
 
        send.
       D    display 'send to ' fdesc end-display
@@ -179,18 +195,16 @@
              perform send-buffer
            end-search.
 
-
        send-buffer.
       D    display 'buffer num: ' buffer-number ' buffer size: ' 
       D      buffer-length(buffer-number) end-display
            call 'send' using
              by value fdesc
-             by reference 
-               buffer(buffer-number)(
-                 buffer-sended(buffer-number)
-                   :buffer-length(buffer-number)
+             by reference write-buffer(buffer-number)(
+                 write-buffer-used(buffer-number)
+                 :write-buffer-length(buffer-number)
                )
-             by value buffer-length(buffer-number)
+             by value write-buffer-length(buffer-number)
              by value MSG_NOSIGNAL
            end-call
            if return-code is equal to -1
@@ -202,12 +216,12 @@
                perform close-connection
              end-if
            end-if
-           add return-code to buffer-sended(buffer-number) end-add
-           subtract 
-             return-code from buffer-length(buffer-number) 
+           add return-code to write-buffer-used(buffer-number) end-add
+           subtract
+             return-code from write-buffer-length(buffer-number)
            end-subtract
-           if buffer-length(buffer-number) is less than or equal to zero
-             move -1 to socket(buffer-number)
+           if write-buffer-length(buffer-number)
+                is less than or equal to zero
              call 'removeWrite' using
                by value fdesc
              end-call

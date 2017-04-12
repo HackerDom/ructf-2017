@@ -1,6 +1,6 @@
 .PHONY: all clean c listing clean-all
 
-cblFiles=echoserver.cbl errnomessage.cbl logerror.cbl logerrorblock.cbl performserverdescriptor.cbl tunesocket.cbl starthandling.cbl
+cblFiles=echoserver.cbl errnomessage.cbl logerror.cbl logerrorblock.cbl performserverdescriptor.cbl tunesocket.cbl starthandling.cbl processrequest.cbl
 cFiles=get_errno.c utils.c polling.c
 files=${cblFiles} ${cFiles}
 
