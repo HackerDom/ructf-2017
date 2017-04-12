@@ -26,7 +26,7 @@
        77 queue-length binary-char value 2.
 
        linkage section.
-       01 port binary-short.
+       01 port binary-short unsigned.
        01 server-descriptor binary-int.
 
        procedure division using port, server-descriptor.
