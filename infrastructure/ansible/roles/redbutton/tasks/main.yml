@@ -1,0 +1,19 @@
+- hostname:
+    name: redbutton
+
+- name: create user
+  user: name=redbutton shell=/bin/false
+
+- name: copy blink files
+  copy: src=blink/{{item}} dest=/root owner=root group=root mode=0755
+  with_items:
+    - blink_green_led.sh
+  notify: enable and restart blink_green_led
+
+- name: copy blink_green_led systemd service
+  copy: src=blink/blink_green_led.service dest=/etc/systemd/system/blink_green_led.service
+  notify: enable and restart blink_green_led
+
+- name: copy motd
+  copy: src=motd dest=/etc/motd
+

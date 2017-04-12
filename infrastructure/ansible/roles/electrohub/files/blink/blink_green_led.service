@@ -1,0 +1,15 @@
+[Unit]
+    Description=Blinks green led
+
+[Service]
+    ExecStart=/root/blink_green_led.sh 2
+    WorkingDirectory=/root
+    User=root
+    Group=root
+    Restart=on-failure
+    RestartSec=3s
+    CPUQuota=10%
+    MemoryLimit=10M
+
+[Install]
+    WantedBy=multi-user.target
