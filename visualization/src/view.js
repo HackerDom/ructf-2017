@@ -31,7 +31,6 @@ export default class View {
 	}
 
 	init() {
-		this.createFilterPanel();
 		this.initThree();
 	}
 
@@ -73,34 +72,10 @@ export default class View {
 		return $("<div>").text(text).html();
 	}
 
-	createFilterPanel() {
-		const _this = this;
-		const deselectionFlag = "deselected";
-		const $fc = $("#filters-container");
-
-		for (let i=0; i<this.model.services.length; i++) {
-			const service = this.model.services[i];
-			const $filter = $(`<div class="filter"><span class="bullet">&#9679;&ensp;&thinsp;</span><span class="service-name">${service.name}</span></div>`);
-			$filter.css("color", "#B7E99B");
-			$filter.find(".bullet").css("color", service.color);
-			$filter.click( function(index) { return function () {
-				if ($(this).hasClass(deselectionFlag)) {
-					$(this).removeClass(deselectionFlag);
-					_this.model.services[index].visible = true;
-				} else {
-					$(this).addClass(deselectionFlag);
-					_this.model.services[index].visible = false;
-				}
-				_this.drawServicesStatusesAndStat();
-				_this.controller.emit('calcFlagStat');
-			};
-			}(i));
-			$fc.append($filter);
-		}
-	}
-
 	showArrow(arrowData) {
 		if(!arrowData.svc.visible)
+			return;
+		if(!arrowData.from.pos) // nodes does not init yet
 			return;
 		const posFrom = arrowData.from.pos.clone();
 		const posTo = arrowData.to.pos.clone();

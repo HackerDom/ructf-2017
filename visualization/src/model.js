@@ -1,8 +1,6 @@
 import _ from "underscore";
 
-const SERVICE_NAME_TO_NUM = {"atlablog": 4, "weather": 1, "cartographer": 3, "sapmarine": 2, "crash": 0, "thebin": 5};
 const COLOR_CONSTANTS = ["#ED953A", "#E5BD1F", "#3FE1D6", "#568AFF", "#8C41DA", "#BA329E"];
-const SERVICE_NAME_TO_SPHERE_NUM = {"atlablog": 3, "weather": 4, "cartographer": 5, "sapmarine": 0, "crash": 1, "thebin": 2};
 const SERVICES_COUNT = 6;
 
 export class GameModel {
@@ -45,19 +43,19 @@ export class GameModel {
 	}
 
 	initServices(info) {
+		let num = 0;
 		for (const fieldName in info.services) {
 			if (info.services.hasOwnProperty(fieldName)) {
 				const name = info.services[fieldName];
-				const num = SERVICE_NAME_TO_NUM[name];
 				this.services[num] = {
 					id: num,
 					service_id: fieldName,
 					name: name,
 					color: COLOR_CONSTANTS[num],
-					visible: true,
-					sphere_num: SERVICE_NAME_TO_SPHERE_NUM[name]
+					visible: true
 				};
 				this._serviceIdToNum[fieldName] = num;
+				num++;
 			}
 		}
 	}

@@ -54,28 +54,6 @@ body,
 .ui-tooltip .team-tooltip img {
   margin-right: 5px;
 }
-#filters-container {
-  display: none;
-  position: absolute;
-  left: 20px;
-  top: 20px;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  cursor: pointer;
-}
-#filters-container .filter {
-  color: white;
-  cursor: pointer;
-  text-align: left;
-}
-#filters-container .filter.deselected .service-name {
-  text-decoration: line-through;
-}
-#filters-container .filter.deselected .bullet {
-  color: #1D3542 !important;
-}
 .statistics {
   position: absolute;
   bottom: 0;
