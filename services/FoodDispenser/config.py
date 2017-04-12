@@ -30,7 +30,7 @@ class Config:
             return self.data.get_raw()
         return super().__getattribute__(item)
 
-    def __init__(self, config_file="basic_config.json"):
+    def __init__(self, config_file="config.json"):
         self.config_file = config_file
         self.load_configs()
 
@@ -46,22 +46,15 @@ class Config:
 
     def load_configs(self):
         if not os.path.isfile(self.config_file):
-            Config.data.add({
-                "address": "localhost",
-                "port": 3306,
-                "login": "root",
-                "password": "",
-                "database": "dispenser"
-            })
-
-            Config.data.add({
-                "token_secret": Config.generate_random_hash(),
-                "hash_settings": {"method": "sha"},
+            self.data.add({
+                "debug": False,
+                "debug_user_group": self.generate_random_hash(),
+                "debug_user_group_invite_code": self.generate_random_hash()
             })
 
             with open(self.config_file, "w") as configfile:
                 json.dump(
-                    Config.data.__subdir,
+                    self.raw,
                     configfile, indent=4
                 )
         else:
@@ -70,4 +63,4 @@ class Config:
                 Config.data.add(data)
 
 
-config = Config("config.json")
+config = Config("config1.json")

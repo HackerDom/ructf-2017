@@ -26,7 +26,12 @@ def init_models(db):
         food_service_id = IntegerField()
         client_id = IntegerField()
         stars_amount = IntegerField()
-        comment_content = TextField()
+        comment_content = TextField(default="")
+
+    class Group(AbstractTable):
+        group_name = CharField(max_length=32, unique=True)
+        group_creator_id = IntegerField()
+        group_invite_hash = CharField(max_length=64)
 
     def init_db():
         if not User.table_exists():
@@ -35,5 +40,7 @@ def init_models(db):
             TicketStorage.create_table()
         if not Ratings.table_exists():
             Ratings.create_table()
+        if not Group.table_exists():
+            Group.create_table()
 
-    return User, TicketStorage, Ratings, init_db
+    return User, TicketStorage, Ratings, Group, init_db
