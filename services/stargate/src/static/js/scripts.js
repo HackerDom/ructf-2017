@@ -117,6 +117,11 @@ var MAX_MSG_COUNT = 50;
 			if(xhr.readyState === XMLHttpRequest.DONE) {
 				if(event.target.status === 200) {
 					ChangeEventHorizonState(SUCCESS, "Substance Passed");
+					var msg = Spectrum.decode(new Uint8Array(xhr.response));
+					var $spectrum = $(".spectrum");
+					var $canvas = $spectrum.length > MAX_MSG_COUNT ? $spectrum.remove() : $('<canvas class="spectrum" width="256" height="' + HEIGHT + '"></canvas>');
+					$(".right-container").prepend($("<div/>").append($canvas));
+					DrawSpectrum($canvas[0], msg);
 				} else {
 					var error = new TextDecoder("utf-8").decode(new Uint8Array(xhr.response));
 					ChangeEventHorizonState(ERROR, error || "Internal Stargate Error");
@@ -126,15 +131,8 @@ var MAX_MSG_COUNT = 50;
 
 		xhr.open('PUT', '/put/');
 		xhr.setRequestHeader("X-SG1-Name", filename);
+		xhr.setRequestHeader("X-SG1-Entropy", file.lastModified.toString(36).substr(2)); // Some secret entropy
 		xhr.send(file);
-
-		xhr.onload = () => {
-			var msg = Spectrum.decode(new Uint8Array(xhr.response));
-			var $spectrum = $(".spectrum");
-			var $canvas = $spectrum.length > MAX_MSG_COUNT ? $spectrum.remove() : $('<canvas class="spectrum" width="256" height="' + HEIGHT + '"></canvas>');
-			$(".right-container").prepend($("<div/>").append($canvas));
-			DrawSpectrum($canvas[0], msg);
-		};
 
 		return true;
 	};

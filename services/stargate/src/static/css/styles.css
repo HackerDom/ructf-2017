@@ -18,6 +18,9 @@ svg {
 	-webkit-filter: invert(100%);
 	filter: invert(100%);
 }
+svg * {
+	pointer-events: none;
+}
 
 #stargate {
 	width:100%;

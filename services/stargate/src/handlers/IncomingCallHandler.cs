@@ -21,8 +21,8 @@ namespace stargåte.handlers
 				return new HttpResult {StatusCode = 400, Message = "Substance Without Name"};
 
 			var secret = context.Request.Headers["X-SG1-Entropy"].FirstOrDefault();
-			if(name.Length > Settings.MaxNameLength || secret?.Length > 0)
-				return new HttpResult {StatusCode = 400, Message = "Name Too Long"};
+			if(name.Length > Settings.MaxFieldLength || secret?.Length > Settings.MaxFieldLength)
+				return new HttpResult {StatusCode = 400, Message = "Too Long"};
 
 			if(context.Request.ContentLength == null)
 				return new HttpResult {StatusCode = 411, Message = "Substance With Unknown Size"};

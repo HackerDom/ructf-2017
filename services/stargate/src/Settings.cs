@@ -11,7 +11,7 @@ namespace stargåte
 				rng.GetBytes(Key);*/
 		}
 
-		public const int MaxNameLength = 340;
+		public const int MaxFieldLength = 340;
 
 		public const int MaxMatterSize = 65536;
 		public const int MaxMatterDimensions = 32768;
