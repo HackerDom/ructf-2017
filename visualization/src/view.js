@@ -80,7 +80,7 @@ export default class View {
 			return;
 		const posFrom = arrowData.from.pos.clone();
 		const posTo = arrowData.to.pos.clone();
-		const spline_points = View.getSplinePoints(posFrom.normalize().multiplyScalar(44), posTo.normalize().multiplyScalar(44));
+		const spline_points = View.getSplinePoints(posFrom.normalize().multiplyScalar(43), posTo.normalize().multiplyScalar(43));
 		this.createArrow(spline_points, arrowData.svc.color);
 	}
 
@@ -135,6 +135,7 @@ export default class View {
 		const planetBumpTex = textureLoader.load("static/img/planet/Bump.jpg");
 		const planetDiffuseTex = textureLoader.load("static/img/planet/Diffuse.jpg");
 		const planetGlossTex = textureLoader.load("static/img/planet/Gloss.jpg");
+		const planetCloudsTex = textureLoader.load("static/img/planet/Clouds.jpg");
 
 		const stationBumpTex = textureLoader.load("static/img/station/Bump.png");
 		const stationDiffuseTex = textureLoader.load("static/img/station/Diffuse.jpg");
@@ -146,7 +147,7 @@ export default class View {
 			colorRandomness: 0,
 			turbulence: 0.5,
 			lifetime: 0.5,
-			size: 10,
+			size: 12,
 			sizeRandomness: 3
 		};
 
@@ -169,32 +170,56 @@ export default class View {
 			camera = new THREE.PerspectiveCamera(55, aspect, 1, 1000);
 			camera.position.set(0, 0, 100);
 
-			const light = new THREE.DirectionalLight(0xdfebff, 1);
+			const light = new THREE.DirectionalLight(0xdddddd, 1);
 			light.position.set(75, 20, 60);
-			light.shadow.mapSize.width = 1024; // default is 512
-			light.shadow.mapSize.height = 1024; // default is 512
+			light.shadow.mapSize.width = 2048; // default is 512
+			light.shadow.mapSize.height = 2048; // default is 512
 			light.castShadow = true;
-			light.shadow.camera.left = -48;
-			light.shadow.camera.right = 48;
-			light.shadow.camera.top = 48;
-			light.shadow.camera.bottom = -48;
-			light.shadowCameraHelper = new THREE.CameraHelper(light.shadow.camera);
+			light.shadow.camera.left = -45;
+			light.shadow.camera.right = 45;
+			light.shadow.camera.top = 45;
+			light.shadow.camera.bottom = -45;
+			//light.shadowCameraHelper = new THREE.CameraHelper(light.shadow.camera);
 			scene.add(light);
-			scene.add(light.shadowCameraHelper);
+			//scene.add(light.shadowCameraHelper);
 
 
-			scene.add(new THREE.AmbientLight(0x666666));
+			scene.add(new THREE.AmbientLight(0x444444));
 
 			const planetMaterial = new THREE.MeshPhongMaterial({
 				bumpMap: planetBumpTex,
 				map: planetDiffuseTex,
 				specularMap: planetGlossTex,
 			});
+			const cloudMaterial  = new THREE.MeshPhongMaterial({
+				alphaMap : planetCloudsTex,
+				opacity : 1,
+				transparent : true,
+				depthWrite : false,
+			});
 			const sphere = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40, 3), planetMaterial);
+			_this.clouds = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40.7, 3), cloudMaterial);
 			sphere.castShadow = true;
 			sphere.position.set(0, 0, 0);
 			sphere.receiveShadow = true;
+			_this.clouds.castShadow = false;
+			_this.clouds.position.set(0, 0, 0);
+			_this.clouds.receiveShadow = true;
 			planetGroup.add(sphere);
+			planetGroup.add(_this.clouds);
+
+			const customMaterial = new THREE.MeshBasicMaterial(
+				{
+					opacity : 0.2,
+					color: 0xD790CF,
+					side: THREE.FrontSide,
+					transparent: true
+				}
+			);
+
+			const glow = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40.7, 3), customMaterial);
+			glow.position.set(0, 0, 0);
+			planetGroup.add(glow);
 
 			calculateNodesPositions();
 
@@ -210,7 +235,7 @@ export default class View {
 				node.castShadow = true;
 				node.receiveShadow = true;
 				const myDirectionVector = new THREE.Vector3(team.point[0], team.point[1], team.point[2]);
-				const nodePosition = myDirectionVector.clone().multiplyScalar(43);
+				const nodePosition = myDirectionVector.clone().multiplyScalar(44);
 				node.position.set(nodePosition.x, nodePosition.y, nodePosition.z);
 				let mx = new THREE.Matrix4().lookAt(new THREE.Vector3(0, 0, 0), myDirectionVector, new THREE.Vector3(0, 1, 0));
 				let qt = new THREE.Quaternion().setFromRotationMatrix(mx);
@@ -234,8 +259,8 @@ export default class View {
 
 			scene.add(planetGroup);
 
-			const axes = new THREE.AxisHelper(100);
-			scene.add(axes);
+			//const axes = new THREE.AxisHelper(100);
+			//scene.add(axes);
 
 			renderer = new THREE.WebGLRenderer({alpha: true, antialias: true});
 			renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -425,6 +450,7 @@ export default class View {
 			camera.lookAt(scene.position);
 			const delta = clock.getDelta();
 			planetGroup.rotateY(delta / 40);
+			_this.clouds.rotateY(delta / 100);
 
 			removeParticleSystemsIfNeeded();
 			for (let i = 0; i < _this.arrows.length; i++) {
