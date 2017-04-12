@@ -1,2 +1,2 @@
 DB_HOME="`pwd`"
-./echoserver 1234
+./settings 1234

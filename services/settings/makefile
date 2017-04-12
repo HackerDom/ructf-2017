@@ -1,15 +1,15 @@
 .PHONY: all clean c listing clean-all
 
-cblFiles=echoserver.cbl errnomessage.cbl logerror.cbl logerrorblock.cbl performserverdescriptor.cbl tunesocket.cbl starthandling.cbl processrequest.cbl addsection.cbl addapikey.cbl random.cbl
+cblFiles=settings.cbl errnomessage.cbl logerror.cbl logerrorblock.cbl performserverdescriptor.cbl tunesocket.cbl starthandling.cbl processrequest.cbl addsection.cbl addapikey.cbl random.cbl
 cFiles=get_errno.c utils.c polling.c
 files=${cblFiles} ${cFiles}
 
 genFiles=$(cblFiles:.cbl=.c) $(cblFiles:.cbl=.c.h) $(cblFiles:.cbl=.c.l.h)
 lstFiles=$(cblFiles:.cbl=.lst)
 
-all: echoserver
+all: settings
 
-echoserver: ${files}
+settings: ${files}
 	cobc -x -O2 -W -std=cobol2002 -g $^
 
 c: ${files}
@@ -25,4 +25,4 @@ clean:
 	-rm *.i
 
 clean-all: clean
-	-rm echoserver
+	-rm settings

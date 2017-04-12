@@ -1,4 +1,4 @@
-echoserver
+settings
 
 *.swp
 *.c.l.h
@@ -9,7 +9,7 @@ echoserver
 
 #generated files
 
-echoserver.c
+settings.c
 errnomessage.c
 logerror.c
 logerrorblock.c
