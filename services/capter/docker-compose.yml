@@ -1,51 +1,102 @@
 version: "2"
 services:
-  team1:
+  capter.team1.ructf:
     build: capterca
     restart: unless-stopped
-  team2:
+  capter.team2.ructf:
     extends:
-      service: team1
+      service: capter.team1.ructf
     ports:
       - "8081:8081"
-  team3:
+  capter.team3.ructf:
     extends:
-      service: team1
-  team4:
+      service: capter.team1.ructf
+  capter.team4.ructf:
     extends:
-      service: team1
-  team5:
+      service: capter.team1.ructf
+  capter.team5.ructf:
     extends:
-      service: team1
-  team6:
+      service: capter.team1.ructf
+  capter.team6.ructf:
     extends:
-      service: team1
-  team7:
+      service: capter.team1.ructf
+  capter.team7.ructf:
     extends:
-      service: team1
-  team8:
+      service: capter.team1.ructf
+  capter.team8.ructf:
     extends:
-      service: team1
-  team9:
+      service: capter.team1.ructf
+  capter.team9.ructf:
     extends:
-      service: team1
-  team10:
+      service: capter.team1.ructf
+  capter.team10.ructf:
     extends:
-      service: team1
+      service: capter.team1.ructf
+  capter.team11.ructf:
+    extends:
+      service: capter.team1.ructf
+  capter.team12.ructf:
+    extends:
+      service: capter.team1.ructf
+  capter.team13.ructf:
+    extends:
+      service: capter.team1.ructf
+  capter.team14.ructf:
+    extends:
+      service: capter.team1.ructf
+  capter.team15.ructf:
+    extends:
+      service: capter.team1.ructf
+  capter.team16.ructf:
+    extends:
+      service: capter.team1.ructf
+  capter.team17.ructf:
+    extends:
+      service: capter.team1.ructf
+  capter.team18.ructf:
+    extends:
+      service: capter.team1.ructf
+  capter.team19.ructf:
+    extends:
+      service: capter.team1.ructf
+  capter.team20.ructf:
+    extends:
+      service: capter.team1.ructf
+  capter.team21.ructf:
+    extends:
+      service: capter.team1.ructf
+  capter.team22.ructf:
+    extends:
+      service: capter.team1.ructf
+  capter.team23.ructf:
+    extends:
+      service: capter.team1.ructf
   capter:
     build: capter
     restart: unless-stopped
     ports:
       - "1234:1234"
     depends_on:
-      - team1
-      - team2
-      - team3
-      - team4
-      - team5
-      - team6
-      - team7
-      - team8
-      - team9
-      - team10
-    
+      - capter.team1.ructf
+      - capter.team2.ructf
+      - capter.team3.ructf
+      - capter.team4.ructf
+      - capter.team5.ructf
+      - capter.team6.ructf
+      - capter.team7.ructf
+      - capter.team8.ructf
+      - capter.team9.ructf
+      - capter.team10.ructf
+      - capter.team11.ructf
+      - capter.team12.ructf
+      - capter.team13.ructf
+      - capter.team14.ructf
+      - capter.team15.ructf
+      - capter.team16.ructf
+      - capter.team17.ructf
+      - capter.team18.ructf
+      - capter.team19.ructf
+      - capter.team20.ructf
+      - capter.team21.ructf
+      - capter.team22.ructf
+      - capter.team23.ructf

@@ -98,7 +98,6 @@ func store_get(n int, wg *sync.WaitGroup) {
 
 func main() {
 	var wg sync.WaitGroup
-	wg.Add(1)
 	// store_get(0, &wg)
 	// top(5)
 	for i := 0; i < 1000; i += 50 {
