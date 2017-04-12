@@ -15,10 +15,11 @@
        file section.
          fd keyvalue is external.
          01 ssection.
-           02 name picture x(13).
+           02 name picture x(40).
            02 api-keys occurs 9 times.
-             03 api-key picture x(20).
+             03 api-key picture x(80).
            02 api-keys-count picture 9.
+      *     02 state picture x(40).
 
        working-storage section.
        01 need-more picture 9.
@@ -26,12 +27,12 @@
        linkage section.
        01 argc binary-long unsigned.
        01 argv.
-         02 section-name picture x(13).
-         02 filler picture x(1000).
+         02 section-name picture x(40).
+         02 filler picture x(973).
        01 result.
          02 state picture x(2).
-         02 new-api-key picture x(20).
-         02 filler picture x(1002).
+         02 new-api-key picture x(80).
+         02 filler picture x(942).
        01 result-length binary-long unsigned.
 
        procedure division 
@@ -62,7 +63,6 @@
 
             move 'ok' to state
             move api-key(1) to new-api-key
-            move 22 to result-length.
-
+            move 82 to result-length.
 
        end program add-section.

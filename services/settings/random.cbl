@@ -9,7 +9,7 @@
        data division.
        file section.
          fd random-dev is external.
-         01 buffer picture x(20).
+         01 buffer picture x(80).
        
        working-storage section.
          01 ind picture 99.
@@ -20,13 +20,13 @@
       -                                      'abcdefghijklmnopqrstuvwxyz
       -       'ABCDEFGHIJKLMNOPQRSTUVWYZ'.
        linkage section.
-         01 result picture x(20).
+         01 result picture x(80).
 
        procedure division using result.
        start-rand.
          read random-dev record end-read
          perform 
-           varying ind from 1 by 1 until ind is greater than 20
+           varying ind from 1 by 1 until ind is greater than 80
            move function ord(buffer(ind:1)) to chr
            move function mod(chr, 62) to chr
            add 1 to chr end-add

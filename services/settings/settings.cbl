@@ -16,12 +16,12 @@
        file section.
          fd keyvalue is external.
          01 ssection.
-           02 name picture x(13).
+           02 name picture x(40).
            02 api-keys occurs 9 times.
-             03 api-key picture x(20).
+             03 api-key picture x(80).
            02 api-keys-count picture 9.
          fd random-dev is external.
-         01 buffer picture x(20).
+         01 buffer picture x(80).
 
        working-storage section.
          01 server-descriptor binary-int.

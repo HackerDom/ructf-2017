@@ -15,9 +15,9 @@
        file section.
          fd keyvalue is external.
          01 ssection.
-           02 name picture x(13).
+           02 name picture x(40).
            02 api-keys occurs 9 times.
-             03 api-key picture x(20).
+             03 api-key picture x(80).
            02 api-keys-count picture 9.
 
        working-storage section.
@@ -27,10 +27,10 @@
        linkage section.
        01 argc binary-long unsigned.
        01 argv.
-         02 section-name picture x(13).
-         02 oldkey picture x(20).
-         02 newkey picture x(20).
-         02 filler picture x(980).
+         02 section-name picture x(40).
+         02 oldkey picture x(80).
+         02 newkey picture x(80).
+         02 filler picture x(813).
        01 result.
          02 state picture x(2).
          02 filler picture x(1022).
