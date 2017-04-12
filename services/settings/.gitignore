@@ -5,6 +5,7 @@ echoserver
 *.c.h
 *.i
 *.lst
+*.dat
 
 #generated files
 
@@ -16,3 +17,6 @@ performserverdescriptor.c
 starthandling.c
 tunesocket.c
 processrequest.c
+addapikey.c
+addsection.c
+random.c
