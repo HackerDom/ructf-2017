@@ -1,5 +1,5 @@
 body {
-  background: url(../img/background.jpg) #220347;
+  background: url(../img/background.png) #220347;
   background-size: cover;
 }
 html,
@@ -12,6 +12,8 @@ body,
 #container {
   overflow: hidden;
   position: absolute;
+  left: 18%;
+  width: 82%;
 }
 #svg-viz {
   cursor: move;
@@ -113,27 +115,62 @@ body,
 }
 #stats-container > div {
   bottom: 0;
+  right: 0;
+  left: initial !important;
   top: initial !important;
+  opacity: 0.2 !important;
 }
 #scoreboard-container {
   position: absolute;
-  left: 20px;
-  top: 20px;
-  color: #FFF;
+  left: 30px;
+  top: 50%;
+  transform: translate(0, -50%);
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+}
+#scoreboard-container table {
+  border-spacing: 0;
 }
 #scoreboard-container img {
   width: auto;
+  margin-right: 9px;
+  margin-top: 3px;
 }
 #scoreboard-container tr:nth-child(1) .place {
   background-color: #FFBF1B;
+  color: #220347;
+}
+#scoreboard-container tr:nth-child(1) td:nth-last-child(-n+2) {
+  font-weight: 700;
 }
 #scoreboard-container tr:nth-child(2) .place {
   background-color: #E4E4E4;
+  color: #220347;
+}
+#scoreboard-container tr:nth-child(2) td:nth-last-child(-n+2) {
+  font-weight: 700;
 }
 #scoreboard-container tr:nth-child(3) .place {
   background-color: #EC8F47;
+  color: #220347;
+}
+#scoreboard-container tr:nth-child(3) td:nth-last-child(-n+2) {
+  font-weight: 700;
+}
+#scoreboard-container td:nth-child(3) div {
+  margin-left: 1px;
+  margin-right: 30px;
+}
+#scoreboard-container td:nth-child(4) div {
+  margin-right: 1px;
+}
+#scoreboard-container tr:not(*:last-child) td:nth-last-child(-n+2) {
+  border-bottom: 1px solid #463078;
 }
 #scoreboard-container .place {
+  color: #9284AB;
   border-radius: 100px;
   text-align: center;
+  margin-right: 13px;
 }

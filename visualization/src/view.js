@@ -43,8 +43,8 @@ export default class View {
 		const place_size = Math.max(img_height - 4, 3);
 		for (let i=0; i<this.model.teams.length; i++) {
 			const team = this.model.teams[i];
-			table.append($(`<tr><td><div class="place" style="width:${place_size}px;height:${place_size}px;">${i}</div></td>
-<td><img height='${img_height}' src='${View.getLogo()}'/></td><td></td><td>${View.escape(team.name)}</td><td>${team.score}</td></tr>`));
+			table.append($(`<tr><td><div class="place" style="width:${place_size}px;height:${place_size}px;line-height:${place_size}px;">${i + 1}</div></td>
+<td><img height='${img_height}' width='${img_height}' src='${View.getLogo()}'/></td><td><div>${View.escape(team.name)}</div></td><td><div>${team.score}</div></td></tr>`));
 		}
 		this.scoreboardContainer.append(table);
 	}
@@ -103,9 +103,12 @@ export default class View {
 
 	static getSplinePoints(pos0, pos1) {
 		const result = [pos0];
-		result.push(pos0.clone().normalize().multiplyScalar(46).add(pos1.clone().normalize()));
-		result.push(new THREE.Vector3(0.01, 0, 0).add(pos0).add(pos1).normalize().multiplyScalar(46));
-		result.push(pos1.clone().normalize().multiplyScalar(46).add(pos0.clone().normalize()));
+		const center_vec = new THREE.Vector3(0.01, 0, 0).add(pos0).add(pos1).normalize();
+		result.push(pos0.clone().normalize().multiplyScalar(45).add(pos1.clone().normalize().multiplyScalar(3)).normalize().multiplyScalar(44.5));
+		result.push(pos0.clone().normalize().add(center_vec).normalize().multiplyScalar(46));
+		result.push(center_vec.clone().normalize().multiplyScalar(47));
+		result.push(pos1.clone().normalize().add(center_vec).normalize().multiplyScalar(46));
+		result.push(pos1.clone().normalize().multiplyScalar(45).add(pos0.clone().normalize().multiplyScalar(1)).normalize().multiplyScalar(45.5));
 		result.push(pos1);
 		return result;
 	}
@@ -142,17 +145,17 @@ export default class View {
 
 		const options = {
 			position: new THREE.Vector3(),
-			positionRandomness: 1.1,
+			positionRandomness: 0.5,
 			velocityRandomness: 0.43,
 			colorRandomness: 0,
 			turbulence: 0.5,
-			lifetime: 0.5,
-			size: 12,
+			lifetime: 0.8,
+			size: 8,
 			sizeRandomness: 3
 		};
 
 		const spawnerOptions = {
-			spawnRate: 1000
+			spawnRate: 300
 		};
 
 		this.arrows = [];
@@ -168,9 +171,8 @@ export default class View {
 
 		function init() {
 			camera = new THREE.PerspectiveCamera(55, aspect, 1, 1000);
-			camera.position.set(0, 0, 100);
 
-			const light = new THREE.DirectionalLight(0xdddddd, 1);
+			const light = new THREE.DirectionalLight(0xcccccc, 1);
 			light.position.set(75, 20, 60);
 			light.shadow.mapSize.width = 2048; // default is 512
 			light.shadow.mapSize.height = 2048; // default is 512
@@ -188,6 +190,7 @@ export default class View {
 
 			const planetMaterial = new THREE.MeshPhongMaterial({
 				bumpMap: planetBumpTex,
+				bumpScale: 0.3,
 				map: planetDiffuseTex,
 				specularMap: planetGlossTex,
 			});
@@ -197,21 +200,21 @@ export default class View {
 				transparent : true,
 				depthWrite : false,
 			});
-			const sphere = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40, 3), planetMaterial);
+			const sphere = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40, 4), planetMaterial);
 			_this.clouds = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40.7, 3), cloudMaterial);
 			sphere.castShadow = true;
 			sphere.position.set(0, 0, 0);
 			sphere.receiveShadow = true;
 			_this.clouds.castShadow = false;
 			_this.clouds.position.set(0, 0, 0);
-			_this.clouds.receiveShadow = true;
+			_this.clouds.receiveShadow = false;
 			planetGroup.add(sphere);
 			planetGroup.add(_this.clouds);
 
 			const customMaterial = new THREE.MeshBasicMaterial(
 				{
 					opacity : 0.2,
-					color: 0xD790CF,
+					color: 0xd65ec8,
 					side: THREE.FrontSide,
 					transparent: true
 				}
@@ -428,7 +431,7 @@ export default class View {
 		function removeParticleSystemsIfNeeded() {
 			const now = new Date().getTime();
 			_this.arrows = _this.arrows.filter(function(a) {
-				if(now - a.creationTime < 3 * 1000)
+				if(now - a.creationTime < 4 * 1000)
 					return true;
 				planetGroup.remove(a.particleSystem);
 				a.particleSystem.dispose();
@@ -457,7 +460,7 @@ export default class View {
 				const arrow = _this.arrows[i];
 				if (delta > 0) {
 					options.color = arrow.color.getHex();
-					const steps = 3;
+					const steps = 8;
 					for (let step = 0; step < steps; step++) {
 						arrow.timer += delta / 3 / steps;
 						options.position = arrow.spline.getPoint(arrow.timer);

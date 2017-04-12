@@ -1,6 +1,6 @@
 import _ from "underscore";
 
-const COLOR_CONSTANTS = ["#ED953A", "#E5BD1F", "#3FE1D6", "#568AFF", "#8C41DA", "#BA329E"];
+const COLOR_CONSTANTS = ["#9549E4", "#1E31FF", "#7CDFD8", "#3FD637", "#E2C551", "#D85D40"];
 const SERVICES_COUNT = 6;
 
 export class GameModel {
