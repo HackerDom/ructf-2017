@@ -19,7 +19,7 @@
            02 api-keys occurs 9 times.
              03 api-key picture x(80).
            02 api-keys-count picture 9.
-      *     02 state picture x(40).
+           02 state picture x(40).
 
        working-storage section.
        01 need-more picture 9.
@@ -30,7 +30,7 @@
          02 section-name picture x(40).
          02 filler picture x(973).
        01 result.
-         02 state picture x(2).
+         02 rcode picture x(2).
          02 new-api-key picture x(80).
          02 filler picture x(942).
        01 result-length binary-long unsigned.
@@ -39,7 +39,7 @@
          using argc, argv, result, result-length 
          returning need-more.
        start-add-section.
-            if argc is less than 13
+            if argc is less than 40
               move 1 to need-more
               goback
             else
@@ -51,7 +51,7 @@
             call 'random-string' using by reference api-key(1) end-call
             write ssection
               invalid key
-                move 'fl' to state
+                move 'fl' to rcode
                 move 2 to result-length
                 goback
             end-write
@@ -61,7 +61,7 @@
       *        returning omitted
       *      end-call
 
-            move 'ok' to state
+            move 'ok' to rcode
             move api-key(1) to new-api-key
             move 82 to result-length.
 

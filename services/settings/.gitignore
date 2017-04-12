@@ -19,4 +19,5 @@ tunesocket.c
 processrequest.c
 addapikey.c
 addsection.c
+fixsection.c
 random.c

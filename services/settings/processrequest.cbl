@@ -38,7 +38,10 @@
               by reference write-buffer
               by reference output-length
               returning need-more
-              on exception display 'bad command ' command end-display
+              on exception
+                move 'uc' to write-buffer
+                move 2 to output-length
+                move 0 to need-more
             end-call
 
             if need-more is greater than zero
