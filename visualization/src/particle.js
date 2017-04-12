@@ -38,52 +38,6 @@ export const GPUParticleSystem = function(options) {
 
 		vertexShader: [
 
-			'precision highp float;',
-			'const vec4 bitSh = vec4(256. * 256. * 256., 256. * 256., 256., 1.);',
-			'const vec4 bitMsk = vec4(0.,vec3(1./256.0));',
-			'const vec4 bitShifts = vec4(1.) / bitSh;',
-
-			'#define FLOAT_MAX	1.70141184e38',
-			'#define FLOAT_MIN	1.17549435e-38',
-
-			'lowp vec4 encode_float(highp float v) {',
-			'highp float av = abs(v);',
-
-			'//Handle special cases',
-			'if(av < FLOAT_MIN) {',
-			'return vec4(0.0, 0.0, 0.0, 0.0);',
-			'} else if(v > FLOAT_MAX) {',
-			'return vec4(127.0, 128.0, 0.0, 0.0) / 255.0;',
-			'} else if(v < -FLOAT_MAX) {',
-			'return vec4(255.0, 128.0, 0.0, 0.0) / 255.0;',
-			'}',
-
-			'highp vec4 c = vec4(0,0,0,0);',
-
-			'//Compute exponent and mantissa',
-			'highp float e = floor(log2(av));',
-			'highp float m = av * pow(2.0, -e) - 1.0;',
-
-			//Unpack mantissa
-			'c[1] = floor(128.0 * m);',
-			'm -= c[1] / 128.0;',
-			'c[2] = floor(32768.0 * m);',
-			'm -= c[2] / 32768.0;',
-			'c[3] = floor(8388608.0 * m);',
-
-			'//Unpack exponent',
-			'highp float ebias = e + 127.0;',
-			'c[0] = floor(ebias / 2.0);',
-			'ebias -= c[0] * 2.0;',
-			'c[1] += floor(ebias) * 128.0;',
-
-			'//Unpack sign bit',
-			'c[0] += 128.0 * step(0.0, -v);',
-
-			'//Scale back to range',
-			'return c / 255.0;',
-			'}',
-
 			'uniform float uTime;',
 			'uniform float uScale;',
 
@@ -97,10 +51,6 @@ export const GPUParticleSystem = function(options) {
 			'void main() {',
 
 			'vColor = particleColor / 255.0;',
-			'// convert our velocity back into a value we can use',
-			'vec4 velTurb = encode_float( particleVelColSizeLife.x );',
-			'vec3 velocity = vec3( velTurb.xyz );',
-			'float turbulence = velTurb.w;',
 
 			'vec3 newPosition;',
 
@@ -111,14 +61,6 @@ export const GPUParticleSystem = function(options) {
 			'gl_PointSize = ( uScale * particleVelColSizeLife.z ) * lifeLeft;',
 
 			'newPosition = particlePositionsStartTime.xyz;',
-
-			'if( velocity.y > 0. && velocity.y < .05 ) {',
-			'lifeLeft = 0.;',
-			'}',
-
-			'if( velocity.x < -1.45 ) {',
-			'lifeLeft = 0.;',
-			'}',
 
 			'if( timeElapsed > 0. ) {',
 			'gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );',
@@ -324,23 +266,8 @@ export const GPUParticleContainer = function(maxParticles, particleSystem) {
 
 	for (var i = 0; i < self.PARTICLE_COUNT; i++) {
 		self.particlePositionsStartTime[i * 4 + 0] = 100; //x
-		self.particlePositionsStartTime[i * 4 + 1] = 0; //y
-		self.particlePositionsStartTime[i * 4 + 2] = 0.0; //z
-		self.particlePositionsStartTime[i * 4 + 3] = 0.0; //startTime
 
-		self.particleVertices[i * 3 + 0] = 0; //x
-		self.particleVertices[i * 3 + 1] = 0; //y
-		self.particleVertices[i * 3 + 2] = 0.0; //z
-
-		self.particleVelColSizeLife[i * 4 + 0] = decodeFloat(128, 128, 0, 0); //vel
-		self.particleVelColSizeLife[i * 4 + 1] = 0;
 		self.particleVelColSizeLife[i * 4 + 2] = 1.0; //size
-		self.particleVelColSizeLife[i * 4 + 3] = 0.0; //lifespan
-
-		self.particleColor[i * 4 + 0] = 0;
-		self.particleColor[i * 4 + 1] = 0;
-		self.particleColor[i * 4 + 2] = 0;
-		self.particleColor[i * 4 + 3] = 0;
 	}
 
 	self.particleShaderGeo.addAttribute('position', new THREE.BufferAttribute(self.particleVertices, 3));
@@ -409,20 +336,6 @@ export const GPUParticleContainer = function(maxParticles, particleSystem) {
 			self.posStart.array[i * 4 + 1] += -(velocity.y * particleSystem.random()); //y
 			self.posStart.array[i * 4 + 2] += -(velocity.z * particleSystem.random()); //z
 		}
-
-		var velX = velocity.x + (particleSystem.random()) * velocityRandomness;
-		var velY = velocity.y + (particleSystem.random()) * velocityRandomness;
-		var velZ = velocity.z + (particleSystem.random()) * velocityRandomness;
-
-		// convert turbulence rating to something we can pack into a vec4
-		var turbulence = Math.floor(turbulence * 254);
-
-		// clamp our value to between 0. and 1.
-		velX = Math.floor(maxSource * ((velX - -maxVel) / (maxVel - -maxVel)));
-		velY = Math.floor(maxSource * ((velY - -maxVel) / (maxVel - -maxVel)));
-		velZ = Math.floor(maxSource * ((velZ - -maxVel) / (maxVel - -maxVel)));
-
-		self.velCol.array[i * 4 + 0] = decodeFloat(velX, velY, velZ, turbulence); //vel
 
 		const rgb = hexToRgb(color);
 		self.color.array[i * 4 + 0] = rgb[0];

@@ -1,6 +1,7 @@
 import $ from "jquery";
 import md5 from "md5";
 import * as THREE from "three";
+import station from "./station";
 import * as THREE_particle from "./particle";
 import Stats from "stats.js";
 
@@ -85,7 +86,7 @@ export default class View {
 
 	createArrow(points, color) {
 		const particleSystem = new THREE_particle.GPUParticleSystem({
-			maxParticles: 10000,
+			maxParticles: 1500,
 			particleSpriteTex: this.particleSpriteTex
 		});
 		const spline = new THREE.CatmullRomCurve3(points);
@@ -136,23 +137,21 @@ export default class View {
 		const planetGlossTex = textureLoader.load("static/img/planet/Gloss.jpg");
 
 		const stationBumpTex = textureLoader.load("static/img/station/Bump.png");
-		const stationDiffuseTex = textureLoader.load("static/img/station/Diffuse.png");
-		const stationOpacityTex = textureLoader.load("static/img/station/Opacity.png");
-		const stationSelfIlluminationTex = textureLoader.load("static/img/station/Self-Illumination.png");
+		const stationDiffuseTex = textureLoader.load("static/img/station/Diffuse.jpg");
 
 		const options = {
 			position: new THREE.Vector3(),
-			positionRandomness: 1.2,
+			positionRandomness: 1.1,
 			velocityRandomness: 0.43,
 			colorRandomness: 0,
 			turbulence: 0.5,
 			lifetime: 0.5,
-			size: 6,
+			size: 10,
 			sizeRandomness: 3
 		};
 
 		const spawnerOptions = {
-			spawnRate: 4000
+			spawnRate: 1000
 		};
 
 		this.arrows = [];
@@ -172,13 +171,13 @@ export default class View {
 
 			const light = new THREE.DirectionalLight(0xdfebff, 1);
 			light.position.set(75, 20, 60);
-			light.shadow.mapSize.width = 2048; // default is 512
-			light.shadow.mapSize.height = 2048; // default is 512
+			light.shadow.mapSize.width = 1024; // default is 512
+			light.shadow.mapSize.height = 1024; // default is 512
 			light.castShadow = true;
-			light.shadow.camera.left = -50;
-			light.shadow.camera.right = 50;
-			light.shadow.camera.top = 50;
-			light.shadow.camera.bottom = -50;
+			light.shadow.camera.left = -48;
+			light.shadow.camera.right = 48;
+			light.shadow.camera.top = 48;
+			light.shadow.camera.bottom = -48;
 			light.shadowCameraHelper = new THREE.CameraHelper(light.shadow.camera);
 			scene.add(light);
 			scene.add(light.shadowCameraHelper);
@@ -191,7 +190,7 @@ export default class View {
 				map: planetDiffuseTex,
 				specularMap: planetGlossTex,
 			});
-			const sphere = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40, 4), planetMaterial);
+			const sphere = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40, 3), planetMaterial);
 			sphere.castShadow = true;
 			sphere.position.set(0, 0, 0);
 			sphere.receiveShadow = true;
@@ -200,40 +199,38 @@ export default class View {
 			calculateNodesPositions();
 
 			const loader = new THREE.JSONLoader();
-			loader.load( 'static/img/station/station.json', function ( geometry, materials ) {
-				for (let i = 0; i < teams.length; i++) {
-					const team = teams[i];
-					const material = materials[0];
-					material.map = stationDiffuseTex;
-					material.bumpMap = stationBumpTex;
-					material.emissiveMap = stationSelfIlluminationTex;
-					const node = new THREE.Mesh( geometry, material );
-					node.scale.set( 1.2, 1.2, 1.2 );
-					node.castShadow = true;
-					node.receiveShadow = true;
-					const myDirectionVector = new THREE.Vector3(team.point[0], team.point[1], team.point[2]);
-					const nodePosition = myDirectionVector.clone().multiplyScalar(43);
-					node.position.set(nodePosition.x, nodePosition.y, nodePosition.z);
-					let mx = new THREE.Matrix4().lookAt(new THREE.Vector3(0, 0, 0), myDirectionVector, new THREE.Vector3(0, 1, 0));
-					let qt = new THREE.Quaternion().setFromRotationMatrix(mx);
-					node.rotateY((90 * Math.PI)/180);
-					node.quaternion.copy(qt);
-					team.node = node;
-					team.pos = nodePosition;
-					planetGroup.add(node);
+			const {geometry, materials} = loader.parse(station, "");
+			for (let i = 0; i < teams.length; i++) {
+				const team = teams[i];
+				const material = materials[0];
+				material.map = stationDiffuseTex;
+				material.bumpMap = stationBumpTex;
+				const node = new THREE.Mesh( geometry, material );
+				node.scale.set( 1.2, 1.2, 1.2 );
+				node.castShadow = true;
+				node.receiveShadow = true;
+				const myDirectionVector = new THREE.Vector3(team.point[0], team.point[1], team.point[2]);
+				const nodePosition = myDirectionVector.clone().multiplyScalar(43);
+				node.position.set(nodePosition.x, nodePosition.y, nodePosition.z);
+				let mx = new THREE.Matrix4().lookAt(new THREE.Vector3(0, 0, 0), myDirectionVector, new THREE.Vector3(0, 1, 0));
+				let qt = new THREE.Quaternion().setFromRotationMatrix(mx);
+				node.rotateY((90 * Math.PI)/180);
+				node.quaternion.copy(qt);
+				team.node = node;
+				team.pos = nodePosition;
+				planetGroup.add(node);
 
-					const sprite = makeTextSprite(" " + team.name + " ",
-						{
-							fontsize: 48,
-							borderColor: {r: 255, g: 0, b: 0, a: 1.0},
-							backgroundColor: {r: 255, g: 100, b: 100, a: 0.8}
-						});
-					const spritePosition = myDirectionVector.clone().multiplyScalar(52);
-					sprite.position.set(spritePosition.x, spritePosition.y, spritePosition.z);
-					teams[i].sprite = sprite;
-					planetGroup.add(sprite);
-				}
-			});
+				const sprite = makeTextSprite(" " + team.name + " ",
+					{
+						fontsize: 48,
+						borderColor: {r: 255, g: 0, b: 0, a: 1.0},
+						backgroundColor: {r: 255, g: 100, b: 100, a: 0.8}
+					});
+				const spritePosition = myDirectionVector.clone().multiplyScalar(52);
+				sprite.position.set(spritePosition.x, spritePosition.y, spritePosition.z);
+				teams[i].sprite = sprite;
+				planetGroup.add(sprite);
+			}
 
 			scene.add(planetGroup);
 
@@ -262,73 +259,6 @@ export default class View {
 				nodes_points = nodes_points.slice(0, teams.length);
 			for(let i=0; i<nodes_points.length; i++)
 				teams[i].point = nodes_points[i];
-		}
-
-		function genNode() {
-			const geometry = new THREE.Geometry();
-			const ISLAND_WIDTH = 8;
-			const ISLAND_HEIGHT = ISLAND_WIDTH * 0.866; // sqrt(3)/2
-			const fig = [{x: ISLAND_WIDTH / 4 , y: 0},
-				{x: ISLAND_WIDTH * 3 / 4, y: 0},
-				{x: ISLAND_WIDTH, y: ISLAND_HEIGHT / 2},
-				{x: ISLAND_WIDTH * 3 / 4, y: ISLAND_HEIGHT},
-				{x: ISLAND_WIDTH / 4 , y: ISLAND_HEIGHT},
-				{x: 0, y: ISLAND_HEIGHT / 2}];
-			for (let i=0; i<fig.length; i++)
-				geometry.vertices.push(new THREE.Vector3(fig[i].x - ISLAND_WIDTH / 2, fig[i].y - ISLAND_HEIGHT / 2, -1));
-			for (let i=0; i<fig.length; i++)
-				geometry.vertices.push(new THREE.Vector3(fig[i].x  - ISLAND_WIDTH / 2, fig[i].y - ISLAND_HEIGHT / 2, 1));
-			const faces1 = [[0,5,1],[1,3,2],[3,5,4],[1,5,3]];
-			const faces2 = [[0,1,5],[1,2,3],[3,4,5],[1,3,5]];
-			for (let i=0; i<faces1.length; i++)
-				geometry.faces.push(new THREE.Face3(faces1[i][0], faces1[i][1], faces1[i][2]));
-			for (let i=0; i<faces2.length; i++)
-				geometry.faces.push(new THREE.Face3(faces2[i][0] + 6, faces2[i][1] + 6, faces2[i][2] + 6));
-			const borders = [[0,7,6],[1,8,7],[2,9,8],[3,10,9],[4,11,10],[5,6,11],
-				[0,1,7],[1,2,8],[2,3,9],[3,4,10],[4,5,11],[5,0,6]];
-			for (let i=0; i<borders.length; i++)
-				geometry.faces.push(new THREE.Face3(borders[i][0], borders[i][1], borders[i][2]));
-			geometry.computeVertexNormals();
-			const stationMaterial = new THREE.MeshPhongMaterial({
-				bumpMap: stationBumpTex,
-				map: stationDiffuseTex,
-				//alphaMap: stationOpacityTex,
-				//emissiveMap: stationSelfIlluminationTex,
-			});
-			return new THREE.Mesh(geometry, stationMaterial);
-		}
-
-		function genPlane() {
-			const geometry = new THREE.Geometry();
-			const ISLAND_WIDTH = 8;
-			const ISLAND_HEIGHT = ISLAND_WIDTH * 0.866; // sqrt(3)/2
-			const fig = [{x: ISLAND_WIDTH / 4 , y: 0},
-				{x: ISLAND_WIDTH * 3 / 4, y: 0},
-				{x: ISLAND_WIDTH, y: ISLAND_HEIGHT / 2},
-				{x: ISLAND_WIDTH * 3 / 4, y: ISLAND_HEIGHT},
-				{x: ISLAND_WIDTH / 4 , y: ISLAND_HEIGHT},
-				{x: 0, y: ISLAND_HEIGHT / 2}];
-			for (let i=0; i<fig.length; i++)
-				geometry.vertices.push(new THREE.Vector3(fig[i].x - ISLAND_WIDTH / 2, fig[i].y - ISLAND_HEIGHT / 2, -1));
-			for (let i=0; i<fig.length; i++)
-				geometry.vertices.push(new THREE.Vector3(fig[i].x  - ISLAND_WIDTH / 2, fig[i].y - ISLAND_HEIGHT / 2, 1));
-			const faces1 = [[0,5,1],[1,3,2],[3,5,4],[1,5,3]];
-			const faces2 = [[0,1,5],[1,2,3],[3,4,5],[1,3,5]];
-			for (let i=0; i<faces1.length; i++)
-				geometry.faces.push(new THREE.Face3(faces1[i][0], faces1[i][1], faces1[i][2]));
-			for (let i=0; i<faces2.length; i++)
-				geometry.faces.push(new THREE.Face3(faces2[i][0] + 6, faces2[i][1] + 6, faces2[i][2] + 6));
-			const borders = [[0,7,6],[1,8,7],[2,9,8],[3,10,9],[4,11,10],[5,6,11],
-				[0,1,7],[1,2,8],[2,3,9],[3,4,10],[4,5,11],[5,0,6]];
-			for (let i=0; i<borders.length; i++)
-				geometry.faces.push(new THREE.Face3(borders[i][0], borders[i][1], borders[i][2]));
-			geometry.computeVertexNormals();
-			const stationMaterial = new THREE.MeshPhongMaterial({
-				bumpMap: stationBumpTex,
-				map: stationDiffuseTex,
-				alphaMap: stationOpacityTex,
-				emissiveMap: stationSelfIlluminationTex,
-			});
 		}
 
 		function fibonacci_sphere(samples) { // http://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere
@@ -494,7 +424,7 @@ export default class View {
 			camera.position.z = 100 * Math.sin(phi) * Math.sin(theta);
 			camera.lookAt(scene.position);
 			const delta = clock.getDelta();
-			planetGroup.rotateY(delta / 10);
+			planetGroup.rotateY(delta / 40);
 
 			removeParticleSystemsIfNeeded();
 			for (let i = 0; i < _this.arrows.length; i++) {
