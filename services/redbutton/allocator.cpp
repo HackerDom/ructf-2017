@@ -20,7 +20,7 @@ struct Chunk
 
 Chunk* g_freeChunksList;
 Chunk* g_curChunk;
-const size_t SIZE = 16 * 1024 * 1024;
+const size_t SIZE = 1 * 1024 * 1024;
 uint8_t* g_memory;
 uint8_t* g_memoryEnd;
 

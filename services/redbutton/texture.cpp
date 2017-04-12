@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <png.h>
 #include "glwrap.h"
+#include "allocator.h"
 
 
 //
@@ -106,9 +107,6 @@ Texture2D::Texture2D( const void* pngData, uint32_t size )
 	if( color_type == PNG_COLOR_TYPE_RGB )
 		png_set_filler( png, 255, PNG_FILLER_AFTER );
 
-	if( color_type == PNG_COLOR_TYPE_RGB_ALPHA )
-		printf( "PNG_COLOR_TYPE_RGB_ALPHA\n");
-
 	png_read_update_info( png, info );
 
     Init( width, height, FORMAT_RGBA, nullptr );
@@ -145,7 +143,7 @@ Texture2D::~Texture2D()
 	glDeleteFramebuffers( 1, &m_framebuffer );
 	m_texture = 0;
 	m_framebuffer = 0;
-	delete[] m_shadowCopy;
+    Free( m_shadowCopy );
 }
 
 
@@ -181,7 +179,7 @@ bool Texture2D::Init(int width, int height, Format format, void* initData)
         return false;
     }
 
-    m_shadowCopy = new RGBA[ width * height ];
+    m_shadowCopy = ( RGBA* )Allocate( width * height * sizeof( RGBA ) );
     if( initData )
         memcpy( m_shadowCopy, initData, width * height * sizeof( RGBA ) );
 

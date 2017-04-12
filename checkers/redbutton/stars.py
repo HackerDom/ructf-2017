@@ -5,9 +5,6 @@ from random import random
 import numpy
 import math
 
-W = 256
-H = 256
-
 def rough_line(canvas, x1, y1, x2, y2):
 	x1 = int(x1)
 	y1 = int(y1)
@@ -42,7 +39,7 @@ def rough_line(canvas, x1, y1, x2, y2):
 			y += ystep
 			error += dx
 
-def place_stars(canvas):
+def place_stars(canvas, W, H):
 	seed = urandom(W * H + 1)
 
 	for x in range(W):
@@ -85,7 +82,7 @@ def hits(box1, box2):
 def offset(box, origin):
 	return (box[0] + origin[0], box[1] + origin[1], box[2] + origin[0], box[3] + origin[1])
 
-def place_crosses(canvas, color, l1, l2, angle, count):
+def place_crosses(canvas, W, H, color, l1, l2, angle, count):
 	boxes = []
 
 	for i in range(count):
@@ -123,12 +120,12 @@ def place_crosses(canvas, color, l1, l2, angle, count):
 
 
 
-def generate_image(color, l1, l2, angle, count):
+def generate_image(W, H, color, l1, l2, angle, count):
 	canvas = PNGCanvas(W, H, color = (0, 0, 0, 0xff))
 
 	canvas.filled_rectangle(0, 0, W - 1, H - 1)
 
-	place_stars(canvas)
-	place_crosses(canvas, color, l1, l2, angle, count)
+	place_stars(canvas, W, H)
+	place_crosses(canvas, W, H, color, l1, l2, angle, count)
 
 	return canvas.dump()

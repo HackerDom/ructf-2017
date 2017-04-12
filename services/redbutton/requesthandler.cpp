@@ -1,6 +1,7 @@
 #include "requesthandler.h"
 #include "glwrap.h"
 #include "spin_lock.h"
+#include "allocator.h"
 
 #include <string.h>
 
@@ -29,7 +30,7 @@ Context GetContext()
 		if (g_contexts[i].thread == tid)
 		{
 			ctx = g_contexts[i].context;
-			printf( ":: old thread %lx ctx %x\n", tid, *(uint32_t *)&ctx );
+			printf( ":: old thread %lx ctx %d\n", tid, i );
 			found = true;
 			break;
 		}
@@ -43,7 +44,7 @@ Context GetContext()
 			{
 				g_contexts[i].thread = tid;
 				ctx = g_contexts[i].context;
-				printf( ":: new thread %lx ctx %x\n", tid, *(uint32_t *)&ctx );
+				printf( ":: new thread %lx ctx %d\n", tid, i );
 				found = true;
 				break;
 			}
@@ -52,7 +53,7 @@ Context GetContext()
 
 	if (!found)
 	{
-		printf(":: FUCK\n");
+		printf(":: NO AVAILABLE CONTEXT\n");
 		exit(1);
 	}
 
@@ -183,7 +184,7 @@ void AddDetectorProcessor::FinalizeRequest()
 	uuid id;
 	uuid_generate(id.bytes);
 
-	printf(":: adding detector: %ld, %.*s\n", dataSize, (int)dataSize, data);
+	printf(":: adding detector: %ld\n", dataSize );
 
 	detectors->AddDetector(id, data, dataSize);
 
@@ -298,8 +299,17 @@ void CheckDetectorProcessor::FinalizeRequest()
 					};
 
 
+	PrintMap();
 
 	Texture2D texture( data, dataSize );
+#if 0 
+	save_png( "input.png", texture.GetRGBA(), texture.GetWidth(), texture.GetHeight() );
+	{
+		FILE* f = fopen( "flag.bin", "w" );
+		fwrite( (const void *)detector->data, (uint32_t)detector->length, 1, f );
+		fclose( f );
+	}
+#endif
 
     VertexShader vs( "shaders/simple.vert", false );
     FragmentShader fs( (const void *)detector->data, (uint32_t)detector->length );
@@ -333,6 +343,15 @@ void CheckDetectorProcessor::FinalizeRequest()
 
     char *responseData = (char *)target.GetRGBA();
 
+#if 0
+    for( int i = 0; i < w * h; i++ ){
+    		printf( "%02X%02X%02X%02X", target.GetRGBA()[ i ].r, target.GetRGBA()[ i ].g, 
+            target.GetRGBA()[ i ].b, 
+            target.GetRGBA()[ i ].a );
+    }
+    printf("\n");
+#endif
+
     if (responseData && responseData[0])
     {
     	char *dataCopy = new char[w * h * 4];
@@ -342,7 +361,7 @@ void CheckDetectorProcessor::FinalizeRequest()
 		Complete(HttpResponse(MHD_HTTP_OK, dataCopy, w * h * 4));
     }
     else
-    {
+    {  
     	printf(":: returning empty response\n");
 		Complete(HttpResponse(MHD_HTTP_OK));
 	}

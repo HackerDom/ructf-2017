@@ -75,9 +75,6 @@ bool read_png( const char* file_name, Image& image )
 	if( color_type == PNG_COLOR_TYPE_RGB )
 		png_set_filler( png, 255, PNG_FILLER_AFTER );
 
-	if( color_type == PNG_COLOR_TYPE_RGB_ALPHA )
-		printf( "PNG_COLOR_TYPE_RGB_ALPHA\n");
-
 	png_read_update_info( png, info );
 	image.rgba = new RGBA[ image.width * image.height ];
 	RGBA* rows[ height ];
