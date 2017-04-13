@@ -26,7 +26,6 @@
            02 api-keys occurs 9 times.
              03 api-key picture x(80).
            02 api-keys-count picture 9.
-           02 state picture x(40).
 
          fd settings-db is external.
          01 setting-record.
@@ -91,6 +90,11 @@
            move param-name to sparam-name
            start settings-db 
              key is greater than composite-key
+             invalid key
+               move 'ok' to rcode
+               move zero to result-count
+               move 3 to result-length
+               goback
            end-start
 
            move 'ok' to rcode

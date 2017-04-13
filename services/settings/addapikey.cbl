@@ -19,7 +19,6 @@
            02 api-keys occurs 9 times.
              03 api-key picture x(80).
            02 api-keys-count picture 9.
-           02 state picture x(40).
 
        working-storage section.
          01 need-more picture 9.

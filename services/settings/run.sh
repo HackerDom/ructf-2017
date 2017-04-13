@@ -1,2 +1,2 @@
 DB_HOME="`pwd`"
-./settings 1234
+./settings 1234 < /dev/zero

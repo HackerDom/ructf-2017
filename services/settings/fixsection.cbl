@@ -26,7 +26,6 @@
            02 api-keys occurs 9 times.
              03 api-key picture x(80).
            02 api-keys-count picture 9.
-           02 state picture x(40).
 
          fd settings-db is external.
          01 setting-record.

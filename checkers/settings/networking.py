@@ -12,16 +12,28 @@ def get_bytes(s, length):
 		res += b' ' * (length - len(res))
 	return res
 
+def get_method(method):
+	return get_bytes(method, 11)
+
 def get_section_name(section_name):
 	return get_bytes(section_name, 40)
 
 def get_api_key(api_key):
 	return get_bytes(api_key, 80)
 
-def get_patch(patch):
+def get_start(start):
+	return get_bytes(stary, 87)
+
+def get_patch_bytes(patch):
 	res = str(len(patch)).encode(encoding='ascii')
 	for k, v in patch:
-		res += get_bytes(k, 40) + get_bytes(v, 87)
+		res += k + v
+	return res
+
+def get_patch(patch):
+	res = []
+	for k, v in patch:
+		res.append((get_bytes(k, 40), get_bytes(v, 87)))
 	return res
 
 class State:
@@ -33,9 +45,11 @@ class State:
 	def __del__(self):
 		self.socket.shutdown(socket.SHUT_RDWR)
 		self.socket.close()
-	def send(self, message):
+	def send(self, method, message):
 		try:
-			self.socket.sendall(message)
+			if type(method) is str:
+				method = get_method(method)
+			self.socket.sendall(method + message)
 		except ex:
 			checker.down(error="can't send data. {}".format(message), exception=ex)
 	def recv(self, length):
@@ -50,11 +64,13 @@ class State:
 		status = self.recv(2).decode(encoding='ascii', errors='ignore')
 		if status != 'ok':
 			checker.corrupt(error="unexpexted status '{}' while {}".format(status, method))
+	def send_checked(self, method, message):
+		self.send(method, message)
+		self.ensure_ok(method)
 	def create_section(self, section_name):
 		if type(section_name) == str:
 			section_name = get_section_name(section_name)
-		self.send(b'add-section' + section_name)
-		self.ensure_ok('add-section')
+		self.send_checked('add-section', section_name)
 		return self.recv(80)
 	def add_apikey(self, section_name, old_key, new_key):
 		if type(section_name) == str:
@@ -63,14 +79,42 @@ class State:
 			old_key = get_api_key(old_key)
 		if type(new_key) == str:
 			new_key = get_api_key(new_key)
-		self.send(b'add-apikey ' + section_name + old_key + new_key)
-		self.ensure_ok('add-apikey')
+		self.send_checked('add-apikey', section_name + old_key + new_key)
 	def fix_section(self, section_name, apikey, patch):
 		if type(section_name) == str:
 			section_name = get_section_name(section_name)
 		if type(apikey) == str:
 			apikey = get_api_key(apikey)
-		if type(patch) == list:
-			patch = get_patch(patch)
-		self.send(b'fix-section' + section_name + apikey + patch)
-		self.ensure_ok('fix-section')
+		patch = get_patch(patch)
+		self.send_checked('fix-section', section_name + apikey + get_patch_bytes(patch))
+		return patch
+	def recv_pair(self):
+		key = self.recv(40)
+		value = self.recv(87)
+		return (key, value)
+	def get_section(self, section_name, apikey, start=None):
+		if type(section_name) == str:
+			section_name = get_section_name(section_name)
+		if type(apikey) == str:
+			apikey = get_api_key(apikey)
+		if start is None:
+			start = bytes([0] * 87)
+		if type(start) == str:
+			start = get_bytes(start, 87)
+		self.send_checked('get-section', section_name + apikey + start)
+		res_length = self.recv(1).decode(encoding='ascii')
+		if not res_length.isdigit():
+			checker.mumble(error="count is not digit '{}'".format(res_length))
+		res = []
+		for i in range(int(res_length)):
+			el = self.recv_pair()
+			res.append(el)
+		return res
+	def get_full_section(self, section_name, apikey):
+		res = {}
+		r = self.get_section(section_name, apikey)
+		while len(r) > 0:
+			for k, v in r:
+				res[bytes(k)] = v
+			r = self.get_section(section_name, apikey, r[-1][0])
+		return res
