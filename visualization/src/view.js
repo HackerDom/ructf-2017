@@ -82,7 +82,7 @@ export default class View {
 			return;
 		const posFrom = arrowData.from.pos.clone();
 		const posTo = arrowData.to.pos.clone();
-		const spline_points = View.getSplinePoints(posFrom.normalize().multiplyScalar(43), posTo.normalize().multiplyScalar(43));
+		const spline_points = View.getSplinePoints(posFrom.normalize().multiplyScalar(44), posTo.normalize().multiplyScalar(44));
 		this.createArrow(spline_points, arrowData.svc.color);
 	}
 
@@ -458,19 +458,23 @@ export default class View {
 			_this.clouds.rotateY(delta / 100);
 
 			removeParticleSystemsIfNeeded();
+			const now = new Date().getTime();
 			for (let i = 0; i < _this.arrows.length; i++) {
 				const arrow = _this.arrows[i];
-				if (delta > 0) {
-					options.color = arrow.color.getHex();
-					const steps = 8;
-					for (let step = 0; step < steps; step++) {
-						arrow.timer += delta / 3 / steps;
-						options.position = arrow.spline.getPoint(arrow.timer);
-						for (let x = 0; x < spawnerOptions.spawnRate * delta / steps; x++) {
-							arrow.particleSystem.spawnParticle(options);
+				if (now - arrow.creationTime < 3 * 1000) {
+					if (delta > 0) {
+						options.color = arrow.color.getHex();
+						const steps = 8;
+						for (let step = 0; step < steps; step++) {
+							arrow.timer += delta / 3 / steps;
+							options.position = arrow.spline.getPoint(arrow.timer);
+							for (let x = 0; x < spawnerOptions.spawnRate * delta / steps; x++) {
+								arrow.particleSystem.spawnParticle(options);
+							}
 						}
 					}
-				}
+				} else
+					arrow.timer += delta / 3;
 				arrow.particleSystem.update(arrow.timer);
 			}
 

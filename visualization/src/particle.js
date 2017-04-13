@@ -49,26 +49,11 @@ export const GPUParticleSystem = function(options) {
 			'varying float lifeLeft;',
 
 			'void main() {',
-
-			'vColor = particleColor / 255.0;',
-
-			'vec3 newPosition;',
-
-			'float timeElapsed = uTime - particlePositionsStartTime.a;',
-
-			'lifeLeft = 1. - (timeElapsed / particleVelColSizeLife.w);',
-
-			'gl_PointSize = ( uScale * particleVelColSizeLife.z ) * lifeLeft;',
-
-			'newPosition = particlePositionsStartTime.xyz;',
-
-			'if( timeElapsed > 0. ) {',
-			'gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );',
-			'} else {',
-			'gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
-			'lifeLeft = 0.;',
-			'gl_PointSize = 0.;',
-			'}',
+				'vColor = particleColor / 255.0;',
+				'float timeElapsed = uTime - particlePositionsStartTime.a;',
+				'lifeLeft = 1. - (timeElapsed / particleVelColSizeLife.w);',
+				'gl_PointSize = ( uScale * particleVelColSizeLife.z ) * lifeLeft;',
+				'gl_Position = projectionMatrix * modelViewMatrix * vec4( particlePositionsStartTime.xyz, 1.0 );',
 			'}'
 
 		].join("\n"),
@@ -76,31 +61,25 @@ export const GPUParticleSystem = function(options) {
 		fragmentShader: [
 
 			'float scaleLinear(float value, vec2 valueDomain) {',
-			'return (value - valueDomain.x) / (valueDomain.y - valueDomain.x);',
+				'return (value - valueDomain.x) / (valueDomain.y - valueDomain.x);',
 			'}',
 
 			'float scaleLinear(float value, vec2 valueDomain, vec2 valueRange) {',
-			'return mix(valueRange.x, valueRange.y, scaleLinear(value, valueDomain));',
+				'return mix(valueRange.x, valueRange.y, scaleLinear(value, valueDomain));',
 			'}',
 
 			'varying vec4 vColor;',
 			'varying float lifeLeft;',
-
 			'uniform sampler2D tSprite;',
-
 			'void main() {',
-
-			'float alpha = 0.;',
-
-			'if( lifeLeft > .995 ) {',
-			'alpha = scaleLinear( lifeLeft, vec2(1., .995), vec2(0., 1.));//mix( 0., 1., ( lifeLeft - .95 ) * 100. ) * .75;',
-			'} else {',
-			'alpha = lifeLeft * .75;',
-			'}',
-
-			'vec4 tex = texture2D( tSprite, gl_PointCoord );',
-
-			'gl_FragColor = vec4( vColor.rgb * tex.a, alpha * tex.a );',
+				'float alpha = 0.;',
+				'if( lifeLeft > .995 ) {',
+					'alpha = scaleLinear( lifeLeft, vec2(1., .995), vec2(0., 1.));',
+				'} else {',
+					'alpha = lifeLeft * .75;',
+				'}',
+				'vec4 tex = texture2D( tSprite, gl_PointCoord );',
+				'gl_FragColor = vec4( vColor.rgb * tex.a, alpha * tex.a );',
 			'}'
 
 		].join("\n")
@@ -326,16 +305,10 @@ export const GPUParticleContainer = function(maxParticles, particleSystem) {
 
 		i = self.PARTICLE_CURSOR;
 
-		self.posStart.array[i * 4 + 0] = position.x + ((particleSystem.random()) * positionRandomness); // - ( velocity.x * particleSystem.random() ); //x
-		self.posStart.array[i * 4 + 1] = position.y + ((particleSystem.random()) * positionRandomness); // - ( velocity.y * particleSystem.random() ); //y
-		self.posStart.array[i * 4 + 2] = position.z + ((particleSystem.random()) * positionRandomness); // - ( velocity.z * particleSystem.random() ); //z
+		self.posStart.array[i * 4 + 0] = position.x + ((particleSystem.random()) * positionRandomness);
+		self.posStart.array[i * 4 + 1] = position.y + ((particleSystem.random()) * positionRandomness);
+		self.posStart.array[i * 4 + 2] = position.z + ((particleSystem.random()) * positionRandomness);
 		self.posStart.array[i * 4 + 3] = self.time + (particleSystem.random() * 2e-2); //startTime
-
-		if (smoothPosition === true) {
-			self.posStart.array[i * 4 + 0] += -(velocity.x * particleSystem.random()); //x
-			self.posStart.array[i * 4 + 1] += -(velocity.y * particleSystem.random()); //y
-			self.posStart.array[i * 4 + 2] += -(velocity.z * particleSystem.random()); //z
-		}
 
 		const rgb = hexToRgb(color);
 		self.color.array[i * 4 + 0] = rgb[0];
