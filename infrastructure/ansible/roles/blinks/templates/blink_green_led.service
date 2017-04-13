@@ -2,7 +2,7 @@
     Description=Blinks green led
 
 [Service]
-    ExecStart=/root/blink_green_led.sh 1
+    ExecStart=/root/blink_green_led.sh {{ service_num }}
     WorkingDirectory=/root
     User=root
     Group=root

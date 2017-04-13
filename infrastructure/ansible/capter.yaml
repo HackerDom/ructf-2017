@@ -1,3 +1,3 @@
-- hosts: capter
+- hosts: all
   roles:
     - capter
