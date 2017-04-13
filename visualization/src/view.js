@@ -6,6 +6,9 @@ import * as THREE_particle from "./particle";
 import Stats from "stats.js";
 import _ from "underscore";
 
+const countdown_start = new Date(2017, 3, 16, 9, 0, 0);//new Date(2017, 3, 16, 9, 0, 0); // month from 0
+const countdown_end = new Date(2017, 3, 16, 21, 0, 0);//new Date(2017, 3, 16, 21, 0, 0);
+const YEKT_timezone_offset = 5 * 60 * 60 * 1000;
 
 export default class View {
 
@@ -28,12 +31,13 @@ export default class View {
 			this.drawServicesStatusesAndStat();
 		});
 		controller.on('flagStat', () => {
-			$("#attacks").find(".value").text(this.model.flagsCount);
+			$("#attacks-value").text(this.model.flagsCount);
 		});
 	}
 
 	init() {
 		this.initThree();
+		View.countdown();
 	}
 
 	drawScoreboard() {
@@ -51,6 +55,38 @@ export default class View {
 		this.scoreboardContainer.append(table);
 	}
 
+	static countdown() {
+		let now = new Date().getTime();
+		const utcOffsetMilliseconds = new Date().getTimezoneOffset() * 60000;
+		const yektCorrection = utcOffsetMilliseconds + YEKT_timezone_offset;
+		now += yektCorrection;
+		if (now > countdown_start.getTime()) {
+			const $countdown = $("#countdown-value");
+			if(now > countdown_end.getTime()) {
+				$countdown.text("00:00:00");
+				return;
+			}
+			const diff = countdown_end.getTime() - now;
+			const str = milisecondsToTimeStr(diff);
+			$countdown.text(str);
+		}
+		setTimeout(function() { View.countdown(); }, 100);
+
+		function milisecondsToTimeStr(msec) {
+			const hh = Math.floor(msec / 1000 / 60 / 60);
+			msec -= hh * 1000 * 60 * 60;
+			const mm = Math.floor(msec / 1000 / 60);
+			msec -= mm * 1000 * 60;
+			const ss = Math.floor(msec / 1000);
+			msec -= ss * 1000;
+			return `${hh}:${leadingZero(mm)}:${leadingZero(ss)}`;
+		}
+
+		function leadingZero(n) {
+			return n < 10 ? "0" + n : n;
+		}
+	}
+
 	drawServicesStatusesAndStat() {
 		const _this = this;
 		let teamsWithAliveService = 0; // количество команд с хотя бы 1 сервисом
@@ -63,7 +99,7 @@ export default class View {
 			if (hasUp)
 				teamsWithAliveService++;
 		});
-		$("#alive").find(".value").text(teamsWithAliveService);
+		$("#alive-value").text(teamsWithAliveService);
 	}
 
 	static getLogo(nodeData) {

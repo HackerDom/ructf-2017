@@ -15,69 +15,52 @@ body,
   left: 18%;
   width: 82%;
 }
-#svg-viz {
-  cursor: move;
-}
-.ui-tooltip {
-  position: absolute !important;
-}
-.ui-tooltip .team-tooltip {
-  background: #1D3542;
-  color: white;
-  max-width: 250px;
-  min-width: 200px;
-  min-height: 80px;
-  padding: 5px;
-  position: relative;
-  border: solid #B7E99B 1px;
-}
-.ui-tooltip .team-tooltip table {
-  table-layout: fixed;
-  width: 100%;
-  word-wrap: break-word;
-}
-.ui-tooltip .team-tooltip .header {
-  font-weight: normal;
-}
-.ui-tooltip .team-tooltip .value {
-  font-weight: bold;
-}
-.ui-tooltip .team-tooltip .value.team-name {
-  color: #B7E99B;
-}
-.ui-tooltip .team-tooltip .header-wrapper {
-  margin-bottom: 8px;
-  line-height: 1;
-}
-.ui-tooltip .team-tooltip td:first-child {
-  vertical-align: top;
-  width: 69px;
-}
-.ui-tooltip .team-tooltip img {
-  margin-right: 5px;
-}
-.statistics {
+#attacks-value,
+#alive-value,
+#countdown-value,
+#attacks-header,
+#alive-header,
+#countdown-header {
   position: absolute;
-  bottom: 0;
-  width: 300px;
-  left: 50%;
-  font-family: Arial, sans-serif;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  cursor: default;
+  right: 30px;
 }
-.statistics .value {
+#attacks-value,
+#alive-value,
+#countdown-value {
+  position: absolute;
   font-family: 'Roboto', sans-serif;
   font-weight: 100;
-  font-size: 60px;
-  display: inline-block;
+  font-size: 78px;
+  color: white;
 }
-.statistics .header {
+#attacks-header,
+#alive-header,
+#countdown-header {
+  position: absolute;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
   font-size: 25px;
-  line-height: 68px;
-  vertical-align: top;
+}
+#attacks-header {
+  top: 40px;
+  color: #CE418A;
+}
+#alive-header {
+  top: 190px;
+  color: #568AFF;
+}
+#countdown-header {
+  bottom: 134px;
+  color: white;
+}
+#attacks-value {
+  top: 71px;
+}
+#alive-value {
+  top: 220px;
+}
+#countdown-value {
+  bottom: 40px;
 }
 #attacks {
   color: #EC2B34;
@@ -95,23 +78,6 @@ body,
 }
 #alive .value {
   margin: 0 10px 0 15px;
-}
-.node {
-  cursor: default;
-}
-.island {
-  stroke: #3D7278;
-  stroke-width: 2px;
-}
-.explosion {
-  -webkit-transition: 0.4s linear;
-  transition: 0.4s linear;
-  fill-opacity: 1;
-}
-.arrow-line {
-  stroke-linecap: round;
-  stroke-width: 3px;
-  fill-opacity: 0;
 }
 #stats-container > div {
   bottom: 0;
