@@ -147,17 +147,17 @@ export default class View {
 
 		const options = {
 			position: new THREE.Vector3(),
-			positionRandomness: 0.5,
+			positionRandomness: 0.45,
 			velocityRandomness: 0.43,
 			colorRandomness: 0,
 			turbulence: 0.5,
 			lifetime: 0.8,
-			size: 8,
+			size: 6,
 			sizeRandomness: 3
 		};
 
 		const spawnerOptions = {
-			spawnRate: 300
+			spawnRate: 500
 		};
 
 		this.arrows = [];
@@ -175,7 +175,7 @@ export default class View {
 			camera = new THREE.PerspectiveCamera(55, aspect, 1, 1000);
 
 			const light = new THREE.DirectionalLight(0xcccccc, 1);
-			light.position.set(75, 20, 60);
+			light.position.set(75, 30, 60);
 			light.shadow.mapSize.width = 2048; // default is 512
 			light.shadow.mapSize.height = 2048; // default is 512
 			light.castShadow = true;
@@ -203,7 +203,7 @@ export default class View {
 				depthWrite : false,
 			});
 			const sphere = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40, 4), planetMaterial);
-			_this.clouds = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40.7, 3), cloudMaterial);
+			_this.clouds = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40.7, 4), cloudMaterial);
 			sphere.castShadow = true;
 			sphere.position.set(0, 0, 0);
 			sphere.receiveShadow = true;
@@ -222,7 +222,7 @@ export default class View {
 				}
 			);
 
-			const glow = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40.7, 3), customMaterial);
+			const glow = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40.7, 4), customMaterial);
 			glow.position.set(0, 0, 0);
 			planetGroup.add(glow);
 
@@ -464,7 +464,7 @@ export default class View {
 				if (now - arrow.creationTime < 3 * 1000) {
 					if (delta > 0) {
 						options.color = arrow.color.getHex();
-						const steps = 8;
+						const steps = 10;
 						for (let step = 0; step < steps; step++) {
 							arrow.timer += delta / 3 / steps;
 							options.position = arrow.spline.getPoint(arrow.timer);
