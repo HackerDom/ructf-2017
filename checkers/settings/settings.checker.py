@@ -7,27 +7,38 @@ from networking import State
 import random
 import json
 
-def get_random_patch():
+def get_random_key(words):
+	key = ''
+	for i in range(random.randint(1, 3)):
+		key += random.choice(words).rstrip().title()
+	return key
+
+def get_random_patch(words):
 	res = []
 	for i in range(random.randint(1, 7)):
-		res.append((checker.get_rand_string(40), checker.get_rand_string(87)))
+		res.append((get_random_key(words), checker.get_rand_string(87)))
 	return res
 
 def handler_check(hostname):
+
+	with open('words.txt') as f:
+		words = f.readlines()
 
 	soc1 = State(hostname)
 	soc2 = State(hostname)
 	for i in range(2):
 		section_name = checker.get_rand_string(40)
+
 		key1 = soc1.create_section(section_name)
+
 		key2 = checker.get_rand_string(80)
 		soc1.add_apikey(section_name, key1, key2)
-		soc1.fix_section(section_name, key1, get_random_patch())
-		soc1.fix_section(section_name, key2, get_random_patch())
+		soc1.fix_section(section_name, key1, get_random_patch(words))
+		soc1.fix_section(section_name, key2, get_random_patch(words))
 
 		key3 = checker.get_rand_string(80)
 		soc2.add_apikey(section_name, key2, key3)
-		soc2.fix_section(section_name, key3, get_random_patch())
+		soc2.fix_section(section_name, key3, get_random_patch(words))
 
 	checker.ok()
 
