@@ -1,5 +1,5 @@
        identification division.
-       program-id. fix-section.
+       program-id. get-section.
 
        environment division.
        input-output section.
@@ -44,31 +44,26 @@
          01 argv.
            02 section-name picture x(40).
            02 skey picture x(80).
-           02 patches-count picture 9.
-           02 patch occurs 7 times.
-             03 param-name picture x(40).
-             03 param-value picture x(87).
-           02 filler picture xxx.
+           02 param-name picture x(40).
+           02 filler picture x(853).
          01 result.
            02 rcode picture x(2).
-           02 filler picture x(1022).
+           02 result-count picture 9.
+           02 results occurs 8.
+             03 rparam-name picture x(40).
+             03 rparam-value picture x(87).
+           02 filler picture xxx.
          01 result-length binary-long unsigned.
- 
+
        procedure division 
          using argc, argv, result, result-length 
          returning need-more.
-       start-fix-section.
-           if argc is less than 121
+       start-get-section.
+           if argc is less than 160
              move 1 to need-more
              goback
            else
              move zero to need-more
-           end-if
-
-           if patches-count is equal to zero
-             move 'ok' to rcode
-             move 2 to result-length
-             goback
            end-if
 
            move section-name to name
@@ -83,7 +78,7 @@
              varying ind 
                from 1 by 1 until ind is greater than api-keys-count
              if skey is equal to api-key(ind)
-               perform apply-patch
+               perform get-data
                goback
              end-if
            end-perform
@@ -91,25 +86,36 @@
            move 'na' to rcode
            move 2 to result-length.
 
-       apply-patch.
-
+       get-data.
            move section-name to ssection-name
-           perform 
-             varying ind 
-               from 1 by 1 until ind is greater than patches-count
-             move param-name(ind) to sparam-name
-             move param-value(ind) to sparam-value
-             write setting-record
-               invalid key
-                 rewrite setting-record
-                   invalid key
-                     move 'fl' to rcode
-                     move 2 to result-length
-                 end-rewrite
-             end-write
-           end-perform
+           move param-name to sparam-name
+           start settings-db 
+             key is greater than composite-key
+           end-start
 
            move 'ok' to rcode
-           move 2 to result-length.
+           move zero to result-count
+           move 3 to result-length
 
-       end program fix-section.
+           perform forever
+             if result-count is equal to 8
+               goback
+             end-if
+
+             read settings-db record 
+               at end goback 
+             end-read
+             if ssection-name is not equal to section-name
+               goback
+             end-if
+
+             add 1 to result-count end-add
+             move sparam-name to rparam-name(result-count)
+             move sparam-value to rparam-value(result-count)
+             add 127 to result-length end-add
+
+           end-perform.
+
+
+       end program get-section.
+

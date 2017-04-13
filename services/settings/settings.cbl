@@ -6,7 +6,7 @@
        file-control.
          select optional sections-db assign to external 'sections.dat'
            organization is indexed
-           access mode is random
+           access mode is dynamic
            record key is name
            lock mode is automatic
            sharing with all other.
@@ -15,7 +15,7 @@
 
          select optional settings-db assign to external 'settings.dat'
            organization is indexed
-           access mode is random
+           access mode is dynamic
            record key is composite-key
            lock mode is automatic
            sharing with all other.
