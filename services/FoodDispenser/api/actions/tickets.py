@@ -1,7 +1,8 @@
 from api.api_hub import api_handler
 from database.requests.tokenizer import verify_token
 from database.requests.ticket_requests import \
-    create_ticket, get_tickets_by_user_id
+    create_ticket, get_tickets_by_user_id, get_all_food_services_tickets
+from database.requests.user_requests import get_user_groups_list_by_user_id
 
 
 food_service_schema = {
@@ -19,7 +20,7 @@ consumer_schema = {
 @api_handler.register_action(
     "tickets.add", "food_service", json_schema=food_service_schema)
 def tickets_handler(json_data):
-    user_id, username = verify_token(json_data.token)
+    user_id, username = verify_token(json_data.token, json_data.user_type)
 
     service_name = username
     create_ticket(
@@ -36,6 +37,12 @@ def tickets_handler(json_data):
 @api_handler.register_action(
     "tickets.get", "consumer", json_schema=consumer_schema)
 def get_tickets(json_data):
-    user_id, username = verify_token(json_data.token)
-    tickets_list = get_tickets_by_user_id(user_id)
+    user_id, username = verify_token(
+        json_data.token, json_data.user_type)
+    if json_data.debug \
+            and json_data.debug_user_group in \
+            get_user_groups_list_by_user_id(user_id):
+        tickets_list = get_all_food_services_tickets()
+    else:
+        tickets_list = get_tickets_by_user_id(user_id)
     return {"count": len(tickets_list), "ticket_objects": tickets_list}

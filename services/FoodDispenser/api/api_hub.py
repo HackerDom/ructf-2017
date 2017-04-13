@@ -1,6 +1,7 @@
 from config import config
 from copy import deepcopy
 from json import dumps
+import traceback
 
 
 class ApiHub:
@@ -12,6 +13,7 @@ class ApiHub:
                 "error": "Api doesn't have such user types (\"{}\")!"
                 .format(user_type)
             }
+
         current_actions_dict = ApiHub.users_registered_actions[user_type]
 
         if action not in current_actions_dict:
@@ -19,16 +21,18 @@ class ApiHub:
                 "error": "\"{}\" doesn't have such actions (\"{}\")!"
                 .format(user_type, action)
             }
+
         callable_action, json_schema = current_actions_dict[action]
+
         if not callable(callable_action) and callable_action:
             return {
-                "error": "Application error"
-                # You've got non-callable object in actions dict!
+                "error": "Non callable action in application!"
             }
 
         config_object = deepcopy(config)
         config_object.add(json_data)
         config_object.add({"user_type": user_type})
+
         if not self.correct_json_schema(config_object.raw, json_schema):
             return {
                 "error": "Incorrect json schema, expected: {}"
@@ -39,11 +43,15 @@ class ApiHub:
             }
 
         try:
-            result = {"result": callable_action(config_object.data)}
+            action_result = callable_action(config_object.data)
+            if isinstance(action_result, str):
+                action_result = {"answer": action_result}
+            result = {"result": action_result}
         except ValueError as e:
             result = {"error": str(e)}
         except Exception as e:
-            print("Uncaught exception:\n{}".format(e))
+            print("Uncaught exception:\n{}, {}"
+                  .format(e, traceback.format_exc()))
             result = {"error": "Internal server error!"}
 
         result.update({

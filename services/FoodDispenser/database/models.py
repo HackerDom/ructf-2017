@@ -31,7 +31,7 @@ def init_models(db):
     class Group(AbstractTable):
         group_name = CharField(max_length=32, unique=True)
         group_creator_id = IntegerField()
-        group_invite_hash = CharField(max_length=64)
+        group_invites_list = TextField()
 
     def init_db():
         if not User.table_exists():

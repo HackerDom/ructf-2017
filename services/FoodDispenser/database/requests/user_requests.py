@@ -47,16 +47,6 @@ def get_user_groups_list_by_user_id(user_id):
     return loads(user_row.user_groups)
 
 
-def add_user_to_group(user_id, group_name):
-    with db_request("User") as User:
-        row = User.select().where(User.id == user_id).first()
-        user_groups_set = set(loads(row.user_groups))
-        user_groups_set.add(group_name)
-        User.update(
-            user_groups=dumps(list(user_groups_set))).where(User.id == user_id)\
-            .execute()
-
-
 def user_id_to_username(user_id):
     with db_request("User") as User:
         row = User.select().where(User.id == user_id).first()

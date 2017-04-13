@@ -63,4 +63,4 @@ class Config:
                 Config.data.add(data)
 
 
-config = Config("config1.json")
+config = Config("config.json")
