@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using ProtoBuf;
 using stargåte.db;
 using stargåte.utils;
 
@@ -60,7 +61,9 @@ namespace stargåte.handlers
 			if(!await TransmissionsDb.TryAdd(info))
 				return new HttpResult {StatusCode = 409, Message = "Substance Conflict"};
 
-			info.Entropy = null; //NOTE: remove secrets from broadcast
+			info = Serializer.DeepClone(info); //NOTE: remove secrets from broadcast
+			info.Entropy = null;
+
 			await WsHandler.BroadcastAsync(info, CancellationToken.None);
 
 			context.Response.ContentType = "application/protobuf";
@@ -98,7 +101,6 @@ namespace stargåte.handlers
 			for(int y = 0; y < bmp.Height; y++)
 			for(int x = 0; x < bmp.Width; x++)
 				spectrum.Update(bmp.FastGetPixel(x, y));
-			spectrum.Write();
 		}
 
 		private static readonly ReusableObjectPool<byte[]> InputBuffer = new ReusableObjectPool<byte[]>(() => new byte[Settings.MaxMatterSize], buffer => Array.Clear(buffer, 0, buffer.Length), 64);
