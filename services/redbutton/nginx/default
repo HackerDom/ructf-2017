@@ -1,0 +1,14 @@
+server {
+	listen 80 default_server;
+
+	server_name localhost;
+
+	location / {
+		autoindex off;
+		root /home/redbutton/static;
+	}
+
+	location /detectors {
+		proxy_pass http://127.0.0.1:16780;
+	}
+}

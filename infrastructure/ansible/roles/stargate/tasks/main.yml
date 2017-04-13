@@ -1,0 +1,9 @@
+- hostname:
+    name: stargate
+
+- name: create user
+  user: name=stargate shell=/bin/false
+
+- name: copy motd
+  copy: src=motd dest=/etc/motd
+

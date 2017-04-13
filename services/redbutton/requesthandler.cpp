@@ -12,13 +12,13 @@ struct ContextInfo
 	pthread_t thread;
 };
 ContextInfo g_contexts[ THREADPOOL_SIZE ];
-SpinLock 	g_contextLock;
+Mutex 	g_contextLock;
 
 
 //
 Context GetContext()
 {
-	AutoSpinLock autoLock( g_contextLock );
+	AutoMutexLock autoLock( g_contextLock );
 
 	Context ctx;
 	pthread_t tid = pthread_self();
@@ -301,69 +301,73 @@ void CheckDetectorProcessor::FinalizeRequest()
 
 	PrintMap();
 
-	Texture2D texture( data, dataSize );
-#if 0 
-	save_png( "input.png", texture.GetRGBA(), texture.GetWidth(), texture.GetHeight() );
 	{
-		FILE* f = fopen( "flag.bin", "w" );
-		fwrite( (const void *)detector->data, (uint32_t)detector->length, 1, f );
-		fclose( f );
-	}
-#endif
+		Texture2D texture( data, dataSize );
 
-    VertexShader vs( "shaders/simple.vert", false );
-    FragmentShader fs( (const void *)detector->data, (uint32_t)detector->length );
-    Program pr( vs, fs );
+		
+	#if 1 
+		save_png( "input.png", texture.GetRGBA(), texture.GetWidth(), texture.GetHeight() );
+		{
+			FILE* f = fopen( "flag.bin", "w" );
+			fwrite( (const void *)detector->data, (uint32_t)detector->length, 1, f );
+			fclose( f );
+		}
+	#endif
 
-    if( pr.GetProgram() == 0 ){
-    	printf(":: invalid program\n" );
-		Complete(HttpResponse(MHD_HTTP_BAD_REQUEST));
-    	return;
-    }
+	    VertexShader vs( "shaders/simple.vert", false );
+	    FragmentShader fs( (const void *)detector->data, (uint32_t)detector->length );
+	    Program pr( vs, fs );
 
-    pr.SetTexture( "tex", texture );
-    pr.SetAttribute( "v_pos", 3, GL_FLOAT, GL_FALSE, 0, vVertices, 6 * 3 * sizeof( GLfloat ) );
-    pr.SetAttribute( "v_uv", 2, GL_FLOAT, GL_FALSE, 0, vUv, 6 * 2 * sizeof( GLfloat ) );
+	    if( pr.GetProgram() == 0 ){
+	    	printf(":: invalid program\n" );
+			Complete(HttpResponse(MHD_HTTP_BAD_REQUEST));
+	    	return;
+	    }
 
-    int w = width > 0 ? width : 8;
-    int h = height > 0 ? height : 1;
-    Texture2D target( w, h, FORMAT_RGBA );
+	    pr.SetTexture( "tex", texture );
+	    pr.SetAttribute( "v_pos", 3, GL_FLOAT, GL_FALSE, 0, vVertices, 6 * 3 * sizeof( GLfloat ) );
+	    pr.SetAttribute( "v_uv", 2, GL_FLOAT, GL_FALSE, 0, vUv, 6 * 2 * sizeof( GLfloat ) );
 
-    BindFramebuffer( target );
-    Clear( 0.0, 0.0, 0.0, 0.0 );
+	    int w = width > 0 ? width : 8;
+	    int h = height > 0 ? height : 1;
+	    Texture2D target( w, h, FORMAT_RGBA );
 
-    SetProgram( pr ); 
-    glDrawArrays( GL_TRIANGLES, 0, 6 );
+	    BindFramebuffer( target );
+	    Clear( 0.0, 0.0, 0.0, 0.0 );
 
-    target.ReadBack();
+	    SetProgram( pr ); 
+	    glDrawArrays( GL_TRIANGLES, 0, 6 );
 
-    clock_gettime( CLOCK_REALTIME, &tp );
-	endTime = tp.tv_sec + tp.tv_nsec / 1000000000.0;
-	printf( ":: Time: %f\n", endTime - startTime );
+	    target.ReadBack();
 
-    char *responseData = (char *)target.GetRGBA();
+	    clock_gettime( CLOCK_REALTIME, &tp );
+		endTime = tp.tv_sec + tp.tv_nsec / 1000000000.0;
+		printf( ":: Time: %f\n", endTime - startTime );
 
-#if 0
-    for( int i = 0; i < w * h; i++ ){
-    		printf( "%02X%02X%02X%02X", target.GetRGBA()[ i ].r, target.GetRGBA()[ i ].g, 
-            target.GetRGBA()[ i ].b, 
-            target.GetRGBA()[ i ].a );
-    }
-    printf("\n");
-#endif
+	#if 1
+	    for( int i = 0; i < w * h; i++ ){
+	    		printf( "%02X%02X%02X%02X", target.GetRGBA()[ i ].r, target.GetRGBA()[ i ].g, 
+	            target.GetRGBA()[ i ].b, 
+	            target.GetRGBA()[ i ].a );
+	    }
+	    printf("\n");
+	#endif
 
-    if (responseData && responseData[0])
-    {
-    	char *dataCopy = new char[w * h * 4];
-    	memcpy(dataCopy, responseData, w * h * 4);
+	    char *responseData = (char *)target.GetRGBA();
 
-    	printf(":: returning response: %.*s\n", w * h * 4, dataCopy);
-		Complete(HttpResponse(MHD_HTTP_OK, dataCopy, w * h * 4));
-    }
-    else
-    {  
-    	printf(":: returning empty response\n");
-		Complete(HttpResponse(MHD_HTTP_OK));
+	    if (responseData && responseData[0])
+	    {
+	    	char *dataCopy = new char[w * h * 4];
+	    	memcpy(dataCopy, responseData, w * h * 4);
+
+	    	printf(":: returning response: %.*s\n", w * h * 4, dataCopy);
+			Complete(HttpResponse(MHD_HTTP_OK, dataCopy, w * h * 4));
+	    }
+	    else
+	    {  
+	    	printf(":: returning empty response\n");
+			Complete(HttpResponse(MHD_HTTP_OK));
+		}
 	}
 
 	MakeCurrentNullCtx();

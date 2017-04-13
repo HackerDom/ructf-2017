@@ -1,0 +1,9 @@
+- hostname:
+    name: fooddispenser
+
+- name: create user
+  user: name=fooddispenser shell=/bin/false
+
+- name: copy motd
+  copy: src=motd dest=/etc/motd
+

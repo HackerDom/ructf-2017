@@ -1,0 +1,113 @@
+html, body {
+	height: 100%;
+}
+
+body {
+	background: #222;
+	font-family: 'Orbitron', sans-serif;
+	font-size: 16px;
+	color: #eee;
+	margin: 0;
+	padding: 0;
+
+	border-radius: 40px/20px 0;
+	box-sizing: border-box;
+}
+
+svg {
+	-webkit-filter: invert(100%);
+	filter: invert(100%);
+}
+svg * {
+	pointer-events: none;
+}
+
+#stargate {
+	width:100%;
+	height: 100%;
+}
+
+.wrapper {
+	display: flex;
+	flex-flow: row wrap;
+	height: 100%;
+	width: 100%;
+}
+.header, .main, .left, .right, .footer {
+	flex: 1 100%;
+	margin: 4px;
+	padding: 4px;
+	position: relative;
+}
+.main {
+	max-height: 99%;
+}
+.header, .footer {
+	display: none;
+}
+.left, .right {
+	min-width: 264px;
+	overflow: hidden;
+	display: flex;
+	flex-flow: column;
+}
+.logo {
+	flex: 1;
+	background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmVyc2lvbj0iMSI+PHBhdGggZD0iTTI0LjA5MSAxNi4yNjZMNDQuMzc0IDQzbC05Ljg4Ni4wMTFzMS4xNTUtMS4wOCAxLjc2MS0xLjc2MWMxLjQzNy0xLjYxMyAxLjAzOC0yLjQ3MS01LjA5NS0xMC45NjUtMy42Ni01LjA2OC02Ljg3OS05LjIxNS03LjE1NC05LjIxNS0uMjc1IDAtMy40OTQgNC4xNDctNy4xNTQgOS4yMTUtNi4xMzMgOC40OTQtNi41MzIgOS4zNTItNS4wOTUgMTAuOTY1LjU5Mi42NjQgMS41MDggMS43NDMgMS41MDggMS43NDNMMy42MjYgNDMgMjQuMDkgMTYuMjY2eiIvPjxwYXRoIGQ9Ik0yOC41NzEgOC43ODJhNC41MDggNC41MDggMCAxIDEtOS4wMTUgMCA0LjUwOCA0LjUwOCAwIDEgMSA5LjAxNSAweiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+) no-repeat center;
+	background-size: 25%;
+	filter: invert(100%) drop-shadow(16px 16px 10px cyan);
+	width: 100%;
+	min-height: 128px;
+}
+.left-head, .right-head {
+	flex: 1;
+	text-align: right;
+}
+.left-container, .right-container {
+	flex: 100;
+	border: 1px dotted rgba(0, 255, 255, 0.5);
+	border-radius: 40px/20px 0;
+	margin: 8px 0;
+	padding: 12px 4px;
+	font-size: 14px;
+}
+.right-foot {
+	flex: 1;
+	opacity: 0.3;
+	font-size: 75%;
+}
+.msg {
+	margin-bottom: 8px;
+}
+.canvas {
+	background-color: #333;
+}
+
+#status-wrap {
+	display: table;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+}
+#status {
+	text-align: center;
+	display: table-cell;
+	vertical-align: middle;
+}
+
+@media all and (min-width: 600px) {
+	.left, .right { flex: 1 auto; }
+}
+
+@media all and (min-width: 800px) {
+	body { border: 3px solid rgba(0, 255, 255, 0.7); }
+
+	.main { flex: 2 0; }
+	.left { order: 1; }
+	.main { order: 2; }
+	.right { order: 3; }
+	.footer { order: 4; }
+	.left, .right { max-width: 256px; }
+
+	.logo { background-size: 50%; }
+}

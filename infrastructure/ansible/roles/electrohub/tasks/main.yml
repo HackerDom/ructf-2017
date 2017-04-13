@@ -1,0 +1,9 @@
+- hostname:
+    name: electrohub
+
+- name: create user
+  user: name=electrohub shell=/bin/false
+
+- name: copy motd
+  copy: src=motd dest=/etc/motd
+

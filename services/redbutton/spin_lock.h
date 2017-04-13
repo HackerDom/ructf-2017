@@ -1,5 +1,6 @@
 #pragma once
 #include <sched.h>
+#include <pthread.h>
 
 
 /// Simple spin lock.
@@ -40,6 +41,29 @@ private:
 
 
 //
+class Mutex{
+public:
+    //
+    Mutex(){
+        m_mutex = PTHREAD_MUTEX_INITIALIZER;
+    }
+
+    //
+    void Lock(){
+        pthread_mutex_lock( &m_mutex );
+    }
+
+    //
+    void Unlock(){
+        pthread_mutex_unlock( &m_mutex );   
+    }
+private:
+    //
+    pthread_mutex_t m_mutex;
+};
+
+
+//
 template< typename T >
 class AutoLock {
 public:
@@ -64,4 +88,5 @@ private:
 
 //
 using AutoSpinLock = AutoLock< SpinLock >;
+using AutoMutexLock = AutoLock< Mutex >;
 

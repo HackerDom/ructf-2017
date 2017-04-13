@@ -1,0 +1,16 @@
+[Unit]
+    Description=C.A.P.T.E.R main unit
+    Requires=capterca.service
+    After=capterca.service
+
+[Service]
+    ExecStart=/home/capter/go/bin/capter
+    WorkingDirectory=/home/capter/
+    User=capter
+    Group=capter
+    Restart=on-failure
+    RestartSec=3s
+    CPUQuota=40%
+
+[Install]
+    WantedBy=multi-user.target

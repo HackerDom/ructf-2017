@@ -1,0 +1,3 @@
+---
+dependencies:
+  - { role: blinks, service_num: 3 }

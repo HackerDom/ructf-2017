@@ -1,0 +1,9 @@
+- hostname:
+    name: settings
+
+- name: create user
+  user: name=settings shell=/bin/false
+
+- name: copy motd
+  copy: src=motd dest=/etc/motd
+

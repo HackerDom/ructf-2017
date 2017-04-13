@@ -40,9 +40,8 @@ func NewCapter() *Capter {
 		if err != nil {
 			return err
 		}
-		// TODO: Generate actual teams names
-		for i := 1; i < 50; i++ {
-			if err := b.Put([]byte("team"+strconv.Itoa(i)), []byte(strconv.Itoa(1))); err != nil {
+		for i := 1; i < 33; i++ {
+			if err := b.Put([]byte("capter.team"+strconv.Itoa(i)+".ructf"), []byte(strconv.Itoa(1))); err != nil {
 				return err
 			}
 		}

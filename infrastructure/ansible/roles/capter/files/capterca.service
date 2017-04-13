@@ -1,0 +1,14 @@
+[Unit]
+    Description=C.A.P.T.E.R Candidate place
+
+[Service]
+    ExecStart=/srv/capterca
+    WorkingDirectory=/srv/
+    User=capter
+    Group=capter
+    Restart=on-failure
+    RestartSec=3s
+    CPUQuota=40%
+
+[Install]
+    WantedBy=multi-user.target

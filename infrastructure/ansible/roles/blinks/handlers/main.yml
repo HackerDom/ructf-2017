@@ -1,0 +1,2 @@
+- name: enable and restart blink_green_led
+  systemd: name=blink_green_led enabled=yes state=restarted daemon_reload=yes

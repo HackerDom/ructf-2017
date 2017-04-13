@@ -25,7 +25,7 @@ uint8_t* g_memory;
 uint8_t* g_memoryEnd;
 
 //
-SpinLock g_lock;
+Mutex g_lock;
 
 
 //
@@ -145,7 +145,7 @@ void Merge()
 //
 void* Allocate( size_t size )
 {
-    AutoSpinLock autoLock( g_lock );
+    AutoMutexLock autoLock( g_lock );
 #if DEBUG
     printf( "Allocate %u %u\n", size, size + sizeof( Chunk ) );
 #endif
@@ -167,7 +167,7 @@ void* Allocate( size_t size )
 //
 void Free( void* ptr )
 {
-    AutoSpinLock autoLock( g_lock );
+    AutoMutexLock autoLock( g_lock );
 #ifdef DEBUG
     printf( "Free %p\n", ptr );
 #endif
