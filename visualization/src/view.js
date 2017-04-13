@@ -4,6 +4,7 @@ import * as THREE from "three";
 import station from "./station";
 import * as THREE_particle from "./particle";
 import Stats from "stats.js";
+import _ from "underscore";
 
 
 export default class View {
@@ -41,8 +42,9 @@ export default class View {
 		const $container = $("#container");
 		const img_height = Math.max(Math.ceil(($container.height() - 60) / this.model.teams.length - 10), 3);
 		const place_size = Math.max(img_height - 4, 3);
-		for (let i=0; i<this.model.teams.length; i++) {
-			const team = this.model.teams[i];
+		const teams = _.sortBy(this.model.teams, function(t){ return t.score; }).reverse();
+		for (let i=0; i<teams.length; i++) {
+			const team = teams[i];
 			table.append($(`<tr><td><div class="place" style="width:${place_size}px;height:${place_size}px;line-height:${place_size}px;">${i + 1}</div></td>
 <td><img height='${img_height}' width='${img_height}' src='${View.getLogo()}'/></td><td><div>${View.escape(team.name)}</div></td><td><div>${team.score}</div></td></tr>`));
 		}

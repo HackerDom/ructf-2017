@@ -41,7 +41,7 @@ let prodConfig =  {
 		new webpack.optimize.CommonsChunkPlugin("vendor", "vendor.js"),
 		new webpack.optimize.OccurenceOrderPlugin(),
 		new webpack.optimize.DedupePlugin(),
-		new webpack.optimize.UglifyJsPlugin({minimize: true, mangle: true})
+		new webpack.optimize.UglifyJsPlugin({minimize: true, mangle: false})
 	]
 };
 

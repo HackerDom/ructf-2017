@@ -13,10 +13,12 @@ import threading
 
 
 ROUND_TIME = 60*1000
-service_names = ["atlablog", "weather", "cartographer", "sapmarine", "crash", "thebin"]
+service_names = ["capter", "electrohub", "fooddispenser", "redbutton", "settings", "stargate", "pool"]
+team_names = ['Invisible', "saarsec", "Bushwhackers", "LC↯BC", "c00kies@venice", "ENOFLAG", "WE_0WN_Y0U",
+              "Teamspin", "Magic-Hat", "Espacio", "Destructive Voice", "Переподвысмотрит", "[censored]",
+              "SiBears", "Lights Out", "Shadow Servants", "BSUIR", "girav", "Tower Of Hanoi", "keva", "VoidHack", "MSHP SSL: The Elite Firm"]
 
 def team_(x): return 't{}'.format(x)
-def team_name(x): return 'TEAM{}'.format(x)
 def service_(x): return 's{}'.format(x)
 
 def gtime(): return int(time()*1000)
@@ -45,7 +47,7 @@ def tojson(fn):
 @tojson
 def info_page():
     return {
-        'teams': {team_(i): team_name(i) for i in range(args.teams)},
+        'teams': {team_(i): team_names[i] for i in range(args.teams)},
         'services': {service_(i): service_names[i] for i in range(args.services)},
         'start': 0
     }
@@ -89,7 +91,7 @@ def scoreboard_page():
         "round": cround(),
         "scoreboard": [
             {
-                "name": team_name(t),
+                "name": team_names[t],
                 "score": scores[team_(t)],
                 "services": [
                     {
@@ -127,11 +129,11 @@ async def write_to_websocket(text):
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', '--teams', type=int, help='teams count',
-                        default=25)
+                        default=22)
     parser.add_argument('-s', '--services', type=int, help='services count',
-                        default=6)
+                        default=7)
     parser.add_argument('-q', '--frequency', type=int, help='attack frequency',
-                        default=6)
+                        default=30)
     return parser.parse_args()
 
 
@@ -187,7 +189,7 @@ def gen_state():
         "round": cround(),
         "scoreboard": [
             {
-                "name": team_name(t),
+                "name": team_names[t],
                 "score": scores[team_(t)],
                 "services": [
                     {

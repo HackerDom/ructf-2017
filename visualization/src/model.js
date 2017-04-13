@@ -1,6 +1,6 @@
 import _ from "underscore";
 
-const COLOR_CONSTANTS = ["#9549E4", "#1E31FF", "#7CDFD8", "#3FD637", "#E2C551", "#D85D40"];
+const SERVICE_NAME_TO_COLOR = {"capter": "#E2C551", "electrohub": "#9549E4", "fooddispenser": "#3FD637", "redbutton": "#D85D40", "settings": "#1E31FF", "stargate": "#7CDFD8"};
 const SERVICES_COUNT = 6;
 
 export class GameModel {
@@ -51,7 +51,7 @@ export class GameModel {
 					id: num,
 					service_id: fieldName,
 					name: name,
-					color: COLOR_CONSTANTS[num],
+					color: SERVICE_NAME_TO_COLOR[name],
 					visible: true
 				};
 				this._serviceIdToNum[fieldName] = num;
@@ -91,7 +91,7 @@ export class GameModel {
 
 			for (let j = 0; j < teamData.services.length; j++) {
 				const serviceData = teamData.services[j];
-				team.servicesStatuses[this._serviceIdToNum[serviceData.id]] = serviceData.status == 101;
+				team.servicesStatuses[this._serviceIdToNum[serviceData.id]] = serviceData.status === 101;
 			}
 		}
 	}
