@@ -38,6 +38,20 @@ export default class View {
 	init() {
 		this.initThree();
 		View.countdown();
+		this.loadLogos();
+	}
+
+	loadLogos() {
+		const _this = this;
+		_this.loadedLogosCount = 0;
+		for (let i=0; i<this.model.teams.length; i++) {
+			const logoImg = new Image();
+			logoImg.src = View.getLogo(this.model.teams[i]);
+			this.model.teams[i].logoImage = logoImg;
+			logoImg.onload = function(){
+				_this.loadedLogosCount++;
+			};
+		}
 	}
 
 	drawScoreboard() {
@@ -50,7 +64,7 @@ export default class View {
 		for (let i=0; i<teams.length; i++) {
 			const team = teams[i];
 			table.append($(`<tr><td><div class="place" style="width:${place_size}px;height:${place_size}px;line-height:${place_size}px;">${i + 1}</div></td>
-<td><img height='${img_height}' width='${img_height}' src='${View.getLogo()}'/></td><td><div>${View.escape(team.name)}</div></td><td><div>${team.score}</div></td></tr>`));
+<td><img height='${img_height}' width='${img_height}' src='${View.getLogo(team)}'/></td><td><div>${View.escape(team.name)}</div></td><td><div>${team.score}</div></td></tr>`));
 		}
 		this.scoreboardContainer.append(table);
 	}
@@ -104,7 +118,7 @@ export default class View {
 
 	static getLogo(nodeData) {
 		//return "https://ructfe.org/logos/" + md5(nodeData.name) + ".png"; // TODO
-		return "https://ructfe.org/static/img/teams/a0d934499096790a8d0c50a6002164b7.png";
+		return "./static/img/logo-example.png";
 	}
 
 	static escape(text) {
@@ -286,16 +300,13 @@ export default class View {
 				team.pos = nodePosition;
 				planetGroup.add(node);
 
-				const sprite = makeTextSprite(" " + team.name + " ",
-					{
-						fontsize: 48,
-						borderColor: {r: 255, g: 0, b: 0, a: 1.0},
-						backgroundColor: {r: 255, g: 100, b: 100, a: 0.8}
-					});
-				const spritePosition = myDirectionVector.clone().multiplyScalar(52);
-				sprite.position.set(spritePosition.x, spritePosition.y, spritePosition.z);
-				teams[i].sprite = sprite;
-				planetGroup.add(sprite);
+				setTimeout(function () {
+					const sprite = makeTextSprite(team);
+					const spritePosition = myDirectionVector.clone().multiplyScalar(52);
+					sprite.position.set(spritePosition.x, spritePosition.y, spritePosition.z);
+					team.sprite = sprite;
+					planetGroup.add(sprite);
+				}, 1000);
 			}
 
 			scene.add(planetGroup);
@@ -347,79 +358,44 @@ export default class View {
 			return points;
 		}
 
-		function makeTextSprite( message, parameters )
+		function makeTextSprite(team)
 		{
-			if ( parameters === undefined ) parameters = {};
-
-			const fontface = parameters.hasOwnProperty("fontface") ?
-				parameters["fontface"] : "Arial";
-
-			const fontsize = parameters.hasOwnProperty("fontsize") ?
-				parameters["fontsize"] : 36;
-
-			const borderThickness = parameters.hasOwnProperty("borderThickness") ?
-				parameters["borderThickness"] : 4;
-
-			const borderColor = parameters.hasOwnProperty("borderColor") ?
-				parameters["borderColor"] : { r:0, g:0, b:0, a:1.0 };
-
-			const backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
-				parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
-
-			const tmp_canvas = document.createElement('canvas');
-			const tmp_context = tmp_canvas.getContext('2d');
-			tmp_context.font = "Bold " + fontsize + "px " + fontface;
-			const tmp_metrics = tmp_context.measureText(message);
-			const textWidth = tmp_metrics.width;
+			const coeff = 3;
+			const canvasWidth = 182 * coeff;
+			const canvasHeight = 62 * coeff;
 
 			const canvas = document.createElement('canvas');
-			const width = textWidth + borderThickness * 2;
-			canvas.width = width;
+			canvas.width = canvasWidth;
+			canvas.height = canvasHeight;
 			const context = canvas.getContext('2d');
+
+			// Фон и рамка
+			const borderWidth = 3 * coeff;
+			context.fillStyle = "rgba(34, 3, 71, 0.59)";
+			context.strokeStyle = "rgba(255, 255, 255, 0.2)";
+			context.lineWidth = borderWidth * 2;
+			context.rect(0, 0, canvasWidth, canvasHeight);
+			context.stroke();
+			context.fill();
+
+			if (_this.loadedLogosCount === _this.model.teams.length) {
+				context.drawImage(team.logoImage, 6*coeff, 6*coeff, 50*coeff, 50*coeff);
+			}
+
+			const fontface = "Roboto";
+			const fontsize = 12 * coeff;
+			context.fillStyle = "rgba(255, 255, 255, 1.0)";
 			context.font = "Bold " + fontsize + "px " + fontface;
+			context.fillText(team.name, (6 + 50 + 6)*coeff, canvasHeight / 2);
 
-			// background color
-			context.fillStyle = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
-				+ backgroundColor.b + "," + backgroundColor.a + ")";
-			// border color
-			context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + ","
-				+ borderColor.b + "," + borderColor.a + ")";
-
-			context.lineWidth = borderThickness;
-			roundRect(context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
-			// 1.4 is extra height factor for text below baseline: g,j,p,q.
-
-			// text color
-			context.fillStyle = "rgba(0, 0, 0, 1.0)";
-
-			context.fillText(message, borderThickness, fontsize + borderThickness * 2);
-
-			// canvas contents will be used for a texture
 			const texture = new THREE.Texture(canvas);
+			texture.minFilter = THREE.NearestMipMapNearestFilter; // https://threejs.org/docs/api/constants/Textures.html
 			texture.needsUpdate = true;
-
-			const spriteMaterial = new THREE.SpriteMaterial(
-				{ map: texture } );
-			const sprite = new THREE.Sprite( spriteMaterial );
-			sprite.scale.set(0.03*width*0.9,4*0.9,1.0);
+			texture.anisotropy = 16;
+			const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+			const sprite = new THREE.Sprite(spriteMaterial);
+			sprite.scale.set(canvasWidth * 0.06 / coeff, canvasHeight * 0.06 / coeff, 1.0);
 			return sprite;
-		}
-
-		function roundRect(ctx, x, y, w, h, r)
-		{
-			ctx.beginPath();
-			ctx.moveTo(x+r, y);
-			ctx.lineTo(x+w-r, y);
-			ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-			ctx.lineTo(x+w, y+h-r);
-			ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-			ctx.lineTo(x+r, y+h);
-			ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-			ctx.lineTo(x, y+r);
-			ctx.quadraticCurveTo(x, y, x+r, y);
-			ctx.closePath();
-			ctx.fill();
-			ctx.stroke();
 		}
 
 		function onWindowResized() {
@@ -469,7 +445,7 @@ export default class View {
 		function removeParticleSystemsIfNeeded() {
 			const now = new Date().getTime();
 			_this.arrows = _this.arrows.filter(function(a) {
-				if(now - a.creationTime < 4 * 1000)
+				if(now - a.creationTime < 4.5 * 1000)
 					return true;
 				planetGroup.remove(a.particleSystem);
 				a.particleSystem.dispose();
