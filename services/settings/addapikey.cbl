@@ -4,7 +4,7 @@
        environment division.
        input-output section.
        file-control.
-         select optional keyvalue assign to external 'db.dat'
+         select optional sections-db assign to external 'sections.dat'
            organization is indexed
            access mode is random
            record key is name
@@ -13,7 +13,7 @@
 
        data division.
        file section.
-         fd keyvalue is external.
+         fd sections-db is external.
          01 ssection.
            02 name picture x(40).
            02 api-keys occurs 9 times.
@@ -49,7 +49,7 @@
            end-if
 
            move section-name to name
-           read keyvalue record
+           read sections-db record
              invalid key
                move 'bn' to rcode
                move 2 to result-length

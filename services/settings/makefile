@@ -10,7 +10,7 @@ lstFiles=$(cblFiles:.cbl=.lst)
 all: settings
 
 settings: ${files}
-	cobc -x -O2 -W -std=cobol2002 -g $^
+	cobc -x -O2 -W -g $^
 
 c: ${files}
 	cobc -C $^
