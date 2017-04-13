@@ -70,7 +70,7 @@ var SUCCESS = "rgba(127,0,127,0.5)";
 var ERROR = "rgba(0,127,127,0.5)";
 var OPEN = "rgba(127,127,0,0.5)";
 
-var MAX_MSG_COUNT = 50;
+var MAX_MSG_COUNT = 30;
 
 (() => {
 	var stargate = $("#stargate")[0];
