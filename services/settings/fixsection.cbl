@@ -38,10 +38,6 @@
        working-storage section.
          01 need-more picture 9.
          01 ind picture 9.
-         01 x picture 9.
-         01 y picture 99.
-         01 z picture 99.
-         01 tmp picture 999.
 
        linkage section.
          01 argc binary-long unsigned.
@@ -55,8 +51,7 @@
            02 filler picture xxx.
          01 result.
            02 rcode picture x(2).
-           02 rstate picture x(40).
-           02 filler picture x(982).
+           02 filler picture x(1022).
          01 result-length binary-long unsigned.
  
        procedure division 
@@ -115,7 +110,6 @@
            end-perform
 
            move 'ok' to rcode
-           move state to rstate
-           move 42 to result-length.
+           move 2 to result-length.
 
        end program fix-section.

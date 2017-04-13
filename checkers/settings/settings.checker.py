@@ -7,8 +7,11 @@ from networking import State
 import random
 import json
 
-def get_patch():
-	return [[' ' if random.randint(0, 2) != 0 else '*' for i in range(80)] for j in range(8)]
+def get_random_patch():
+	res = []
+	for i in range(random.randint(1, 7)):
+		res.append((checker.get_rand_string(40), checker.get_rand_string(87)))
+	return res
 
 def handler_check(hostname):
 
@@ -19,12 +22,12 @@ def handler_check(hostname):
 		key1 = soc1.create_section(section_name)
 		key2 = checker.get_rand_string(80)
 		soc1.add_apikey(section_name, key1, key2)
-		soc1.fix_section(section_name, key1, get_patch())
-		soc1.fix_section(section_name, key2, get_patch())
-	
+		soc1.fix_section(section_name, key1, get_random_patch())
+		soc1.fix_section(section_name, key2, get_random_patch())
+
 		key3 = checker.get_rand_string(80)
 		soc2.add_apikey(section_name, key2, key3)
-		soc2.fix_section(section_name, key3, get_patch())
+		soc2.fix_section(section_name, key3, get_random_patch())
 
 	checker.ok()
 

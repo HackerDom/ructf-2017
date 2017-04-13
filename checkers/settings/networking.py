@@ -19,8 +19,10 @@ def get_api_key(api_key):
 	return get_bytes(api_key, 80)
 
 def get_patch(patch):
-	return ('\n' + '\n'.join(''.join(p) for p in patch)).encode(encoding='ascii')
-
+	res = str(len(patch)).encode(encoding='ascii')
+	for k, v in patch:
+		res += get_bytes(k, 40) + get_bytes(v, 87)
+	return res
 
 class State:
 	def __init__(self, hostname, port=None):
@@ -44,15 +46,15 @@ class State:
 			return buf
 		except:
 			checker.down(error="can't recive full data. recived: {}".format(buf), exception=ex)
-	def ensure_ok(self):
+	def ensure_ok(self, method):
 		status = self.recv(2).decode(encoding='ascii', errors='ignore')
 		if status != 'ok':
-			checker.corrupt(error="unexpexted status '{}'".format(status))
+			checker.corrupt(error="unexpexted status '{}' while {}".format(status, method))
 	def create_section(self, section_name):
 		if type(section_name) == str:
 			section_name = get_section_name(section_name)
 		self.send(b'add-section' + section_name)
-		self.ensure_ok()
+		self.ensure_ok('add-section')
 		return self.recv(80)
 	def add_apikey(self, section_name, old_key, new_key):
 		if type(section_name) == str:
@@ -62,7 +64,7 @@ class State:
 		if type(new_key) == str:
 			new_key = get_api_key(new_key)
 		self.send(b'add-apikey ' + section_name + old_key + new_key)
-		self.ensure_ok()
+		self.ensure_ok('add-apikey')
 	def fix_section(self, section_name, apikey, patch):
 		if type(section_name) == str:
 			section_name = get_section_name(section_name)
@@ -71,5 +73,4 @@ class State:
 		if type(patch) == list:
 			patch = get_patch(patch)
 		self.send(b'fix-section' + section_name + apikey + patch)
-		self.ensure_ok()
-		return self.recv(40)
+		self.ensure_ok('fix-section')
