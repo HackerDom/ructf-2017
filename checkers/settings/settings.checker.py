@@ -109,7 +109,7 @@ def handler_get_2(hostname, id, flag):
 
 
 def main():
-	checker = Checker(handler_check, [(handler_put_1, handler_get), (handler_put_3, handler_get_3)])
+	checker = Checker(handler_check, [(handler_put_1, handler_get), (handler_put_2, handler_get_2)])
 	checker.process(sys.argv)
 
 if __name__ == "__main__":
