@@ -43,24 +43,23 @@
             subtract function length(command) from argc end-subtract
             subtract 1 from argc end-subtract
 
-            move 'uc' to write-buffer
-            move 2 to output-length
-            move zero to need-more
-            perform
-              varying ind from 1 by 1 until ind is greater than 4
-              if command-name(ind) is equal to command
-                call command using
-                  by reference argc
-                  by reference args
-                  by reference write-buffer
-                  by reference output-length
-                  returning need-more
-                  on exception
-                    move 'fl' to write-buffer
-                    move 2 to output-length
-                    move zero to need-more
-                end-call
-            end-perform
+            if command(4:1) is not equal to '-'
+              move 'uc' to write-buffer
+              move 2 to output-length
+              move zero to need-more
+            else
+              call command using
+                by reference argc
+                by reference args
+                by reference write-buffer
+                by reference output-length
+                returning need-more
+                on exception
+                  move 'uc' to write-buffer
+                  move 2 to output-length
+                  move zero to need-more
+              end-call
+            end-if
 
             if need-more is greater than zero
               display 'need more argv' end-display
