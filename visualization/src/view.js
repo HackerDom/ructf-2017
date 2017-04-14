@@ -294,7 +294,7 @@ export default class View {
 
 			camera = new THREE.PerspectiveCamera(55, aspect, 1, 1000);
 
-			const light = new THREE.PointLight(0xeeeeee, 1.4, 200, 1);
+			const light = new THREE.PointLight(0xdddddd, 1.4, 200, 1);
 			light.position.set(75, 20, 85);
 			light.shadow.mapSize.width = 2048;
 			light.shadow.mapSize.height = 2048;
@@ -319,7 +319,7 @@ export default class View {
 				map: planetDiffuseTex,
 				specularMap: planetGlossTex,
 				specular: new THREE.Color(0x999999),
-				shininess: 20
+				shininess: 14
 			});
 			const cloudMaterial  = new THREE.MeshPhongMaterial({
 				alphaMap : planetCloudsTex,
@@ -338,18 +338,24 @@ export default class View {
 			planetGroup.add(sphere);
 			planetGroup.add(_this.clouds);
 
-			const customMaterial = new THREE.MeshBasicMaterial(
+			const atmosphereMaterial = new THREE.ShaderMaterial(
 				{
-					opacity : 0.2,
-					color: 0xd65ec8,
+					uniforms:
+						{
+							"c":   { type: "f", value: 1.0 },
+							"p":   { type: "f", value: 1.4 },
+							glowColor: { type: "c", value: new THREE.Color(0xd65ec8) },
+							viewVector: { type: "v3", value: camera.position }
+						},
+					vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
+					fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
 					side: THREE.FrontSide,
+					blending: THREE.AdditiveBlending,
 					transparent: true
-				}
-			);
-
-			const glow = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40.7, 4), customMaterial);
+				}   );
+			const glow = new THREE.Mesh(new THREE.IcosahedronBufferGeometry(40.7, 4), atmosphereMaterial);
 			glow.position.set(0, 0, 0);
-			planetGroup.add(glow);
+			scene.add(glow);
 
 			calculateNodesPositions();
 
