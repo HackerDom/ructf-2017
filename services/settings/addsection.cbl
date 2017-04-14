@@ -4,21 +4,11 @@
        environment division.
        input-output section.
        file-control.
-         select optional sections-db assign to external 'sections.dat'
-           organization is indexed
-           access mode is dynamic
-           record key is name
-           lock mode is automatic
-           sharing with all other.
+         copy sectiondb.
 
        data division.
        file section.
-         fd sections-db is external.
-         01 ssection.
-           02 name picture x(40).
-           02 api-keys occurs 9 times.
-             03 api-key picture x(80).
-           02 api-keys-count picture 9.
+         copy sectionrecord.
 
        working-storage section.
        01 need-more picture 9.
