@@ -1,0 +1,9 @@
+{% extends 'base.twig' %}
+
+{% block content %}
+    {% if is_auth %}
+        <a href="/signout/">Sign out</a>
+    {% else %}
+        <a href="/signin/">Sign in</a>
+    {% endif %}
+{% endblock %}

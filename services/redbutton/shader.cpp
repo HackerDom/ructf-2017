@@ -8,8 +8,10 @@ Shader::Shader( GLuint type, const char* fileName, bool isBinary )
 {
 	printf( "Create shader %s\n", fileName );
 	FILE* f = fopen( fileName, "r" );
-	if( !f )
+	if( !f ){
+		printf( "Shader file not found %s\n", fileName );
 		return;
+	}
 
 	fseek( f, 0, SEEK_END );
 	size_t fileSize = ftell( f );

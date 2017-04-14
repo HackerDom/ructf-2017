@@ -1,7 +1,6 @@
 <?php
     require_once __DIR__ . '/../core/Controller.php';
     require_once __DIR__ . '/../core/Utils.php';
-
     class Signup extends Controller
     {
         public $template = 'signup.twig';
@@ -12,21 +11,18 @@
             $password = $_POST['password'];
             $first_name = $_POST['first_name'];
             $last_name = $_POST['last_name'];
-            $giro = $_POST['checkout_bill'];
+            $checkout_bill = $_POST['checkout_bill'];
             $u = new User(
                 [
                     'login' => $login,
                     'password' => $password,
                     'first_name' => $first_name,
                     'last_name' => $last_name,
-                    'giro' => $giro
+                    'checkout_bill' => $checkout_bill
                 ]
 
             );
-
-            if (!User::get_by_login($u->login)->id) {
-                $result = $u->insert_or_update();
-            }
+            $result = $u->insert();
             redirect('/signin/');
         }
 
