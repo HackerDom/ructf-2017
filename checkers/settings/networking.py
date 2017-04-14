@@ -39,7 +39,7 @@ def get_patch(patch):
 class State:
 	def __init__(self, hostname, port=None):
 		self.hostname = hostname
-		self.port = 1234 if port is None else port
+		self.port = 12345 if port is None else port
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.socket.connect((self.hostname, self.port))
 	def __del__(self):
