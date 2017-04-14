@@ -194,7 +194,7 @@ def gen_state():
                 "services": [
                     {
                         "flags": random.choice((1, 2, 3)),
-                        "status": random.choice((101, 102, 103, 104, 110)),
+                        "status": random.choice((101, 102)),
                         "id": service_(s)
                     }
                     for s in range(args.services)

@@ -6,9 +6,12 @@ import * as THREE_particle from "./particle";
 import Stats from "stats.js";
 import _ from "underscore";
 
-const countdown_start = new Date(2017, 3, 16, 9, 0, 0);//new Date(2017, 3, 16, 9, 0, 0); // month from 0
-const countdown_end = new Date(2017, 3, 16, 21, 0, 0);//new Date(2017, 3, 16, 21, 0, 0);
+const countdown_start = new Date(2017, 3, 16, 9, 0, 0); // month from 0
+const countdown_end = new Date(2017, 3, 16, 21, 0, 0);
 const YEKT_timezone_offset = 5 * 60 * 60 * 1000;
+const sprite_coeff = 3;
+const canvasWidth = 182 * sprite_coeff;
+const canvasHeight = 62 * sprite_coeff;
 
 export default class View {
 
@@ -26,9 +29,11 @@ export default class View {
 		});
 		controller.on('score', () => {
 			this.drawScoreboard();
+			this.updateTeamsTextures();
 		});
 		controller.on('servicesStatuses', () => {
 			this.drawServicesStatusesAndStat();
+			this.updateTeamsTextures();
 		});
 		controller.on('flagStat', () => {
 			$("#attacks-value").text(this.model.flagsCount);
@@ -41,15 +46,23 @@ export default class View {
 		this.loadLogos();
 	}
 
-	loadLogos() {
-		const _this = this;
-		_this.loadedLogosCount = 0;
+	updateTeamsTextures() {
 		for (let i=0; i<this.model.teams.length; i++) {
+			const team = this.model.teams[i];
+			View.drawSpriteTexture(team);
+			team.texture.needsUpdate = true;
+		}
+	}
+
+	loadLogos() {
+		for (let i=0; i<this.model.teams.length; i++) {
+			const team = this.model.teams[i];
 			const logoImg = new Image();
-			logoImg.src = View.getLogo(this.model.teams[i]);
-			this.model.teams[i].logoImage = logoImg;
+			logoImg.src = View.getLogo(team);
+			team.logoImage = logoImg;
 			logoImg.onload = function(){
-				_this.loadedLogosCount++;
+				View.drawSpriteTexture(team);
+				team.texture.needsUpdate = true;
 			};
 		}
 	}
@@ -165,6 +178,58 @@ export default class View {
 		return result;
 	}
 
+	static drawSpriteTexture(team) {
+		const canvas = team.canvas;
+
+		canvas.width = canvasWidth;
+		canvas.height = canvasHeight;
+		const context = canvas.getContext('2d');
+
+		context.fillStyle = "rgba(255, 255, 255, 0.2)";
+		context.fillRect(0, 0, canvasWidth, canvasHeight);
+
+		const borderWidth = 1.5 * sprite_coeff;
+		context.fillStyle = "rgba(34, 3, 71, 0.59)";
+		context.fillRect(borderWidth, borderWidth, canvasWidth - borderWidth * 2, canvasHeight - borderWidth * 2);
+
+		if (team.logoImage !== undefined && team.logoImage.complete && team.logoImage.naturalWidth > 0)
+			context.drawImage(team.logoImage, 6*sprite_coeff, 6*sprite_coeff, 50*sprite_coeff, 50*sprite_coeff);
+
+		const textLeftOffset = (6 + 50 + 6) * sprite_coeff;
+
+		context.fillStyle = "rgba(34, 3, 71, 1.0)";
+		context.fillRect(textLeftOffset, 7 * sprite_coeff, 48 * sprite_coeff, 4 * sprite_coeff);
+
+		context.fillStyle = "rgba(206, 65, 138, 1.0)";
+		for (let i = 0; i < _.filter(team.servicesStatuses, function(ss) { return ss; }).length; i++)
+			context.fillRect(textLeftOffset + i * 8 * sprite_coeff, 7 * sprite_coeff, 7 * sprite_coeff, 4 * sprite_coeff);
+
+		const grd = context.createLinearGradient(0, 0, canvasWidth, 0);
+		grd.addColorStop(0, "rgba(255, 255, 255, 1.0)");
+		grd.addColorStop(0.84, "rgba(255, 255, 255, 1.0)");
+		grd.addColorStop(0.99, "rgba(255, 255, 255, 0.0)");
+		grd.addColorStop(1, "rgba(255, 255, 255, 0.0)");
+		context.fillStyle = grd;
+		context.font = "Bold " + (16 * sprite_coeff) + "px Roboto";
+		context.fillText(team.name, textLeftOffset, 32 * sprite_coeff);
+
+		context.font = (16 * sprite_coeff) + "px Roboto";
+		context.fillText(team.score, textLeftOffset, 52 * sprite_coeff);
+
+		if (team.place !== null) {
+			context.fillStyle = "rgba(86, 138, 255, 1.0)";
+			context.font = "Bold " + (14 * sprite_coeff) + "px Roboto";
+			let place = team.place;
+			const dashIndex = place.indexOf("-");
+			if (dashIndex !== -1)
+				place = place.substring(0, dashIndex);
+			if (place.length > 1)
+				context.fillText(place, 162 * sprite_coeff, 15 * sprite_coeff);
+			else
+				context.fillText(place, 169 * sprite_coeff, 15 * sprite_coeff);
+		}
+	}
+
 	initThree() {
 		const teams = this.model.teams;
 		const $container = $("#container");
@@ -202,7 +267,7 @@ export default class View {
 			colorRandomness: 0,
 			turbulence: 0.5,
 			lifetime: 0.8,
-			size: 6,
+			size: 5,
 			sizeRandomness: 3
 		};
 
@@ -222,6 +287,11 @@ export default class View {
 		animate();
 
 		function init() {
+			renderer = new THREE.WebGLRenderer({alpha: true, antialias: true});
+			renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+			renderer.shadowMap.enabled = true;
+			$container.append(renderer.domElement);
+
 			camera = new THREE.PerspectiveCamera(55, aspect, 1, 1000);
 
 			const light = new THREE.DirectionalLight(0xcccccc, 1);
@@ -300,13 +370,11 @@ export default class View {
 				team.pos = nodePosition;
 				planetGroup.add(node);
 
-				setTimeout(function () {
-					const sprite = makeTextSprite(team);
-					const spritePosition = myDirectionVector.clone().multiplyScalar(52);
-					sprite.position.set(spritePosition.x, spritePosition.y, spritePosition.z);
-					team.sprite = sprite;
-					planetGroup.add(sprite);
-				}, 1000);
+				const sprite = makeTextSprite(team);
+				const spritePosition = myDirectionVector.clone().multiplyScalar(52);
+				sprite.position.set(spritePosition.x, spritePosition.y, spritePosition.z);
+				team.sprite = sprite;
+				planetGroup.add(sprite);
 			}
 
 			scene.add(planetGroup);
@@ -314,11 +382,6 @@ export default class View {
 			//const axes = new THREE.AxisHelper(100);
 			//scene.add(axes);
 
-			renderer = new THREE.WebGLRenderer({alpha: true, antialias: true});
-			renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-			renderer.shadowMap.enabled = true;
-
-			$container.append(renderer.domElement);
 			window.addEventListener('resize', onWindowResized, false);
 			document.addEventListener('mousedown', onDocumentMouseDown, false);
 			document.addEventListener('wheel', onDocumentMouseWheel, false);
@@ -358,43 +421,19 @@ export default class View {
 			return points;
 		}
 
-		function makeTextSprite(team)
-		{
-			const coeff = 3;
-			const canvasWidth = 182 * coeff;
-			const canvasHeight = 62 * coeff;
+		function makeTextSprite(team) {
+			team.canvas = document.createElement('canvas');
+			View.drawSpriteTexture(team);
 
-			const canvas = document.createElement('canvas');
-			canvas.width = canvasWidth;
-			canvas.height = canvasHeight;
-			const context = canvas.getContext('2d');
-
-			// Фон и рамка
-			const borderWidth = 3 * coeff;
-			context.fillStyle = "rgba(34, 3, 71, 0.59)";
-			context.strokeStyle = "rgba(255, 255, 255, 0.2)";
-			context.lineWidth = borderWidth * 2;
-			context.rect(0, 0, canvasWidth, canvasHeight);
-			context.stroke();
-			context.fill();
-
-			if (_this.loadedLogosCount === _this.model.teams.length) {
-				context.drawImage(team.logoImage, 6*coeff, 6*coeff, 50*coeff, 50*coeff);
-			}
-
-			const fontface = "Roboto";
-			const fontsize = 12 * coeff;
-			context.fillStyle = "rgba(255, 255, 255, 1.0)";
-			context.font = "Bold " + fontsize + "px " + fontface;
-			context.fillText(team.name, (6 + 50 + 6)*coeff, canvasHeight / 2);
-
-			const texture = new THREE.Texture(canvas);
+			const texture = new THREE.Texture(team.canvas);
+			team.texture = texture;
+			texture.magFilter = THREE.LinearFilter;
 			texture.minFilter = THREE.NearestMipMapNearestFilter; // https://threejs.org/docs/api/constants/Textures.html
 			texture.needsUpdate = true;
-			texture.anisotropy = 16;
+			texture.anisotropy = renderer.getMaxAnisotropy();
 			const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
 			const sprite = new THREE.Sprite(spriteMaterial);
-			sprite.scale.set(canvasWidth * 0.06 / coeff, canvasHeight * 0.06 / coeff, 1.0);
+			sprite.scale.set(canvasWidth * 0.06 / sprite_coeff, canvasHeight * 0.06 / sprite_coeff, 1.0);
 			return sprite;
 		}
 
@@ -429,9 +468,12 @@ export default class View {
 		}
 
 		function onDocumentMouseWheel(event) {
-			const newFov = camera.fov + (event.deltaY * 0.05);
-			if(newFov > 60 && newFov < 100)
-				camera.fov = newFov;
+			let newFov = camera.fov + (event.deltaY * 0.01);
+			if (newFov < 50)
+				newFov = 50;
+			else if (newFov > 100)
+				newFov = 100;
+			camera.fov = newFov;
 			camera.updateProjectionMatrix();
 		}
 
