@@ -40,16 +40,16 @@
            move zero to result-count
            move 4 to result-length
            move section-name to name
-           start sections-db
-             key is greater than name
-             invalid key
-               goback
-           end-start
-
            perform forever
              if result-count is equal to 51
                goback
              end-if
+
+             start sections-db
+               key is greater than name
+               invalid key
+                 goback
+             end-start
 
              read sections-db record
                at end goback
@@ -57,7 +57,7 @@
 
              add 1 to result-count end-add
              move name to rsection-name(result-count)
-             add 20 to result-length end-add
+             add function byte-length(name) to result-length end-add
           end-perform.
 
        end program all-section.
