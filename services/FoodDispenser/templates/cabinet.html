@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FoodDispenser</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css')}}">
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.2.1.min.js')}}"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row" style="margin-top: 50px">
+        <div class="col-sm-3 centered">
+            <div class="center-content">
+                <h1>FoodDispenser</h1>
+                <h3>Welcome, {{content.service_name}}!</h3>
+                <div class="spaced-block">
+                    {% if content.location %}
+                        <h5>Your servers are located at <i>{{content.location}}</i>!</h5>
+                    {% else %}
+                        <form action="set_location" method="get">
+                        <div>
+                            <input class="form-control spaced-field" style="width: 75%; display: inline-block" type="text" name="location" id="location" placeholder="Enter servers location">
+                            <button type="submit" class="btn btn-success" style="margin-top: -2px">Send</button>
+                        </div>
+
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="well">
+                <p>Latest 50 bad reviews:</p>
+                <div id="reviews"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function() {
+            var data = JSON.parse('{{content.comments| safe}}');
+
+            var reviews = $('#reviews');
+
+            $.each(data, function (_, entry) {
+
+                var review = $('<div class="well well-sm"></div>');
+
+                review.append($('<p></p>').html('&#x2605;'.repeat(entry['stars'])));
+                review.append($('<p></p>').text(entry['comment']));
+
+                reviews.append(review);
+            });
+        })
+    </script>
+</div>
+</body>
+</html>

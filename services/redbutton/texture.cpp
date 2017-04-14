@@ -109,7 +109,10 @@ Texture2D::Texture2D( const void* pngData, uint32_t size )
 
 	png_read_update_info( png, info );
 
-    Init( width, height, FORMAT_RGBA, nullptr );
+    if( !Init( width, height, FORMAT_RGBA, nullptr ) ){
+		errorHandler();
+		return;
+	}
 
 	RGBA* rows[ height ];
 	RGBA* p = m_shadowCopy;
@@ -150,6 +153,16 @@ Texture2D::~Texture2D()
 //
 bool Texture2D::Init(int width, int height, Format format, void* initData)
 {
+	m_shadowCopy = ( RGBA* )Allocate( width * height * sizeof( RGBA ) );
+    if( !m_shadowCopy ){
+        glDeleteTextures( 1, &m_texture );
+        m_texture = 0;
+        return false;
+    }
+    
+    if( initData )
+        memcpy( m_shadowCopy, initData, width * height * sizeof( RGBA ) );
+
     glGenTextures( 1, &m_texture );
     glBindTexture( GL_TEXTURE_2D, m_texture );
 
@@ -158,7 +171,7 @@ bool Texture2D::Init(int width, int height, Format format, void* initData)
 
 
     TextureFormat fmt = g_mapFormatToTextureFormat[ format ];
-    glTexImage2D( GL_TEXTURE_2D, 0, fmt.internalFormat, width, height, 0, fmt.format, fmt.type, initData );
+    glTexImage2D( GL_TEXTURE_2D, 0, fmt.internalFormat, width, height, 0, fmt.format, fmt.type, m_shadowCopy );
 
     if( !CheckError( "Failed to create texture" ) ) {
         glDeleteTextures( 1, &m_texture );
@@ -178,10 +191,6 @@ bool Texture2D::Init(int width, int height, Format format, void* initData)
         m_framebuffer = 0;
         return false;
     }
-
-    m_shadowCopy = ( RGBA* )Allocate( width * height * sizeof( RGBA ) );
-    if( initData )
-        memcpy( m_shadowCopy, initData, width * height * sizeof( RGBA ) );
 
     m_width = width;
     m_height = height;

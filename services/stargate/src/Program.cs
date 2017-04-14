@@ -23,7 +23,7 @@ namespace stargåte
 					options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(3);
 					options.ShutdownTimeout = TimeSpan.FromSeconds(1);
 				})
-				.UseUrls("http://*:5000/")
+				.UseUrls("http://*:5000/", "ws://*:5001/")
 				.UseStartup<Startup>()
 				.UseContentRoot(dir)
 				.UseWebRoot(Path.Combine(dir, "static"))
