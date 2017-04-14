@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FoodDispenser</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css')}}">
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.2.1.min.js')}}"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row" style="margin-top: 50px">
+        <div class="col-sm-3 centered">
+            <div class="center-content"><h1>FoodDispenser</h1><h3>Welcome, {{content.service_name}}!</h3></div>
+            <div class="well">
+                <p>Last bad reviews:</p>
+                <div id="reviews"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function() {
+            var data = JSON.parse("{{content.comments |safe}}");
+
+            var reviews = '';
+
+            $.each(data, function (_, review) {
+                reviews += '<div class="well well-sm"><p>';
+                for (var i = 0; i < review['stars']; i++)
+                    reviews += '&#x2605;';
+                reviews += '</p><p>';
+                reviews += review['comment'];
+                reviews += '</p></div>';
+            });
+
+            $('#reviews').html(reviews);
+        })
+    </script>
+</div>
+</body>
+</html>
