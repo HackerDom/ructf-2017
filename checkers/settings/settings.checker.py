@@ -4,6 +4,7 @@ import sys
 from checker import Checker
 import checker
 from networking import State
+import networking
 import random
 import json
 
@@ -79,16 +80,21 @@ def handler_put(hostname, id, flag):
 	section_name = checker.get_rand_string(20)
 	apikey, section_name = con.create_section(section_name)
 	key = get_random_key(words)
-	con.fix_section(section_name, apikey, [(key, flag)])
-	checker.ok(message=json.dumps({'key': apikey, 'section_name': section_name, 'pkey': key}))
+	patch = con.fix_section(section_name, apikey, [(key, flag)])
+	key = patch[0][0]
+	checker.ok(message=json.dumps({'key': apikey.decode(encoding='ascii', errors='ignore'), 'section_name': section_name.decode(encoding='ascii', errors='ignore'), 'pkey': key.decode(encoding='ascii', errors='ignore')}))
 
 def handler_get(hostname, id, flag):
 	id = json.loads(id)
 	section_name = id['section_name']
 	key = id['key']
+	pkey = id['pkey']
 	con = State(hostname)
+	key = networking.get_api_key(key)
+	pkey = networking.get_k(pkey)
+	flag = networking.get_v(flag)
 	values = con.get_full_section(section_name, key)
-	if id['pkey'] not in values or values[id['pkey']] != flag:
+	if pkey not in values or values[pkey] != flag:
 		checker.corrupt(error='flag not found')
 	checker.ok()
 
