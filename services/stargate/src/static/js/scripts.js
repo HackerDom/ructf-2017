@@ -152,7 +152,7 @@ var MAX_MSG_COUNT = 30;
 })();
 
 (() => {
-	var socket = new ReconnectingWebSocket("ws://" + location.host);
+	var socket = new ReconnectingWebSocket("ws://" + location.host.split(":")[0] + ":5001/");
 
 	socket.binaryType = "arraybuffer";
 	socket.timeoutInterval = 5000;
