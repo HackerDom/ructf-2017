@@ -8,6 +8,7 @@ import json
 import stars
 import random
 import re
+from struct import *
 
 SERVICE_NAME = "redbutton"
 OK, CORRUPT, MUMBLE, DOWN, CHECKER_ERROR = 101, 102, 103, 104, 110
@@ -15,6 +16,7 @@ OK, CORRUPT, MUMBLE, DOWN, CHECKER_ERROR = 101, 102, 103, 104, 110
 
 WIDTH = 128
 HEIGHT = 128
+TENTACLES_NUM = 5
 
 
 guid_regex = re.compile( '^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}\\n' )
@@ -54,7 +56,7 @@ def put(*args):
 		flag_defs = flag_defs + ("-D F%d=%d " % ( i, byte ) )
 	
 	output_file = "/tmp/%s.bin" % flag_id
-	defines = "-D COLOR_R=%s -D COLOR_G=%s -D COLOR_B=%s -D L0=%s -D L1=%s -D ANGLE=%s -D WIDTH=%s -D HEIGHT=%s %s" % ( COLOR_R, COLOR_G, COLOR_B, L0, L1, ANGLE, WIDTH, HEIGHT, flag_defs )
+	defines = "-D COLOR_R=%s -D COLOR_G=%s -D COLOR_B=%s -D L0=%s -D L1=%s -D ANGLE=%s -D WIDTH=%s -D HEIGHT=%s -D TENTACLES_NUM=%s %s" % ( COLOR_R, COLOR_G, COLOR_B, L0, L1, ANGLE, WIDTH, HEIGHT, TENTACLES_NUM, flag_defs )
 	driver = "Mali-400_r4p0-00rel1"
 	core = "Mali-400"
 	rev = "r0p0"
@@ -63,18 +65,24 @@ def put(*args):
 
 	os.remove( output_file + ".prerotate" )
 
-	binary_file = output_file + ".non-prerotate"
+	shader_file_name = output_file + ".non-prerotate"
+	shader_file = open( shader_file_name, 'rb' )
+	shader_file.seek( 0, os.SEEK_END )
+	shader_size = shader_file.tell()
+	shader_file.seek( 0, os.SEEK_SET )
+
+	detector = pack( 'i', shader_size ) + shader_file.read() + pack( 'ii', 8, 1 )
 	
 	flag_id = "" # reset flag id, we will build new, based on service response
 	url = 'http://%s/detectors/add' % addr
-	files = { 'detector': open( binary_file, 'rb' ).read() }
+	files = { 'detector': detector }
 	headers = { 'User-Agent' : UserAgents.get() }
 	try:
 		r = requests.post(url, files=files, headers=headers )
 		if r.status_code == 502:
-			close(DOWN, "Service is down", "Nginx 502", binary_file)
+			close(DOWN, "Service is down", "Nginx 502", shader_file_name)
 		if r.status_code != 200:
-			close( MUMBLE, "Submit error", "Invalid status code: %s %d" % ( url, r.status_code ), binary_file )	
+			close( MUMBLE, "Submit error", "Invalid status code: %s %d" % ( url, r.status_code ), shader_file_name )	
 
 		if not guid_regex.match( r.text ):
 			close( CORRUPT, "Service corrupted", "Invalid guid received" )
@@ -82,10 +90,10 @@ def put(*args):
 		try:
 			flag_id = json.dumps( { 'guid' : r.text[:-1], 'COLOR_R' : COLOR_R, 'COLOR_G' : COLOR_G, 'COLOR_B' : COLOR_B, 'L0' : L0, 'L1' : L1, 'ANGLE' : ANGLE, 'WIDTH' : WIDTH, 'HEIGHT' : HEIGHT } )
 		except Exception as e:
-			close(CORRUPT, "Service corrupted", "Service returns invalid guid: %s" % e, binary_file)			
+			close(CORRUPT, "Service corrupted", "Service returns invalid guid: %s" % e, shader_file_name)			
 	except Exception as e:
-		 close(DOWN, "HTTP Error", "HTTP error: %s" % e, fileToRemove=binary_file)
-	close(OK, flag_id, fileToRemove=binary_file)
+		 close(DOWN, "HTTP Error", "HTTP error: %s" % e, fileToRemove=shader_file_name)
+	close(OK, flag_id, fileToRemove=shader_file_name)
 	
 
 def get(*args):
@@ -106,7 +114,7 @@ def get(*args):
 	WIDTH = params[ 'WIDTH' ]
 	HEIGHT = params[ 'HEIGHT' ]
 
-	image = stars.generate_image( WIDTH, HEIGHT, COLOR, L0, L1, ANGLE, 5 )
+	image = stars.generate_image( WIDTH, HEIGHT, COLOR, L0, L1, ANGLE, TENTACLES_NUM )
 
 	url = 'http://%s/detectors/%s/check' % ( addr, guid )
 	try:
