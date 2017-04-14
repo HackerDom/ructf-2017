@@ -200,9 +200,6 @@ CheckDetectorProcessor::CheckDetectorProcessor(HttpRequest request, Detector *de
 {
 	this->detector = detector;
 	this->data = NULL;
-
-	width = 0;
-	height = 0;
 }
 
 CheckDetectorProcessor::~CheckDetectorProcessor()
@@ -228,36 +225,6 @@ int CheckDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key,
 		memcpy(this->data, data + offset, size);
 
 		dataSize = size;
-	}
-
-	if (!strcmp(key, "w") && size > 0)
-	{
-		printf(":: found out width, length = %d\n", size);
-
-		char buffer[16];
-
-		if (size > sizeof(buffer))
-			return MHD_NO;
-
-		memset(buffer, 0, sizeof(buffer));
-		memcpy(buffer, data + offset, size);
-
-		width = atoi(buffer);
-	}
-
-	if (!strcmp(key, "h") && size > 0)
-	{
-		printf(":: found out height, length = %d\n", size);
-
-		char buffer[16];
-
-		if (size > sizeof(buffer))
-			return MHD_NO;
-
-		memset(buffer, 0, sizeof(buffer));
-		memcpy(buffer, data + offset, size);
-
-		height = atoi(buffer);
 	}
 
 	return MHD_YES;
@@ -315,13 +282,13 @@ void CheckDetectorProcessor::FinalizeRequest()
 		save_png( "input.png", texture.GetRGBA(), texture.GetWidth(), texture.GetHeight() );
 		{
 			FILE* f = fopen( "flag.bin", "w" );
-			fwrite( (const void *)detector->data, (uint32_t)detector->length, 1, f );
+			fwrite( (const void *)detector->shader, (uint32_t)detector->shaderSize, 1, f );
 			fclose( f );
 		}
 	#endif
 
 	    VertexShader vs( "shaders/simple.vert", false );
-	    FragmentShader fs( (const void *)detector->data, (uint32_t)detector->length );
+	    FragmentShader fs( (const void *)detector->shader, (uint32_t)detector->shaderSize );
 	    Program pr( vs, fs );
 
 	    if( pr.GetProgram() == 0 ){
@@ -334,8 +301,9 @@ void CheckDetectorProcessor::FinalizeRequest()
 	    pr.SetAttribute( "v_pos", 3, GL_FLOAT, GL_FALSE, 0, vVertices, 6 * 3 * sizeof( GLfloat ) );
 	    pr.SetAttribute( "v_uv", 2, GL_FLOAT, GL_FALSE, 0, vUv, 6 * 2 * sizeof( GLfloat ) );
 
-	    int w = width > 0 ? width : 8;
-	    int h = height > 0 ? height : 1;
+	    const int w = detector->targetWidth;
+	    const int h = detector->targetHeight;
+	    const int targetSize = w * h * sizeof( RGBA );
 	    Texture2D target( w, h, FORMAT_RGBA );
 	    if( target.GetTexture() == 0 ){
 			printf(":: failed to create target texture\n" );
@@ -356,11 +324,11 @@ void CheckDetectorProcessor::FinalizeRequest()
 		printf( ":: Time: %f\n", endTime - startTime );
 
 	    char *responseData = (char *)target.GetRGBA();
-	    char *dataCopy = new char[w * h * 4];
-	    memcpy(dataCopy, responseData, w * h * 4);
+	    char *dataCopy = new char[ targetSize ];
+	    memcpy(dataCopy, responseData, targetSize );
 
-	    printf(":: returning response %d\n", w * h * 4);
-		Complete(HttpResponse(MHD_HTTP_OK, dataCopy, w * h * 4));
+	    printf(":: returning response %d\n", targetSize );
+		Complete(HttpResponse(MHD_HTTP_OK, dataCopy, targetSize ));
 	}
 
 	MakeCurrentNullCtx();

@@ -50,8 +50,6 @@ public:
 	size_t dataSize;
 	char *data;
 	Detector *detector;
-	uint32_t width;
-	uint32_t height;
 
 protected:
 	virtual void FinalizeRequest();
