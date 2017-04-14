@@ -89,7 +89,7 @@ char *Template::Fill(const char *firstKey, ...)
 
 			size_t currentKeyLength = strlen(key);
 
-			printf(":: currentKeyLength = %ld\n", currentKeyLength);
+			printf(":: currentKeyLength = %d\n", currentKeyLength);
 
 			if (!strncmp(key, varStart + 2, currentKeyLength))
 			{

@@ -26,8 +26,8 @@ namespace stargåte
 				.UseStaticFiles(new StaticFileOptions {OnPrepareResponse = ctx => ctx.Context.Response.Headers.Append("Cache-Control", "public, max-age=600")})
 				.UseRouter(
 					new RouteBuilder(app)
-						.MapPut("put", ctx => ProcessRequest(ctx, IncomingCallHandler.ProcessRequest))
-						.MapGet("get", ctx => ProcessRequest(ctx, TransmissionInfoHandler.ProcessRequest))
+						.MapPut("send", ctx => ProcessRequest(ctx, IncomingCallHandler.ProcessRequest))
+						.MapGet("find", ctx => ProcessRequest(ctx, TransmissionInfoHandler.ProcessRequest))
 						.Build())
 				.Run(ctx =>
 				{

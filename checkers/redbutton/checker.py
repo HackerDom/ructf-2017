@@ -7,6 +7,7 @@ import UserAgents
 import json
 import stars
 import random
+import re
 
 SERVICE_NAME = "redbutton"
 OK, CORRUPT, MUMBLE, DOWN, CHECKER_ERROR = 101, 102, 103, 104, 110
@@ -16,11 +17,16 @@ WIDTH = 128
 HEIGHT = 128
 
 
-def close(code, public="", private=""):
+guid_regex = re.compile( '^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}\\n' )
+
+
+def close(code, public="", private="", fileToRemove=""):
 	if public:
 		print(public)
 	if private:
 		print(private, file=stderr)
+	if fileToRemove:
+		os.remove( fileToRemove )
 	print('Exit with code %d' % code, file=stderr)
 	exit(code)
 
@@ -66,21 +72,20 @@ def put(*args):
 	try:
 		r = requests.post(url, files=files, headers=headers )
 		if r.status_code == 502:
-			close(DOWN, "Service is down", "Nginx 502")
+			close(DOWN, "Service is down", "Nginx 502", binary_file)
 		if r.status_code != 200:
-			close( MUMBLE, "Submit error", "Invalid status code: %s %d" % ( url, r.status_code ) )	
+			close( MUMBLE, "Submit error", "Invalid status code: %s %d" % ( url, r.status_code ), binary_file )	
 
-		# TODO check guid
+		if not guid_regex.match( r.text ):
+			close( CORRUPT, "Service corrupted", "Invalid guid received" )
 
 		try:
-			flag_id = json.dumps( { 'guid' : r.text[:-1], 'COLOR_R' : COLOR_R, 'COLOR_G' : COLOR_G, 'COLOR_B' : COLOR_B, 'L0' : L0, 'L1' : L1, 'ANGLE' : ANGLE } )
+			flag_id = json.dumps( { 'guid' : r.text[:-1], 'COLOR_R' : COLOR_R, 'COLOR_G' : COLOR_G, 'COLOR_B' : COLOR_B, 'L0' : L0, 'L1' : L1, 'ANGLE' : ANGLE, 'WIDTH' : WIDTH, 'HEIGHT' : HEIGHT } )
 		except Exception as e:
-			close(CORRUPT, "Service corrupted", "Service returns invalid guid: %s" % e)			
+			close(CORRUPT, "Service corrupted", "Service returns invalid guid: %s" % e, binary_file)			
 	except Exception as e:
-		 close(DOWN, "HTTP Error", "HTTP error: %s" % e)
-	close(OK, flag_id)
-
-	os.remove( binary_file )
+		 close(DOWN, "HTTP Error", "HTTP error: %s" % e, fileToRemove=binary_file)
+	close(OK, flag_id, fileToRemove=binary_file)
 	
 
 def get(*args):
@@ -98,6 +103,8 @@ def get(*args):
 	L0 = params[ 'L0' ]
 	L1 = params[ 'L1' ]
 	ANGLE = params[ 'ANGLE' ]
+	WIDTH = params[ 'WIDTH' ]
+	HEIGHT = params[ 'HEIGHT' ]
 
 	image = stars.generate_image( WIDTH, HEIGHT, COLOR, L0, L1, ANGLE, 5 )
 
