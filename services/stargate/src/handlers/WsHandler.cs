@@ -16,6 +16,7 @@ namespace stargåte.handlers
 		{
 			using(var ws = await context.WebSockets.AcceptWebSocketAsync().ConfigureAwait(false))
 			{
+				await Task.Delay(250, context.RequestAborted).ConfigureAwait(false); //NOTE: mono ClientWebSocket issue workaround
 				await ws.SendAsync(new ArraySegment<byte>(HelloMessage), WebSocketMessageType.Text, true, context.RequestAborted).Wrap().WithTimeout(Settings.WsSendTimeout).ConfigureAwait(false);
 				var semaphore = new SemaphoreSlim(0, 1);
 				Clients.TryAdd(ws, semaphore);
