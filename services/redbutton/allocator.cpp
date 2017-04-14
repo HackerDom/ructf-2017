@@ -232,6 +232,7 @@ void Free( void* ptr )
 //
 void PrintMap()
 {
+    AutoMutexLock autoLock( g_lock );
     printf( "Start: %p\n", g_freeChunksList );
     printf( "Curr : %p\n", g_curChunk );
     Chunk* chunk = g_freeChunksList;
