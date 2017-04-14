@@ -6,10 +6,6 @@
 #include "spin_lock.h"
 #include "allocator.h"
 
-#if 0
-    #define DEBUG 1
-#endif
-
 struct Chunk
 {
     uint8_t* end;
@@ -47,7 +43,7 @@ void InitAllocator()
     g_freeChunksList = chunk;
     g_curChunk = chunk;
 
-#if DEBUG
+#if ALLOCATOR_DEBUG
     printf( "%p : %p\n", g_memory, g_memoryEnd );
 #endif
 }
@@ -114,7 +110,7 @@ void* AllocateUnsafe( size_t size )
 //
 void Merge()
 {
-#ifdef DEBUG
+#ifdef ALLOCATOR_DEBUG
     printf( "Merge\n" );
 #endif
 
@@ -136,7 +132,7 @@ void Merge()
     }
 
     g_curChunk = g_freeChunksList;
-#ifdef DEBUG
+#ifdef ALLOCATOR_DEBUG
     PrintMap();
 #endif
 }
@@ -146,7 +142,7 @@ void Merge()
 void* Allocate( size_t size )
 {
     AutoMutexLock autoLock( g_lock );
-#if DEBUG
+#if ALLOCATOR_DEBUG
     printf( "Allocate %u %u\n", size, size + sizeof( Chunk ) );
 #endif
 
@@ -156,7 +152,7 @@ void* Allocate( size_t size )
         ptr = AllocateUnsafe( size );
     }
 
-#ifdef DEBUG
+#ifdef ALLOCATOR_DEBUG
     printf( "\t%p\n", ptr );
     PrintMap();
 #endif
@@ -168,7 +164,7 @@ void* Allocate( size_t size )
 void Free( void* ptr )
 {
     AutoMutexLock autoLock( g_lock );
-#ifdef DEBUG
+#ifdef ALLOCATOR_DEBUG
     printf( "Free %p\n", ptr );
 #endif
     if( !ptr )
@@ -201,7 +197,7 @@ void Free( void* ptr )
                     newChunk->prev->next = newChunk;
                 else
                     g_freeChunksList = newChunk;
-#ifdef DEBUG
+#ifdef ALLOCATOR_DEBUG
     PrintMap();
 #endif
 
@@ -223,7 +219,7 @@ void Free( void* ptr )
             lastChunk->next = newChunk;
         }
     }
-#ifdef DEBUG
+#ifdef ALLOCATOR_DEBUG
     PrintMap();
 #endif
 }

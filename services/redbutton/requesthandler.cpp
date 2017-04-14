@@ -299,13 +299,15 @@ void CheckDetectorProcessor::FinalizeRequest()
 					};
 
 
+#if DEBUG
 	PrintMap();
+#endif
 
 	{
 		Texture2D texture( data, dataSize );
 
 		
-	#if 1 
+	#if DEBUG
 		save_png( "input.png", texture.GetRGBA(), texture.GetWidth(), texture.GetHeight() );
 		{
 			FILE* f = fopen( "flag.bin", "w" );
@@ -344,7 +346,7 @@ void CheckDetectorProcessor::FinalizeRequest()
 		endTime = tp.tv_sec + tp.tv_nsec / 1000000000.0;
 		printf( ":: Time: %f\n", endTime - startTime );
 
-	#if 1
+	#if DEBUG
 	    for( int i = 0; i < w * h; i++ ){
 	    		printf( "%02X%02X%02X%02X", target.GetRGBA()[ i ].r, target.GetRGBA()[ i ].g, 
 	            target.GetRGBA()[ i ].b, 
