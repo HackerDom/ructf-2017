@@ -1,6 +1,7 @@
-from flask import Flask, request, jsonify, render_template, redirect, abort
-#from uwsgidecorators import cron
+from flask import Flask, request, jsonify, render_template, redirect
+from uwsgidecorators import cron
 from json import loads, JSONDecodeError, dumps
+from config import config
 from api import api_hub
 from database.requests import \
     tokenizer, user_requests, rating_requests, service_requests
@@ -114,9 +115,9 @@ def get_request_json():
         return None
 
 
-#@cron(-1, -1, -1, -1, -1)
-#def dynamically_load_config_changes(_):
-#    __config.update_config()
+@cron(-1, -1, -1, -1, -1)
+def dynamically_load_config_changes(_):
+    config.update_config()
 
 
 if __name__ == '__main__':

@@ -66,6 +66,7 @@ class Config:
         else:
             with open(self.config_file, "r") as configfile:
                 data = json.load(configfile)
+                Config.data = Config.ConfigDir()
                 Config.data.add(data)
 
 
