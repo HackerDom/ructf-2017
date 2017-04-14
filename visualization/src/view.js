@@ -294,27 +294,32 @@ export default class View {
 
 			camera = new THREE.PerspectiveCamera(55, aspect, 1, 1000);
 
-			const light = new THREE.DirectionalLight(0xcccccc, 1);
-			light.position.set(75, 30, 60);
-			light.shadow.mapSize.width = 2048; // default is 512
-			light.shadow.mapSize.height = 2048; // default is 512
+			const light = new THREE.PointLight(0xeeeeee, 1.4, 200, 1);
+			light.position.set(75, 20, 85);
+			light.shadow.mapSize.width = 2048;
+			light.shadow.mapSize.height = 2048;
 			light.castShadow = true;
 			light.shadow.camera.left = -45;
 			light.shadow.camera.right = 45;
 			light.shadow.camera.top = 45;
 			light.shadow.camera.bottom = -45;
+			light.shadow.radius = 3;
 			//light.shadowCameraHelper = new THREE.CameraHelper(light.shadow.camera);
 			scene.add(light);
 			//scene.add(light.shadowCameraHelper);
 
 
-			scene.add(new THREE.AmbientLight(0x444444));
+			scene.add(new THREE.AmbientLight(0x333333));
 
+			//planetBumpTex.magFilter = THREE.LinearMipMapLinearFilter;
+			//planetDiffuseTex.magFilter = THREE.LinearMipMapLinearFilter;
 			const planetMaterial = new THREE.MeshPhongMaterial({
 				bumpMap: planetBumpTex,
 				bumpScale: 0.3,
 				map: planetDiffuseTex,
 				specularMap: planetGlossTex,
+				specular: new THREE.Color(0x999999),
+				shininess: 20
 			});
 			const cloudMaterial  = new THREE.MeshPhongMaterial({
 				alphaMap : planetCloudsTex,
@@ -509,7 +514,7 @@ export default class View {
 			camera.lookAt(scene.position);
 			const delta = clock.getDelta();
 			planetGroup.rotateY(delta / 40);
-			_this.clouds.rotateY(delta / 100);
+			//_this.clouds.rotateY(delta / 300);
 
 			removeParticleSystemsIfNeeded();
 			const now = new Date().getTime();

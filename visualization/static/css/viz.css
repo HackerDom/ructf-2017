@@ -12,8 +12,8 @@ body,
 #container {
   overflow: hidden;
   position: absolute;
-  left: 18%;
-  width: 82%;
+  left: 15%;
+  width: 85%;
 }
 #attacks-value,
 #alive-value,
