@@ -71,16 +71,16 @@
 
            move section-name to ssection-name
            move param-name to sparam-name
-           start settings-db 
-             key is greater than composite-key
-             invalid key
-               goback
-           end-start
-
            perform forever
              if result-count is equal to 9
                goback
              end-if
+
+             start settings-db 
+               key is greater than composite-key
+               invalid key
+                 goback
+             end-start
 
              read settings-db record 
                at end goback 

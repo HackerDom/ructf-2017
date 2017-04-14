@@ -40,16 +40,16 @@
            move zero to result-count
            move 4 to result-length
            move section-name to name
-           start sections-db
-             key is greater than name
-             invalid key
-               goback
-           end-start
-
            perform forever
              if result-count is equal to 51
                goback
              end-if
+
+             start sections-db
+               key is greater than name
+               invalid key
+                 goback
+             end-start
 
              read sections-db record
                at end goback
