@@ -80,17 +80,12 @@ def handler_get(hostname, id, flag):
 
 def handler_put_1(hostname, id, flag):
 	con = State(hostname)
-	key = con.create_section(flag)
-	checker.ok(message=json.dump({'key': key, 'section_name': flag}))
-
-def handler_put_2(hostname, id, flag):
-	con = State(hostname)
 	section_name = checker.get_rand_string(20)
 	key = con.create_section(section_name)
 	con.add_apikey(section_name, key, flag)
 	checker.ok(message=json.dump({'key': flag, 'section_name': section_name}))
 
-def handler_put_3(hostname, id, flag):
+def handler_put_2(hostname, id, flag):
 
 	with open('words.txt') as f:
 		words = f.readlines()
@@ -102,7 +97,7 @@ def handler_put_3(hostname, id, flag):
 	con.fix_section(section_name, apikey, [key, flag])
 	checker.ok(message=json.dump({'key': apikey, 'section_name': section_name, 'pkey': key}))
 
-def handler_get_3(hostname, id, flag):
+def handler_get_2(hostname, id, flag):
 	id = json.loads(id)
 	section_name = id['section_name']
 	key = id['key']
@@ -114,7 +109,7 @@ def handler_get_3(hostname, id, flag):
 
 
 def main():
-	checker = Checker(handler_check, [(handler_put_1, handler_get), (handler_put_2, handler_get), (handler_put_3, handler_get_3)])
+	checker = Checker(handler_check, [(handler_put_1, handler_get), (handler_put_3, handler_get_3)])
 	checker.process(sys.argv)
 
 if __name__ == "__main__":
