@@ -16,11 +16,11 @@ namespace stargåte.handlers
 		{
 			context.Response.ContentType = "text/plain; charset=utf-8";
 
-			var name = context.Request.Headers["X-SG1-Name"].FirstOrDefault();
+			var name = context.Request.Headers["X-SG1-Name"].FirstOrDefault().RemoveWhiteSpaces();
 			if(string.IsNullOrEmpty(name))
-				return new HttpResult {StatusCode = 400, Message = "Substance Without Name"};
+				return new HttpResult {StatusCode = 400, Message = "Bad Substance Name"};
 
-			var secret = context.Request.Headers["X-SG1-Entropy"].FirstOrDefault();
+			var secret = context.Request.Headers["X-SG1-Entropy"].FirstOrDefault().RemoveWhiteSpaces();
 			if(name.Length > Settings.MaxFieldLength || secret?.Length > Settings.MaxFieldLength)
 				return new HttpResult {StatusCode = 400, Message = "Too Long"};
 

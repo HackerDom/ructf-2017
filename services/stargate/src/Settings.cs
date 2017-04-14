@@ -17,8 +17,8 @@ namespace stargåte
 		public const int MaxIncomingSize = 65536;
 		public const int MaxIncomingDimensions = 32768;
 
-		public const long MaxSpectrumSize = 16384;
-		public static int MaxTransmissionInfoSize = 1024;
+		public const int MaxSpectrumSize = 16384;
+		public const int MaxTransmissionInfoSize = 1024;
 
 		public static readonly byte[] Key;
 
