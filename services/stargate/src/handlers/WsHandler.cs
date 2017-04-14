@@ -16,7 +16,7 @@ namespace stargåte.handlers
 		{
 			using(var ws = await context.WebSockets.AcceptWebSocketAsync().ConfigureAwait(false))
 			{
-				await ws.SendAsync(new ArraySegment<byte>(HelloMessage), WebSocketMessageType.Text, true, context.RequestAborted).Wrap().WithTimeout(Settings.ReadWriteTimeout).ConfigureAwait(false);
+				await ws.SendAsync(new ArraySegment<byte>(HelloMessage), WebSocketMessageType.Text, true, context.RequestAborted).Wrap().WithTimeout(Settings.WsSendTimeout).ConfigureAwait(false);
 				var semaphore = new SemaphoreSlim(0, 1);
 				Clients.TryAdd(ws, semaphore);
 				await semaphore.WaitAsync(context.RequestAborted).ConfigureAwait(false);
@@ -36,7 +36,7 @@ namespace stargåte.handlers
 		{
 			try
 			{
-				if(ws.State == WebSocketState.Open && await ws.SendAsync(buffer, WebSocketMessageType.Binary, true, token).Wrap().WithTimeout(Settings.ReadWriteTimeout).ConfigureAwait(false))
+				if(ws.State == WebSocketState.Open && await ws.SendAsync(buffer, WebSocketMessageType.Binary, true, token).Wrap().WithTimeout(Settings.WsSendTimeout).ConfigureAwait(false))
 					return;
 			}
 			catch { /* ignored */ }
