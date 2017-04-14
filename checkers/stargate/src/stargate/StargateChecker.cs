@@ -44,7 +44,9 @@ namespace checker.stargate
 
 				await Console.Error.WriteLineAsync("ws connected").ConfigureAwait(false);
 
-				await wsClient.TryWaitMessageAsync(buffer => (buffer.Count == 2 && buffer.Array[0] == (byte)'h' && buffer.Array[1] == (byte)'i', buffer), NetworkOpTimeout).ConfigureAwait(false);
+				if(await wsClient.TryWaitMessageAsync(buffer => Tuple.Create(buffer.Count == 2 && buffer.Array[0] == (byte)'h' && buffer.Array[1] == (byte)'i', buffer), NetworkOpTimeout).ConfigureAwait(false) == default(ArraySegment<byte>))
+					throw new CheckerException(ExitCode.MUMBLE, "await hello failed");
+
 				await Console.Error.WriteLineAsync("ws hello received").ConfigureAwait(false);
 
 				// ReSharper disable once AccessToDisposedClosure
@@ -52,7 +54,7 @@ namespace checker.stargate
 				{
 					if(!ProtoBufHelper.TryDeserialize<Transmission>(buffer, out var transmission))
 						throw new CheckerException(ExitCode.MUMBLE, "invalid ws data");
-					return (transmission.Name == b64Name, transmission);
+					return Tuple.Create(transmission.Name == b64Name, transmission);
 				}, NetworkOpTimeout));
 
 				await RndUtil.RndDelay(MaxDelay).ConfigureAwait(false);
@@ -114,10 +116,11 @@ namespace checker.stargate
 				throw new CheckerException(ExitCode.CORRUPT, "no entropy found");
 		}
 
-		private const int Port = 5000;
+		private const int WsPort = 5001;
+		private const int HttpPort = 5000;
 
-		private static Uri GetBaseWsUri(string host) => new Uri($"ws://{host}:{Port}/");
-		private static Uri GetBaseHttpUri(string host) => new Uri($"http://{host}:{Port}/");
+		private static Uri GetBaseWsUri(string host) => new Uri($"ws://{host}:{WsPort}/");
+		private static Uri GetBaseHttpUri(string host) => new Uri($"http://{host}:{HttpPort}/");
 
 		private const string GetRelative = "/find/";
 		private const string PutRelative = "/send/";

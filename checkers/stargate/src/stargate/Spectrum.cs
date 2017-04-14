@@ -36,10 +36,10 @@ namespace checker.stargate
 			G[color.G]++;
 			B[color.B]++;
 			A[color.A]++;
-			var (h, s, l) = color.ToHSL();
-			H[h]++;
-			S[s]++;
-			L[l]++;
+			var hsl = color.ToHSL();
+			H[hsl.H]++;
+			S[hsl.S]++;
+			L[hsl.L]++;
 		}
 
 		public void Zero()
