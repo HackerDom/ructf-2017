@@ -35,7 +35,9 @@ int main(int argc, char *argv[])
 
 	server.Start(16780);
 
-	getchar();
+	while(1){
+        sleep(1);
+    }
 
 	server.Stop();
 #endif
