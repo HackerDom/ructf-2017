@@ -1,0 +1,17 @@
+[Unit]
+    Description=Stargate service
+
+[Service]
+    ExecStart=/home/stargate/stargåte
+    WorkingDirectory=/home/stargate
+    User=stargate
+    Group=stargate
+    Restart=on-failure
+    RestartSec=1s
+    Environment=DOTNET_CLI_TELEMETRY_OPTOUT=1
+    Environment=COMPlus_JitTelemetry=0
+    Environment=COMPlus_legacyCorruptedStateExceptionsPolicy=1
+    Environment=COMPlus_legacyUnhandledExceptionPolicy=1
+   
+[Install]
+    WantedBy=multi-user.target

@@ -1,12 +1,12 @@
 precision mediump float;
 uniform sampler2D tex;
 
-/*const float COLOR_R = 83.0;
-const float COLOR_G = 171.0;
-const float COLOR_B = 153.0;
-const float L0 = 11.952579280055215;
-const float L1 = 15.779421983487431;
-const float ANGLE = 80.33672063732777;
+/*const float COLOR_R = 81.0;
+const float COLOR_G = 219.0;
+const float COLOR_B = 79.0;
+const float L0 = 20.305017977590403;
+const float L1 = 26.52041580358022;
+const float ANGLE = 36.94160821928396;
 const int WIDTH = 128;
 const int HEIGHT = 128;*/
 
@@ -92,6 +92,8 @@ void main()
 
 	const int PointsNum = 1024;
 	const int LinesNum = 1024;
+	const int TentaclesNum = LinesNum / 2;
+
 	vec2 points[ PointsNum ];
 	int pointsCounter = 0;
 	vec4 ret =  vec4( 0.0, 1.0, 0.0, 1.0 );
@@ -139,12 +141,72 @@ void main()
 			if( !CheckLength( pi, pj ) )
 				continue;
 
-			lines[ linesCounter++ ] = vec4( pi.x, pi.y, pj.x, pj.y );
+			float x1 = pi.x;
+			float y1 = pi.y;
+			float x2 = pj.x;
+			float y2 = pj.y;
+
+			float dx = x2 - x1;
+			float dy = y2 - y1;
+
+			bool is_steep = abs( dy ) > abs( dx );
+			if( is_steep ){
+				float t = x1;
+				x1 = y1;
+				y1 = t;
+
+				t = x2;
+				x2 = y2;
+				y2 = t;
+			}
+
+			if( x1 > x2 ){
+				float t = x1;
+				x1 = x2;
+				x2 = t;
+
+				t = y1;
+				y1 = y2;
+				y2 = t;
+			}
+
+			dx = x2 - x1;
+			dy = y2 - y1;
+
+			float error = dx / 2.0;
+			int ystep = -1;
+			if( y1 < y2 )
+				ystep = 1;
+
+			bool ok = true;
+
+			int y = int( y1 );
+			for( int x = int( x1 ); x <= int( x2 ); x++ ){
+				ivec2 coord = ivec2( x, y );
+				if( is_steep )
+					coord = ivec2( y, x );
+
+				vec2 uv = vec2( coord ) / vec2( WIDTH, HEIGHT );
+				vec4 p = texture2D( tex, uv );
+				if( !CheckColor( p.rgb ) ){
+					ok = false;
+					break;
+				}
+
+				error -= abs( dy );
+				if( error < 0.0 ){
+					y += ystep;
+					error += dx;
+				}
+			}
+			
+			if( ok )
+				lines[ linesCounter++ ] = vec4( pi.x, pi.y, pj.x, pj.y );
 		}
 
 	//
-	ivec2 crossingLines[ LinesNum ];
-	int crossingLinesCounter = 0;
+	ivec2 tentacles[ TentaclesNum ];
+	int tentaclesCounter = 0;
 	for( int i = 0; i < linesCounter; i++ )
 		for( int j = i + 1; j < linesCounter; j++ )
 		{
@@ -162,14 +224,14 @@ void main()
 			if( !CheckCrossing( Li0, Li1, Lj0, Lj1 ) )
 				continue;
 
-			crossingLines[ crossingLinesCounter ] = ivec2( i, j );
-			crossingLinesCounter++;
+			tentacles[ tentaclesCounter ] = ivec2( i, j );
+			tentaclesCounter++;
 		}
 
-
-	/*ret.x = float( pointsCounter ) / 255.0;
+#ifdef DEBUG
+	ret.x = float( pointsCounter ) / 255.0;
 	ret.y = float( linesCounter ) / 255.0;
-	ret.z = float( crossingLinesCounter ) / 255.0;
+	ret.z = float( tentaclesCounter ) / 255.0;
 	ret.w = 0.0;
 	if( sx == 1 )
 		ret = C;
@@ -186,15 +248,16 @@ void main()
 			ret = lines[ li ] / 255.0;
 		}
 		int cli = sx - pointsCounter - linesCounter - 1;
-		if( cli >= 0 && cli < crossingLinesCounter ){
-			ret.x = ( float( crossingLines[ cli ].x ) ) / 255.0;
-			ret.y = ( float( crossingLines[ cli ].y ) ) / 255.0;
+		if( cli >= 0 && cli < tentaclesCounter ){
+			ret.x = ( float( tentacles[ cli ].x ) ) / 255.0;
+			ret.y = ( float( tentacles[ cli ].y ) ) / 255.0;
 		}
 
 	}
-	gl_FragColor = ret;*/
+	gl_FragColor = ret;
+#else
 	
-	if( crossingLinesCounter == 0 )
+	if( tentaclesCounter == 0 )
 		discard;
 
 	vec4 flag[ 8 ];
@@ -208,4 +271,5 @@ void main()
 	flag[ 7 ] = vec4( F28, F29, F30, F31 ) / 255.0;
 	
 	gl_FragColor = flag[ int( gl_FragCoord.x ) ];
+#endif
 }
