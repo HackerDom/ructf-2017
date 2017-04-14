@@ -33,6 +33,7 @@ void InitAllocator()
         printf( "mmap: %s\n", strerror( errno ) );
         return;
     }
+    memset( g_memory, 0xDC, SIZE );
 
     Chunk* chunk = ( Chunk* )g_memory;
     chunk->end = ( uint8_t* )chunk + SIZE;

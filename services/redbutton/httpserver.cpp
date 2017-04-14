@@ -139,7 +139,7 @@ void HttpServer::PostProcessRequest(void *param, MHD_Connection *connection, voi
 
 int HttpServer::SendResponse(MHD_Connection *connection, HttpResponse response)
 {
-	printf(":: send response: %.*s", (int)response.contentLength, response.content);
+	printf(":: send response");
 
 	MHD_Response *mhdResponse = MHD_create_response_from_buffer(response.contentLength, response.content, MHD_RESPMEM_MUST_COPY);
 
