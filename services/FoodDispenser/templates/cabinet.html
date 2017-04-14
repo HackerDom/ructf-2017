@@ -13,29 +13,44 @@
 <div class="container">
     <div class="row" style="margin-top: 50px">
         <div class="col-sm-3 centered">
-            <div class="center-content"><h1>FoodDispenser</h1><h3>Welcome, {{content.service_name}}!</h3></div>
+            <div class="center-content">
+                <h1>FoodDispenser</h1>
+                <h3>Welcome, {{content.service_name}}!</h3>
+                <div class="spaced-block">
+                    {% if content.location %}
+                        <h5>Your servers are located at <i>{{content.location}}</i>!</h5>
+                    {% else %}
+                        <form action="set_location" method="get">
+                        <div>
+                            <input class="form-control spaced-field" style="width: 75%; display: inline-block" type="text" name="location" id="location" placeholder="Enter servers location">
+                            <button type="submit" class="btn btn-success" style="margin-top: -2px">Send</button>
+                        </div>
+
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
             <div class="well">
-                <p>Last bad reviews:</p>
+                <p>Latest 50 bad reviews:</p>
                 <div id="reviews"></div>
             </div>
         </div>
     </div>
     <script>
         $(function() {
-            var data = JSON.parse("{{content.comments |safe}}");
+            var data = JSON.parse('{{content.comments| safe}}');
 
-            var reviews = '';
+            var reviews = $('#reviews');
 
-            $.each(data, function (_, review) {
-                reviews += '<div class="well well-sm"><p>';
-                for (var i = 0; i < review['stars']; i++)
-                    reviews += '&#x2605;';
-                reviews += '</p><p>';
-                reviews += review['comment'];
-                reviews += '</p></div>';
+            $.each(data, function (_, entry) {
+
+                var review = $('<div class="well well-sm"></div>');
+
+                review.append($('<p></p>').html('&#x2605;'.repeat(entry['stars'])));
+                review.append($('<p></p>').text(entry['comment']));
+
+                reviews.append(review);
             });
-
-            $('#reviews').html(reviews);
         })
     </script>
 </div>

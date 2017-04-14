@@ -1,5 +1,6 @@
 from api.api_hub import api_handler
 from database.requests.rating_requests import rate_service, get_ratings
+from database.requests.service_requests import get_service_servers_location
 from database.requests.tokenizer import verify_token
 
 
@@ -35,7 +36,11 @@ def get_food_service_ratings(json_data):
     if json_data.amount < 0 or json_data.offset < 0:
         raise ValueError("Amount and offset should not be negative!")
     user_id, _ = verify_token(json_data.token, json_data.user_type)
+    servers_location = get_service_servers_location(user_id)
     ratings = get_ratings(
         user_id, json_data.stars, json_data.offset, json_data.amount)
-    return {"count": len(ratings), "ratings": ratings}
+    return {
+        "servers_location": servers_location,
+        "count": len(ratings),
+        "ratings": ratings}
 

@@ -37,8 +37,7 @@ def tickets_handler(json_data):
 @api_handler.register_action(
     "tickets.get", "consumer", json_schema=consumer_schema)
 def get_tickets(json_data):
-    user_id, username = verify_token(
-        json_data.token, json_data.user_type)
+    user_id, username = verify_token(json_data.token, json_data.user_type)
     if json_data.debug \
             and json_data.debug_user_group in \
             get_user_groups_list_by_user_id(user_id):

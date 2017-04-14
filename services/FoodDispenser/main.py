@@ -1,11 +1,23 @@
-from flask import Flask, request, jsonify, render_template, redirect
+from flask import Flask, request, jsonify, render_template, redirect, abort
 #from uwsgidecorators import cron
-from json import loads, JSONDecodeError
+from json import loads, JSONDecodeError, dumps
 from api import api_hub
-from database.requests import tokenizer, user_requests, rating_requests
+from database.requests import \
+    tokenizer, user_requests, rating_requests, service_requests
 
 
 app = Flask(__name__, static_folder='static', static_url_path='')
+
+app.config.update({
+    "MAX_CONTENT_LENGTH": 2000000
+})
+
+
+@app.after_request
+def patch_response(response):
+    response.headers['Content-Security-Policy'] = \
+        "default-src 'self' 'unsafe-inline';"
+    return response
 
 
 @app.route("/api/v1/<user_type>/<action>", methods=["POST"])
@@ -18,23 +30,33 @@ def registration(user_type, action):
         return jsonify({"response": {"error": "Received incorrect data!"}})
 
 
-#@cron(-1, -1, -1, -1, -1)
-#def dynamically_load_config_changes(_):
-#    __config.update_config()
-
-
 def check_cookie():
     cookie = request.cookies.get("token")
-    try:
-        user_id, username = tokenizer.verify_token(cookie)
-        return user_id, username
-    except ValueError:
-        return None
+    user_id, username = tokenizer.verify_token(cookie, "food_service")
+    return user_id, username
 
 
 @app.route("/")
 def main_page():
-    return render_template("login.html")
+    try:
+        check_cookie()
+        return redirect("/cabinet")
+    except ValueError:
+        return render_template("login.html")
+
+
+@app.route("/set_location", methods=["GET"])
+def set_servers_location():
+    try:
+        user_id, username = check_cookie()
+        location = request.args.get("location")
+    except (ValueError, KeyError):
+        return redirect("/")
+    try:
+        service_requests.add_service_servers_location(user_id, location)
+    except ValueError:
+        return redirect("/")
+    return redirect("/cabinet")
 
 
 @app.route("/login", methods=["POST"])
@@ -42,10 +64,11 @@ def login_page():
     login = request.form["login"]
     password = request.form["password"]
     try:
-        user_id, username, is_food = user_requests.check_user_password(login, password)
+        user_id, username, is_food = \
+            user_requests.check_user_password(login, password)
         if not is_food:
             raise ValueError()
-        token = tokenizer.generate_token(user_id, username, is_food)
+        token = tokenizer.generate_token(user_id, username, "food_service")
         response = app.make_response(redirect("cabinet"))
         response.set_cookie("token", token)
         return response
@@ -55,13 +78,27 @@ def login_page():
 
 @app.route("/cabinet")
 def cabinet_page():
-    user_tuple = check_cookie()
-    if not user_tuple:
+    try:
+        user_tuple = check_cookie()
+    except ValueError as e:
+        print(e)
         return redirect("/#badcookie")
-    service_user_id, username = user_tuple
-    list_of_comments = rating_requests.get_ratings(service_user_id, stars=[1, 2], offset=0, amount=50)
-    print(list_of_comments)
-    return render_template("cabinet.html", content={"comments": list_of_comments, "service_name": username})
+    service_id, username = user_tuple
+    list_of_comments = \
+        rating_requests.get_ratings(
+            service_id,
+            stars=[1, 2],
+            offset=0,
+            amount=50
+        )
+    service_loc = service_requests.get_service_servers_location(service_id)
+    return render_template(
+        "cabinet.html",
+        content={
+            "comments": dumps(list_of_comments),
+            "service_name": username,
+            "location": service_loc
+        })
 
 
 def get_request_json():
@@ -75,6 +112,12 @@ def get_request_json():
         return None
     except TypeError:
         return None
+
+
+#@cron(-1, -1, -1, -1, -1)
+#def dynamically_load_config_changes(_):
+#    __config.update_config()
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8080)

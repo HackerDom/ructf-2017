@@ -2,17 +2,6 @@ from database.database_requests import db_request
 from database.requests.user_requests import username_to_user_id
 
 
-def get_services_list(offset, amount):
-    with db_request("User") as User:
-        rows = User.select()\
-            .order_by(User.id.desc())\
-            .where(User.is_food_service)\
-            .offset(offset)\
-            .limit(amount)
-
-    return [row.username for row in rows]
-
-
 def rate_service(service_name, publisher_id, stars, comment):
     if not (isinstance(stars, int) and 1 <= stars <= 5):
         raise ValueError("Stars field should be int: from 1 to 5!")
