@@ -18,7 +18,7 @@
          77 alph picture x(62) value 
                                                              '0123456789
       -                                      'abcdefghijklmnopqrstuvwxyz
-      -       'ABCDEFGHIJKLMNOPQRSTUVWYZ'.
+      -       'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.
        linkage section.
          01 result picture x(80).
 
