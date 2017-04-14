@@ -6,7 +6,12 @@
     {
         static $db;
         private $name_fields = [
-            'id', 'login', 'first_name', 'last_name', 'password', 'giro'
+            'id',
+            'login',
+            'first_name',
+            'last_name',
+            'password',
+            'giro'
         ];
         private static $table_name = 'users';
 
@@ -58,7 +63,7 @@
             return self::$db->query($query);
         }
 
-        public function update(int $id)
+        private function update(int $id)
         {
             $query = "UPDATE " . self::$table_name . " SET ";
             $query .= "login=" . self::$db->escape_value($this->login) . ", ";
@@ -83,6 +88,16 @@
             return self::$db->query($query)->fetch_assoc();
         }
 
+        public function insert_or_update()
+        {
+            $user = new User(User::get_by_login($this->login));
+            if ($user->id) {
+                return $this->update($user->id);
+            } else {
+                return $this->insert();
+            }
+
+        }
 
         public static function check_login_and_password($login, $password)
         {
@@ -96,20 +111,21 @@
             }
         }
     }
+
 //
     User::$db = new DB();
-//    $user = new User([
-//        'login' => 'login',
-//        'first_name' => 'first_name',
-//        'last_name' => 'last_name',
-//        'password' => 'password',
-//        'giro' => 'giro'
-//    ]);
-//
-////    $user->insert();
-////    $user->last_name = 'last_name2';
-////    $user->update(1);
-////
-//    echo var_dump(User::check_login_and_password('login', 'password'));
-//
-//    echo var_dump(User::check_login_and_password('login', 'password2'));
+    //    $user = new User([
+    //        'login' => 'login',
+    //        'first_name' => 'first_name',
+    //        'last_name' => 'last_name',
+    //        'password' => 'password',
+    //        'giro' => 'giro'
+    //    ]);
+    //
+    ////    $user->insert();
+    ////    $user->last_name = 'last_name2';
+    ////    $user->update(1);
+    ////
+    //    echo var_dump(User::check_login_and_password('login', 'password'));
+    //
+    //    echo var_dump(User::check_login_and_password('login', 'password2'));

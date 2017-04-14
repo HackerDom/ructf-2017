@@ -3,12 +3,11 @@
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
-from .httpchecker import *
-from .randomizer import *
+from httpchecker import *
+from randomizer import *
 
 GET = 'GET'
 POST = 'POST'
-PORT = 3000
 
 
 class StrongboxChecker(HttpCheckerBase, Randomizer):
