@@ -30,6 +30,9 @@ class Config:
             return self.data.get_raw()
         return super().__getattribute__(item)
 
+    def __getitem__(self, item):
+        return Config.data[item]
+
     def __init__(self, config_file="config.json"):
         self.config_file = config_file
         self.load_configs()
