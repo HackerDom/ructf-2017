@@ -50,8 +50,6 @@
 
        procedure division using server-descriptor, admin-descriptor.
        start-handling.
-           display 'server: ' server-descriptor end-display
-           display 'admin: ' admin-descriptor end-display
            perform process-event forever.
 
        process-event.
@@ -74,7 +72,6 @@
              by value POLLIN
              returning flag 
            end-call
-      D    display 'event and POLLIN = ' flag end-display
            if flag is equal to POLLIN
              perform recv
              exit paragraph
@@ -84,19 +81,16 @@
              by value POLLOUT
              returning flag
            end-call
-      D    display 'event and POLLOUT = ' flag end-display
            if flag is equal to POLLOUT
              perform send
              exit paragraph
-           end-if
-      D    display 'strange event ' event end-display
-           .
+           end-if.
 
 
        add-new-client.
            perform forever
-             display fdesc end-display
-             move function length(peer-address) to peer-address-length
+             move function byte-length(peer-address)
+               to peer-address-length
              call 'accept' using
                by value fdesc
                by reference peer-address
@@ -126,10 +120,6 @@
                when socket(buffer-number) is equal to -1
                perform perform-buffer
              end-search
-
-      D      display 'new connection from '
-      D        peer-ip-address ':' peer-port end-display
-
            end-perform.
 
        perform-buffer.
@@ -147,7 +137,7 @@
              else
                move spaces to read-buffer(buffer-number)
                move 1 to read-buffer-used(buffer-number)
-               move function length(read-buffer(buffer-number))
+               move function byte-length(read-buffer(buffer-number))
                  to read-buffer-length(buffer-number)
                move peer-descriptor to socket(buffer-number)
                move is-admin-descriptor to is-admin(buffer-number)
@@ -155,7 +145,6 @@
 
 
        recv.
-      D    display 'recv fdesc:' fdesc end-display
            call 'removeRead' using 
              by value fdesc
            end-call
@@ -167,8 +156,6 @@
 
 
        recv-to-buffer.
-      D    display 'buffer num: ' buffer-number ' buffer size: ' 
-      D      function length(buffer(buffer-number)) end-display
            call 'recv' using 
              by value fdesc
              by reference read-buffer(buffer-number)(
@@ -201,7 +188,6 @@
            end-evaluate.
 
        send.
-      D    display 'send to ' fdesc end-display
            set buffer-number to 1
            search buffers
              when socket(buffer-number) is equal to fdesc
@@ -209,8 +195,6 @@
            end-search.
 
        send-buffer.
-      D    display 'buffer num: ' buffer-number ' buffer size: ' 
-      D      buffer-length(buffer-number) end-display
            call 'send' using
              by value fdesc
              by reference write-buffer(buffer-number)(
@@ -238,11 +222,9 @@
              call 'removeWrite' using
                by value fdesc
              end-call
-      D      display 'remove write ' fdesc end-display
              call 'addRead' using
                by value fdesc
              end-call
-      D      display 'add read ' fdesc end-display
            end-if.
 
        close-connection.

@@ -39,7 +39,6 @@
               end-call
             else
 
-      D       display data-length end-display
               if data-length is less than 11
                 call 'addRead' using
                   by value socket
@@ -48,7 +47,9 @@
               end-if
 
               move data-length to argc
-              subtract function length(command) from argc end-subtract    todo fix all length
+              subtract function byte-length(command)
+                 from argc
+              end-subtract
               subtract 1 from argc end-subtract
 
               if command(4:1) is not equal to '-'
@@ -71,14 +72,13 @@
             end-if
 
             if need-more is greater than zero
-              display 'need more argv' end-display
               call 'addRead' using
                 by value socket
               end-call
               goback
             end-if
 
-            move function length(read-buffer) to buffer-length
+            move function byte-length(read-buffer) to buffer-length
             move 1 to data-length
 
             move 1 to sended

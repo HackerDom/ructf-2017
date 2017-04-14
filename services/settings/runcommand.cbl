@@ -73,7 +73,7 @@
            end-read
 
            if api-keys-count is less than 9
-             add 1 to api-keys-count
+             add 1 to api-keys-count end-add
            end-if
 
            move zero to need-more

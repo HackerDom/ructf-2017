@@ -31,7 +31,6 @@
        procedure division
          using command-ip-address, port, server-descriptor.
        start-perform-server.
-      D    display "port: ", port end-display
 
            call 'socket' using
                by value AF_INET
@@ -46,21 +45,15 @@
              end-call
            end-if
 
-      D    display "create socket: ", server-descriptor end-display
-
           call 'tune-socket' using
              by reference server-descriptor
              by content 1
            end-call
 
-      D    display "tune socket" end-display
-
            call 'htons' using
              by value port
              giving server-port
            end-call
-
-      D    display "binary port: ", server-port end-display
 
            move AF_INET to server-family
            move command-ip-address to server-ip-address
@@ -68,7 +61,7 @@
            call 'bind' using
              by value server-descriptor
              by reference server-address
-             by value function length(server-address)
+             by value function byte-length(server-address)
            end-call
            if return-code is less than zero
              call 'logerror' using
@@ -76,8 +69,6 @@
                by content 1
              end-call
            end-if
-
-      D    display "bind" end-display
 
            call 'listen' using
              by value server-descriptor
@@ -90,8 +81,6 @@
              end-call
            end-if
 
-      D    display "start listen" end-display
-
           call 'addRead' using
              by value server-descriptor
            end-call
@@ -101,8 +90,6 @@
                by content 1
              end-call
            end-if
-
-      D    display "init polling" end-display
 
            goback.
        end program perform-server-descriptor.
