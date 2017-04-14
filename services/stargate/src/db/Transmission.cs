@@ -1,4 +1,5 @@
-﻿using ProtoBuf;
+﻿using System;
+using ProtoBuf;
 
 namespace stargåte.db
 {
@@ -8,5 +9,7 @@ namespace stargåte.db
 		[ProtoMember(1)] public long Timestamp;
 		[ProtoMember(2)] public string Name;
 		[ProtoMember(3)] public string Entropy;
+
+		public DateTime Time => new DateTime(Timestamp, DateTimeKind.Utc);
 	}
 }

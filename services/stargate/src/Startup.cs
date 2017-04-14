@@ -20,7 +20,7 @@ namespace stargåte
 		public void Configure(IApplicationBuilder app)
 		{
 			app
-				.UseWebSockets(new WebSocketOptions {KeepAliveInterval = TimeSpan.FromSeconds(10)})
+				.UseWebSockets(new WebSocketOptions {KeepAliveInterval = Settings.WsPingInterval})
 				.Use((ctx, next) => ctx.WebSockets.IsWebSocketRequest ? WsHandler.TryProcessWebSocketRequest(ctx) : next())
 				.UseDefaultFiles(new DefaultFilesOptions {DefaultFileNames = new List<string>(1) {"index.html"}})
 				.UseStaticFiles(new StaticFileOptions {OnPrepareResponse = ctx => ctx.Context.Response.Headers.Append("Cache-Control", "public, max-age=600")})

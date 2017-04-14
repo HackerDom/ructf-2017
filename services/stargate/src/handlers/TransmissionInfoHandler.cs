@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -11,11 +12,11 @@ namespace stargåte.handlers
 	{
 		public static async Task<HttpResult> ProcessRequest(HttpContext context)
 		{
-			var name = context.Request.Headers["X-SG1-Name"];
+			var name = context.Request.Headers["X-SG1-Name"].FirstOrDefault().RemoveWhiteSpaces();
 			if(string.IsNullOrEmpty(name))
 				return new HttpResult {StatusCode = 404, Message = "Substance Not Found"};
 
-			var key = context.Request.Headers["X-SG1-Key"];
+			var key = context.Request.Headers["X-SG1-Key"].FirstOrDefault().RemoveWhiteSpaces();
 			if(string.IsNullOrEmpty(key))
 				return new HttpResult {StatusCode = 403, Message = "Access Denied"};
 
@@ -45,6 +46,6 @@ namespace stargåte.handlers
 			return HttpResult.OK;
 		}
 
-		private static readonly ReusableObjectPool<byte[]> ResponsePool = new ReusableObjectPool<byte[]>(() => new byte[Settings.MaxTransmissionInfoSize], buffer => Array.Clear(buffer, 0, buffer.Length), 64);
+		private static readonly ReusableObjectPool<byte[]> ResponsePool = new ReusableObjectPool<byte[]>(() => new byte[Settings.MaxTransmissionInfoSize], null, 64);
 	}
 }
