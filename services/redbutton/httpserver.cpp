@@ -44,7 +44,7 @@ void HttpServer::Start(uint32_t port)
 		exit(1);
 	}
 
-	printf(":: current thread id = %X\n", pthread_self());
+	printf(":: current thread id = %lX\n", pthread_self());
 
 	printf("Listening on port %d...\n", port);
 

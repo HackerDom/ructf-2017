@@ -159,7 +159,7 @@ int AddDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key, c
 
 	if (!strcmp(key, "detector") && size > 0)
 	{
-		printf(":: found detector data, length = %ld\n", size);
+		printf(":: found detector data, length = %d\n", size);
 
 		this->data = new char[size];
 
@@ -184,7 +184,7 @@ void AddDetectorProcessor::FinalizeRequest()
 	uuid id;
 	uuid_generate(id.bytes);
 
-	printf(":: adding detector: %ld\n", dataSize );
+	printf(":: adding detector: %d\n", dataSize );
 
 	detectors->AddDetector(id, data, dataSize);
 
@@ -221,7 +221,7 @@ int CheckDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key,
 
 	if (!strcmp(key, "image") && size > 0)
 	{
-		printf(":: found image data, length = %ld\n", size);
+		printf(":: found image data, length = %d\n", size);
 		printf(":: filename = %s\n", filename);
 
 		this->data = new char[size];
@@ -233,7 +233,7 @@ int CheckDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key,
 
 	if (!strcmp(key, "w") && size > 0)
 	{
-		printf(":: found out width, length = %ld\n", size);
+		printf(":: found out width, length = %d\n", size);
 
 		char buffer[16];
 
@@ -248,7 +248,7 @@ int CheckDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key,
 
 	if (!strcmp(key, "h") && size > 0)
 	{
-		printf(":: found out height, length = %ld\n", size);
+		printf(":: found out height, length = %d\n", size);
 
 		char buffer[16];
 
