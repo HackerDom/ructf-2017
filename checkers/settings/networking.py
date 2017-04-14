@@ -47,7 +47,10 @@ class State:
 		self.hostname = hostname
 		self.port = 12345 if port is None else port
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.socket.connect((self.hostname, self.port))
+		try:
+			self.socket.connect((self.hostname, self.port))
+		except Exception as ex:
+			checker.down(error="can't connect to {}".format(hostname), exception=ex)
 	def __del__(self):
 		self.socket.shutdown(socket.SHUT_RDWR)
 		self.socket.close()

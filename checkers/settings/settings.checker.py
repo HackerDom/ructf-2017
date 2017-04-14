@@ -27,12 +27,12 @@ def add(d1, d2):
 def dicts_diff(d1, d2):
 	for k, v in d1.items():
 		if k not in d2:
-			return "element {} present in first dict, but not in second".format(k)
+			return "element {} present in calculated dict, but not in recived".format(k)
 		if v != d2[k]:
 			return "elements for key {} are different: {} vs {}".format(k, v, d2[k])
 	for k, v in d2.items():
 		if k not in d1:
-			return "element {} present in second dict, but not in first".format(k)
+			return "element {} present in recived dict, but not in calculated".format(k)
 		if v != d1[k]:
 			return "elements for key {} are different: {} vs {}".format(k, d1[k], v)
 	return None
@@ -62,12 +62,12 @@ def handler_check(hostname):
 
 		diff = dicts_diff(patches, values)
 		if diff is not None:
-			checker.mumble(error="patches are not equal to stored values: {}".format(diff))
+			checker.mumble(error="patches are not equal to stored values: {}.\n{} vs {}".format(diff, patches, values))
 
 		soc3 = State(hostname)
 		sections = soc3.get_all_sections()
 		if section_name not in sections:
-			checker.mumble(error="not found created section. {}".format(section_name))
+			checker.mumble(error="not found created section. name: {}\n{}".format(section_name, sections))
 
 	checker.ok()
 
