@@ -3,9 +3,9 @@ using System.Drawing;
 
 namespace checker.stargate
 {
-	static class ColorSpaceHelper
+	internal static class ColorSpaceHelper
 	{
-		public static (byte H, byte S, byte L) ToHSL(this Color color)
+		public static HSL ToHSL(this Color color)
 		{
 			int r = color.R, g = color.G, b = color.B;
 
@@ -41,11 +41,18 @@ namespace checker.stargate
 					h = MAXdiv3mul2 + (r - g) * MAXdiv3 / deltaX2;
 			}
 
-			return ((byte)h, (byte)s, (byte)l);
+			return new HSL {H = (byte)h, S = (byte)s, L = (byte)l};
 		}
 
 		private const int MAX = byte.MaxValue;
 		private const int MAXdiv3 = MAX / 3;
 		private const int MAXdiv3mul2 = MAXdiv3 * 2;
+	}
+
+	internal struct HSL
+	{
+		public byte H;
+		public byte S;
+		public byte L;
 	}
 }

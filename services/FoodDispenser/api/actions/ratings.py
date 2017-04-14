@@ -22,12 +22,12 @@ food_service_schema = {
 
 @api_handler.register_action(
     "ratings.rate", "consumer", json_schema=consumer_schema)
-def rate_services(json_data):
-    user_id, _ = verify_token(json_data.token, json_data.user_type)
+def rate_services(request):
+    user_id, _ = verify_token(request.token, request.user_type)
     rate_service(
-        json_data.service_name, user_id, json_data.stars, json_data.comment)
+        request.service_name, user_id, request.stars, request.comment)
     return "Successfully rated {} with {} stars!".format(
-        json_data.service_name, json_data.stars)
+        request.service_name, request.stars)
 
 
 @api_handler.register_action(

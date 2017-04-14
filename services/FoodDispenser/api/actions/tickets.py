@@ -3,6 +3,7 @@ from database.requests.tokenizer import verify_token
 from database.requests.ticket_requests import \
     create_ticket, get_tickets_by_user_id, get_all_food_services_tickets
 from database.requests.user_requests import get_user_groups_list_by_user_id
+from config import config
 
 
 food_service_schema = {
@@ -19,27 +20,27 @@ consumer_schema = {
 
 @api_handler.register_action(
     "tickets.add", "food_service", json_schema=food_service_schema)
-def tickets_handler(json_data):
-    user_id, username = verify_token(json_data.token, json_data.user_type)
+def tickets_handler(request):
+    user_id, username = verify_token(request.token, request.user_type)
 
     service_name = username
     create_ticket(
         service_name,
-        json_data.ticket_code,
-        json_data.ticket_content,
-        json_data.ticket_target_group
+        request.ticket_code,
+        request.ticket_content,
+        request.ticket_target_group
     )
     return "Ticket \"{}\" added to \"{}\" group".format(
-        json_data.ticket_code, json_data.ticket_target_group
+        request.ticket_code, request.ticket_target_group
     )
 
 
 @api_handler.register_action(
     "tickets.get", "consumer", json_schema=consumer_schema)
-def get_tickets(json_data):
-    user_id, username = verify_token(json_data.token, json_data.user_type)
-    if json_data.debug \
-            and json_data.debug_user_group in \
+def get_tickets(request):
+    user_id, username = verify_token(request.token, request.user_type)
+    if config["debug"] \
+            and config["debug_user_group"] in \
             get_user_groups_list_by_user_id(user_id):
         tickets_list = get_all_food_services_tickets()
     else:
