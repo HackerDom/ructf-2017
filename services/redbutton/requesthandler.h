@@ -2,7 +2,6 @@
 
 #include "httpserver.h"
 #include "detector.h"
-#include "template.h"
 #include "glwrap.h"
 
 #define min(a, b) ((a) <= (b) ? (a) : (b))
@@ -11,14 +10,13 @@
 class RequestHandler : public HttpRequestHandler
 {
 public:
-	RequestHandler(DetectorStorage *detectors, TemplateStorage *templates);
+	RequestHandler(DetectorStorage *detectors);
 
 	virtual HttpResponse HandleGet(HttpRequest request);
 	virtual HttpResponse HandlePost(HttpRequest request, HttpPostProcessor **postProcessor);
 
 private:
 	DetectorStorage *detectors;
-	TemplateStorage *templates;
 };
 
 

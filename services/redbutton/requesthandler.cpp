@@ -62,10 +62,9 @@ Context GetContext()
 
 
 //
-RequestHandler::RequestHandler(DetectorStorage *detectors, TemplateStorage *templates)
+RequestHandler::RequestHandler(DetectorStorage *detectors)
 {
 	this->detectors = detectors;
-	this->templates = templates;
 
 	for( int i = 0; i < THREADPOOL_SIZE; i++ )
 	{

@@ -7,3 +7,19 @@
 - name: copy motd
   copy: src=motd dest=/etc/motd
 
+- name: copy settings service
+  copy: src=systemd/settings.service dest=/etc/systemd/system/
+  notify: enable and restart settings
+
+- name: copy service files
+  synchronize: 
+    src: settings/
+    dest: /home/settings/
+    rsync_opts: "--chmod=D0770 --chmod=F0660 --chown=settings:settings"
+  notify: enable and restart settings
+
+- name: make service executable
+  file: path={{item}} mode=0755
+  with_items:
+    - /home/settings/settings
+  notify: enable and restart settings

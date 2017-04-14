@@ -27,15 +27,16 @@ int main(int argc, char *argv[])
     InitAllocator();
     InitEGL();
 #if 1
-	TemplateStorage templates("templates");
 	DetectorStorage detectors("detectors");
 
-	RequestHandler handler(&detectors, &templates);
+	RequestHandler handler(&detectors);
 	HttpServer server(&handler);
 
 	server.Start(16780);
 
-	getchar();
+	while(1){
+        sleep(1);
+    }
 
 	server.Stop();
 #endif

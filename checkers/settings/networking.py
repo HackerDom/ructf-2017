@@ -16,13 +16,13 @@ def get_method(method):
 	return get_bytes(method, 11)
 
 def get_section_name(section_name):
-	return get_bytes(section_name, 40)
+	return get_bytes(section_name, 20)
 
 def get_api_key(api_key):
-	return get_bytes(api_key, 80)
+	return get_bytes(api_key, 40)
 
 def get_start(start):
-	return get_bytes(stary, 87)
+	return get_bytes(stary, 85)
 
 def get_patch_bytes(patch):
 	res = str(len(patch)).encode(encoding='ascii')
@@ -33,13 +33,13 @@ def get_patch_bytes(patch):
 def get_patch(patch):
 	res = []
 	for k, v in patch:
-		res.append((get_bytes(k, 40), get_bytes(v, 87)))
+		res.append((get_bytes(k, 20), get_bytes(v, 85)))
 	return res
 
 class State:
 	def __init__(self, hostname, port=None):
 		self.hostname = hostname
-		self.port = 1234 if port is None else port
+		self.port = 12345 if port is None else port
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.socket.connect((self.hostname, self.port))
 	def __del__(self):
@@ -71,7 +71,7 @@ class State:
 		if type(section_name) == str:
 			section_name = get_section_name(section_name)
 		self.send_checked('add-section', section_name)
-		return (self.recv(80), section_name)
+		return (self.recv(40), section_name)
 	def add_apikey(self, section_name, old_key, new_key):
 		if type(section_name) == str:
 			section_name = get_section_name(section_name)
@@ -89,8 +89,8 @@ class State:
 		self.send_checked('fix-section', section_name + apikey + get_patch_bytes(patch))
 		return patch
 	def recv_pair(self):
-		key = self.recv(40)
-		value = self.recv(87)
+		key = self.recv(20)
+		value = self.recv(85)
 		return (key, value)
 	def get_section(self, section_name, apikey, start=None):
 		if type(section_name) == str:
@@ -98,9 +98,9 @@ class State:
 		if type(apikey) == str:
 			apikey = get_api_key(apikey)
 		if start is None:
-			start = bytes([0] * 87)
+			start = bytes([0] * 85)
 		if type(start) == str:
-			start = get_bytes(start, 87)
+			start = get_bytes(start, 85)
 		self.send_checked('get-section', section_name + apikey + start)
 		res_length = self.recv(1).decode(encoding='ascii')
 		if not res_length.isdigit():
@@ -120,7 +120,7 @@ class State:
 		return res
 	def get_sections(self, section_name=None):
 		if section_name is None:
-			section_name = bytes([0] * 40)
+			section_name = bytes([0] * 20)
 		if type(section_name) == str:
 			section_name = get_section_name(section_name)
 		self.send_checked('all-section', section_name)
@@ -129,7 +129,7 @@ class State:
 			checker.mumble(error="count is not digit '{}'".format(res_length))
 		res = []
 		for i in range(int(res_length)):
-			res.append(self.recv(40))
+			res.append(self.recv(20))
 		return res
 	def get_all_sections(self):
 		res = []

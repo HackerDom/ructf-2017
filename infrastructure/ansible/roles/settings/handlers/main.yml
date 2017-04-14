@@ -1,0 +1,2 @@
+- name: enable and restart settings
+  systemd: name=settings enabled=yes state=restarted daemon_reload=yes
