@@ -17,10 +17,10 @@
        linkage section.
          01 argc binary-long unsigned.
          01 argv.
-           02 section-name picture x(40).
-           02 oldkey picture x(80).
-           02 newkey picture x(80).
-           02 filler picture x(813).
+           02 section-name picture x(20).
+           02 oldkey picture x(40).
+           02 newkey picture x(40).
+           02 filler picture x(913).
          01 result.
            02 rcode picture x(2).
            02 filler picture x(1022).
@@ -30,7 +30,7 @@
          using argc, argv, result, result-length 
          returning need-more.
        start-api--key.
-           if argc is less than 200
+           if argc is less than 100
              move 1 to need-more
              goback
            else

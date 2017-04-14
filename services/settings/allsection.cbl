@@ -16,21 +16,20 @@
        linkage section.
          01 argc binary-long unsigned.
          01 argv.
-           02 section-name picture x(40).
-           02 filler picture x(973).
+           02 section-name picture x(20).
+           02 filler picture x(993).
          01 result.
            02 rcode picture x(2).
            02 result-count picture 99.
-           02 results occurs 25.
-             03 rsection-name picture x(40).
-           02 filler picture x(20).
+           02 results occurs 51.
+             03 rsection-name picture x(20).
          01 result-length binary-long unsigned.
 
        procedure division 
          using argc, argv, result, result-length 
          returning need-more.
        start-all-section.
-           if argc is less than 40
+           if argc is less than 20
              move 1 to need-more
              goback
            else
@@ -48,7 +47,7 @@
            end-start
 
            perform forever
-             if result-count is equal to 25
+             if result-count is equal to 51
                goback
              end-if
 
@@ -58,7 +57,7 @@
 
              add 1 to result-count end-add
              move name to rsection-name(result-count)
-             add 40 to result-length end-add
+             add 20 to result-length end-add
           end-perform.
 
        end program all-section.

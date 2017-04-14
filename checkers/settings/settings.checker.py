@@ -42,19 +42,19 @@ def handler_check(hostname):
 		words = f.readlines()
 
 	for i in range(2):
-		section_name = checker.get_rand_string(40)
+		section_name = checker.get_rand_string(20)
 
 		soc1 = State(hostname)
 		key1, section_name = soc1.create_section(section_name)
 
-		key2 = checker.get_rand_string(80)
+		key2 = checker.get_rand_string(40)
 		soc1.add_apikey(section_name, key1, key2)
 		patches = {}
 		add(patches, soc1.fix_section(section_name, key1, get_random_patch(words)))
 		add(patches, soc1.fix_section(section_name, key2, get_random_patch(words)))
 
 		soc2 = State(hostname)
-		key3 = checker.get_rand_string(80)
+		key3 = checker.get_rand_string(40)
 		soc2.add_apikey(section_name, key2, key3)
 		add(patches, soc2.fix_section(section_name, key3, get_random_patch(words)))
 		values = soc1.get_full_section(section_name, key3)
@@ -85,7 +85,7 @@ def handler_put_1(hostname, id, flag):
 
 def handler_put_2(hostname, id, flag):
 	con = State(hostname)
-	section_name = checker.get_rand_string(40)
+	section_name = checker.get_rand_string(20)
 	key = con.create_section(section_name)
 	con.add_apikey(section_name, key, flag)
 	checker.ok(message=json.dump({'key': flag, 'section_name': section_name}))
@@ -96,7 +96,7 @@ def handler_put_3(hostname, id, flag):
 		words = f.readlines()
 
 	con = State(hostname)
-	section_name = checker.get_rand_string(40)
+	section_name = checker.get_rand_string(20)
 	apikey = con.create_section(section_name)
 	key = get_random_key(words)
 	con.fix_section(section_name, apikey, [key, flag])

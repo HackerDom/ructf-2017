@@ -1,5 +1,5 @@
        identification division.
-       program-id. log-error.
+       program-id. logerror.
 
        data division.
        working-storage section.
@@ -14,7 +14,7 @@
        01 need-abort picture 9.
 
        procedure division using error-message, need-abort.
-       start-log-error.
+       start-logerror.
            display NL error-message end-display
            call 'errnomessage' using
              by reference errno errno-name errno-message
@@ -24,4 +24,4 @@
              stop run
            end-if.
 
-       end program log-error.
+       end program logerror.

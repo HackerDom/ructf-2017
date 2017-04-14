@@ -19,13 +19,13 @@
        linkage section.
          01 argc binary-long unsigned.
          01 argv.
-           02 section-name picture x(40).
-           02 skey picture x(80).
+           02 section-name picture x(20).
+           02 skey picture x(40).
            02 patches-count picture 9.
-           02 patch occurs 7 times.
-             03 param-name picture x(40).
-             03 param-value picture x(87).
-           02 filler picture xxx.
+           02 patch occurs 9 times.
+             03 param-name picture x(20).
+             03 param-value picture x(85).
+           02 filler picture x(7).
          01 result.
            02 rcode picture x(2).
            02 filler picture x(1022).
@@ -35,7 +35,7 @@
          using argc, argv, result, result-length 
          returning need-more.
        start-fix-section.
-           if argc is less than 121
+           if argc is less than 61
              move 1 to need-more
              goback
            else

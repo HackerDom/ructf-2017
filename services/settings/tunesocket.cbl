@@ -36,7 +36,7 @@
              by value function length(YES)
            end-call
            if return-code is less than zero
-             call 'log-error' using
+             call 'logerror' using
                by content SETSOCKOPT_ERROR
                by value need-abort
              end-call
@@ -51,7 +51,7 @@
              returning flags
            end-call
            if return-code is less than zero
-             call 'log-error' using
+             call 'logerror' using
                by content GET_ERROR 
                by value need-abort
              end-call
@@ -71,7 +71,7 @@
              by value flags
            end-call
            if return-code is less than zero
-             call 'log-error' using
+             call 'logerror' using
                by content SET_ERROR
                by value need-abort
              end-call

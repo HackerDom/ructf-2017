@@ -92,7 +92,7 @@
                giving peer-descriptor
              end-call
              if return-code is less than zero
-               call 'log-error-nonblock' using
+               call 'logerror-nonblock' using
                  by content ACCEPT_ERROR
                  returning need-close
                end-call
@@ -125,7 +125,7 @@
                by value peer-descriptor
              end-call
              if return-code is less than zero
-               call 'log-error' using
+               call 'logerror' using
                  by content ADD_POLL_ERROR
                  by content 0
                end-call
@@ -167,7 +167,7 @@
            end-call
            evaluate return-code
              when -1
-               call 'log-error-nonblock' using
+               call 'logerror-nonblock' using
                  by content RECV_ERROR
                  returning need-close
                end-call
@@ -208,7 +208,7 @@
              by value MSG_NOSIGNAL
            end-call
            if return-code is equal to -1
-             call 'log-error-nonblock' using
+             call 'logerror-nonblock' using
                by content SEND_ERROR
                returning need-close
              end-call

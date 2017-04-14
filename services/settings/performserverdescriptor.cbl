@@ -40,7 +40,7 @@
                giving server-descriptor
            end-call
            if return-code is less than zero
-             call 'log-error' using
+             call 'logerror' using
                by content SOCKET_ERROR
                by content 1
              end-call
@@ -71,7 +71,7 @@
              by value function length(server-address)
            end-call
            if return-code is less than zero
-             call 'log-error' using
+             call 'logerror' using
                by content BIND_ERROR 
                by content 1
              end-call
@@ -84,7 +84,7 @@
              by value queue-length
            end-call
            if return-code is less than zero
-             call 'log-error' using
+             call 'logerror' using
                by content LISTEN_ERROR 
                by content 1
              end-call
@@ -94,7 +94,7 @@
 
            call 'initPoll' end-call
            if return-code is less than zero
-             call 'log-error' using
+             call 'logerror' using
                by content INIT_POLL_ERROR
                by content 1
              end-call
@@ -104,7 +104,7 @@
              by value server-descriptor
            end-call
            if return-code is less than zero
-             call 'log-error' using
+             call 'logerror' using
                by content ADD_POLL_ERROR
                by content 1
              end-call

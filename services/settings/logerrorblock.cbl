@@ -1,5 +1,5 @@
        identification division.
-       program-id. log-error-nonblock.
+       program-id. logerror-nonblock.
 
        data division.
        working-storage section.
@@ -16,7 +16,7 @@
        01 error-message picture x(64).
 
        procedure division using error-message returning need-close.
-       start-log-error.
+       start-logerror.
            call 'errnomessage' using
              by reference errno errno-name errno-message
            end-call
@@ -30,4 +30,4 @@
            end-if.
 
  
-       end program log-error-nonblock.
+       end program logerror-nonblock.

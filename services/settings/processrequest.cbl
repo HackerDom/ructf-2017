@@ -7,16 +7,6 @@
        01 need-more picture 9.
        01 ind picture 9.
 
-       01 commands-list.
-         02 commands.
-           03 filler picture x(11) value 'add-section'.
-           03 filler picture x(11) value 'add-apikey '.
-           03 filler picture x(11) value 'fix-section'.
-           03 filler picture x(11) value 'get-section'.
-         02 filler redefines commands.
-           03 command-name picture x(11) occurs 4 times.
-
-
        linkage section.
        01 buffer.
          02 read-buffer.

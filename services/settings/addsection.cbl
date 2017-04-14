@@ -16,19 +16,19 @@
        linkage section.
        01 argc binary-long unsigned.
        01 argv.
-         02 section-name picture x(40).
-         02 filler picture x(973).
+         02 section-name picture x(20).
+         02 filler picture x(993).
        01 result.
          02 rcode picture x(2).
-         02 new-api-key picture x(80).
-         02 filler picture x(942).
+         02 new-api-key picture x(40).
+         02 filler picture x(982).
        01 result-length binary-long unsigned.
 
        procedure division 
          using argc, argv, result, result-length 
          returning need-more.
        start-add-section.
-            if argc is less than 40
+            if argc is less than 20
               move 1 to need-more
               goback
             else
@@ -47,6 +47,6 @@
 
             move 'ok' to rcode
             move api-key(1) to new-api-key
-            move 82 to result-length.
+            move 42 to result-length.
 
        end program add-section.
