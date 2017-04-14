@@ -28,7 +28,7 @@ namespace stargåte.handlers
 			using(var pooled = await ResponsePool.AcquireAsync().ConfigureAwait(false))
 			{
 				var buffer = ProtoBufHelper.SerializeAsArraySegment(pooled.Item, msg);
-				await Task.WhenAll(Clients.Select(pair => TrySendAsync(pair.Key, buffer, token))).ConfigureAwait(false);
+				await Task.WhenAll(Clients.Select(pair => Task.Run(() => TrySendAsync(pair.Key, buffer, token), token))).ConfigureAwait(false);
 			}
 		}
 
@@ -51,6 +51,6 @@ namespace stargåte.handlers
 
 		private static readonly byte[] HelloMessage = Encoding.ASCII.GetBytes("hi");
 		private static readonly ConcurrentDictionary<WebSocket, SemaphoreSlim> Clients = new ConcurrentDictionary<WebSocket, SemaphoreSlim>();
-		private static readonly ReusableObjectPool<byte[]> ResponsePool = new ReusableObjectPool<byte[]>(() => new byte[Settings.MaxTransmissionInfoSize], buffer => Array.Clear(buffer, 0, buffer.Length), 64);
+		private static readonly ReusableObjectPool<byte[]> ResponsePool = new ReusableObjectPool<byte[]>(() => new byte[Settings.MaxTransmissionInfoSize], null, 512);
 	}
 }

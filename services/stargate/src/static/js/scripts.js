@@ -19,6 +19,10 @@ function b64Dec(str) {
 	}).join(""));
 }
 
+function ticksToDate(ticks) {
+	return new Date(ticks / 10000 - 62135596800000);
+}
+
 var HEIGHT = 32;
 var HALFHEIGHT = HEIGHT / 2;
 
@@ -154,7 +158,7 @@ var MAX_MSG_COUNT = 30;
 				console.log("ws connected");
 			else {
 				var msg = Transmission.decode(new Uint8Array(event.data));
-				var time = new Date(msg.Timestamp).toLocaleTimeString();
+				var time = new Date(ticksToDate(msg.Timestamp)).toLocaleTimeString();
 				var name = b64Dec(msg.Name);
 				var $msgs = $(".msg");
 				var $msg = ($msgs.length > MAX_MSG_COUNT ? $msgs.last().remove() : $("<div class='msg'/>"));

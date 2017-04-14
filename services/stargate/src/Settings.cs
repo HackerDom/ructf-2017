@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 
 namespace stargåte
 {
@@ -13,14 +14,18 @@ namespace stargåte
 
 		public const int MaxFieldLength = 340;
 
-		public const int MaxMatterSize = 65536;
-		public const int MaxMatterDimensions = 32768;
+		public const int MaxIncomingSize = 65536;
+		public const int MaxIncomingDimensions = 32768;
 
 		public const long MaxSpectrumSize = 16384;
 		public static int MaxTransmissionInfoSize = 1024;
 
 		public static readonly byte[] Key;
 
+		public static TimeSpan Ttl = TimeSpan.FromMinutes(30);
+
 		public const int ReadWriteTimeout = 3000;
+
+		public static TimeSpan WsPingInterval = TimeSpan.FromSeconds(3);
 	}
 }

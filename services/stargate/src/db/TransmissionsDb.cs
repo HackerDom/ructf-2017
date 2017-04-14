@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace stargåte.db
@@ -8,15 +8,16 @@ namespace stargåte.db
 	{
 		public static async Task<bool> TryAdd(Transmission item)
 		{
-			if(!Dict.TryAdd(item.Name, item))
+			if(!Index.TryAdd(item.Name, item))
 				return false;
 			await Store.WriteAsync(item).ConfigureAwait(false);
 			return true;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Transmission Find(string name)
 		{
-			return Dict.TryGetValue(name, out Transmission item) ? item : null;
+			return Index.GetOrDefault(name);
 		}
 
 		public static void Close()
@@ -24,7 +25,7 @@ namespace stargåte.db
 			Store.FlushAsync().Wait(3000);
 		}
 
-		private static readonly ConcurrentDictionary<string, Transmission> Dict = new ConcurrentDictionary<string, Transmission>(StringComparer.Ordinal);
-		private static readonly QuantumStore<Transmission> Store = new QuantumStore<Transmission>("data/transmissions.db", transmission => Dict[transmission.Name] = transmission);
+		private static readonly HyperspatialIndex<string, Transmission> Index = new HyperspatialIndex<string, Transmission>(Settings.Ttl, StringComparer.Ordinal);
+		private static readonly QuantumStore<Transmission> Store = new QuantumStore<Transmission>("data/transmissions.db", transmission => Index.TryAdd(transmission.Name, transmission, transmission.Time));
 	}
 }
