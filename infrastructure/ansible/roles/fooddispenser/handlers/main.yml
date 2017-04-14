@@ -1,0 +1,5 @@
+- name: enable and restart uwsgi
+  systemd: name=uwsgi enabled=yes state=restarted daemon_reload=yes
+
+- name: enable and restart nginx
+  systemd: name=nginx enabled=yes state=restarted daemon_reload=yes
