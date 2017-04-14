@@ -2,7 +2,7 @@
     Description=Settings service
 
 [Service]
-    ExecStart=/home/settings/settings 12345
+    ExecStart=/home/settings/settings 12345 54321
     WorkingDirectory=/home/settings
     User=settings
     Group=settings
