@@ -1,0 +1,9 @@
+[Unit]
+Description=Launch X
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/X -nolisten tcp -novtswitch :0
+
+[Install]
+WantedBy=multi-user.target

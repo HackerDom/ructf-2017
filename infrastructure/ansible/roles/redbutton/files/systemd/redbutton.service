@@ -1,0 +1,15 @@
+[Unit]
+    Description=Redbutton service
+    After=xorg.service
+
+[Service]
+    ExecStart=/root/redbutton
+    WorkingDirectory=/root
+    User=root
+    Group=root
+    Restart=on-failure
+    RestartSec=1s
+    Environment=DISPLAY=:0
+    
+[Install]
+    WantedBy=multi-user.target
