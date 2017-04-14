@@ -65,15 +65,15 @@ private:
 
 //
 template< typename T >
-class AutoLock {
+class AutoLockGeneric {
 public:
     ///
-    AutoLock( T& lockObject ) : m_lockObject( lockObject ) {
+    AutoLockGeneric( T& lockObject ) : m_lockObject( lockObject ) {
         m_lockObject.Lock();
     }
 
     ///
-    ~AutoLock() {
+    ~AutoLockGeneric() {
         m_lockObject.Unlock();
     }
 
@@ -81,12 +81,15 @@ private:
     //
     T& m_lockObject;
 
-    AutoLock( const AutoLock& ) = delete;
-    AutoLock& operator =( const AutoLock& ) = delete;
+    AutoLockGeneric( const AutoLockGeneric& ) = delete;
+    AutoLockGeneric& operator =( const AutoLockGeneric& ) = delete;
 };
 
 
 //
-using AutoSpinLock = AutoLock< SpinLock >;
-using AutoMutexLock = AutoLock< Mutex >;
+using AutoSpinLock = AutoLockGeneric< SpinLock >;
+using AutoMutexLock = AutoLockGeneric< Mutex >;
+
+using Lock = SpinLock;
+using AutoLock = AutoLockGeneric< SpinLock >;
 

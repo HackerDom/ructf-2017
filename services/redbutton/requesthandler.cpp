@@ -12,13 +12,13 @@ struct ContextInfo
 	pthread_t thread;
 };
 ContextInfo g_contexts[ THREADPOOL_SIZE ];
-Mutex 	g_contextLock;
+Lock 	g_contextLock;
 
 
 //
 Context GetContext()
 {
-	AutoMutexLock autoLock( g_contextLock );
+	AutoLock autoLock( g_contextLock );
 
 	Context ctx;
 	pthread_t tid = pthread_self();
