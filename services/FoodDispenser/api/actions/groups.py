@@ -30,7 +30,7 @@ def group_add(json_data):
        and json_data.target_group == json_data.debug_user_group \
        and json_data.group_invite == json_data.debug_user_group_invite_code:
         add_user_to_group(user_id, json_data.debug_user_group)
-        return "Sucessfully added to \"{}\" debug group!"
+        return "Sucessfully added to debug group!"
     activate_invite(user_id, json_data.target_group, json_data.group_invite)
     return "Sucessfully added to \"{}\" group"\
         .format(json_data.target_group)

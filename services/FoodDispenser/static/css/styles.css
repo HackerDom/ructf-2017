@@ -1,0 +1,16 @@
+.centered {
+    margin: 0 auto;
+    float: none;
+}
+
+.center-content {
+    text-align: center;
+}
+
+.spaced-field {
+    margin-bottom: 5px !important;
+}
+
+.spaced-block {
+    margin-bottom: 20px;
+}
