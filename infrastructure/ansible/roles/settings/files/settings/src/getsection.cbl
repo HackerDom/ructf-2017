@@ -27,8 +27,9 @@
            02 rcode picture x(2).
            02 result-count picture 9.
            02 results occurs 9.
-             03 rparam-name picture x(20).
-             03 rparam-value picture x(85).
+             03 result-container.
+               04 rparam-name picture x(20).
+               04 rparam-value picture x(85).
            02 filler picture x(76).
          01 result-length binary-long unsigned.
 
@@ -91,7 +92,9 @@
              add 1 to result-count end-add
              move sparam-name to rparam-name(result-count)
              move sparam-value to rparam-value(result-count)
-             add 105 to result-length end-add
+             add function byte-length(result-container(result-count))
+               to result-length
+             end-add
 
            end-perform.
 
