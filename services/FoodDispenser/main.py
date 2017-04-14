@@ -9,10 +9,6 @@ from database.requests import \
 
 app = Flask(__name__, static_folder='static', static_url_path='')
 
-app.config.update({
-    "MAX_CONTENT_LENGTH": 2000000
-})
-
 
 @app.after_request
 def patch_response(response):
@@ -33,6 +29,8 @@ def registration(user_type, action):
 
 def check_cookie():
     cookie = request.cookies.get("token")
+    if not cookie:
+        raise ValueError()
     user_id, username = tokenizer.verify_token(cookie, "food_service")
     return user_id, username
 
