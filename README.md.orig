@@ -1,9 +1,0 @@
-# ructf-2017
-
-+ infrastructure/
-+ checkers/\<service_name\>/checker.py or checkers/\<service_name\>.checker.py
-<<<<<<< HEAD
-+ services/\<service_name\>/
-=======
-+ services/\<service_name\>/
->>>>>>> FoodDispenser
