@@ -79,7 +79,7 @@ def handler_put(hostname, id, flag):
 	section_name = checker.get_rand_string(20)
 	apikey, section_name = con.create_section(section_name)
 	key = get_random_key(words)
-	con.fix_section(section_name, apikey, [key, flag])
+	con.fix_section(section_name, apikey, [(key, flag)])
 	checker.ok(message=json.dump({'key': apikey, 'section_name': section_name, 'pkey': key}))
 
 def handler_get(hostname, id, flag):
