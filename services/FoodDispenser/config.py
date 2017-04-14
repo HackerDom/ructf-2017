@@ -30,6 +30,9 @@ class Config:
             return self.data.get_raw()
         return super().__getattribute__(item)
 
+    def __getitem__(self, item):
+        return Config.data[item]
+
     def __init__(self, config_file="config.json"):
         self.config_file = config_file
         self.load_configs()
@@ -47,9 +50,15 @@ class Config:
     def load_configs(self):
         if not os.path.isfile(self.config_file):
             self.data.add({
+                "mysql_user": "root",
+                "mysql_db": "dispenser",
+                "mysql_port": 3306,
+                "mysql_password": "",
+                "mysql_host": "localhost",
                 "debug": False,
                 "debug_user_group": self.generate_random_hash(),
-                "debug_user_group_invite_code": self.generate_random_hash()
+                "debug_user_group_invite_code": self.generate_random_hash(),
+                "salt": self.generate_random_hash()
             })
 
             with open(self.config_file, "w") as configfile:
@@ -60,6 +69,7 @@ class Config:
         else:
             with open(self.config_file, "r") as configfile:
                 data = json.load(configfile)
+                Config.data = Config.ConfigDir()
                 Config.data.add(data)
 
 

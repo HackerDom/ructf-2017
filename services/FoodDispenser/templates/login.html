@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FoodDispenser</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css')}}">
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.2.1.min.js')}}"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row" style="margin-top: 50px">
+        <div class="col-sm-3 centered">
+            <div class="center-content"><h1>FoodDispenser</h1><h3>Food service cabinet</h3></div>
+            <div>
+                <div class="alert alert-danger spaced-field" id="error-box" hidden>
+                    <strong>Error: </strong><span id="error-message"></span>
+                </div>
+                <form action="login" method="post" id="loginForm">
+                    <div class="form-group">
+                        <input class="form-control spaced-field" type="text" name="login" id="login" placeholder="Login">
+                        <input class="form-control spaced-field" type="password" name="password" id="password" placeholder="Password">
+                    </div>
+                    <button type="submit" class="btn btn-success">Log in</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function() {
+            if (/badlogin/.test(window.location.hash)) {
+                $('#error-message').html("Incorrect login or password!");
+                $('#error-box').show();
+            }
+            else if (/badcookie/.test(window.location.hash)) {
+                $('#error-message').html("Please re-enter your password");
+                $('#error-box').show();
+            }
+        })
+    </script>
+</div>
+<footer class="footer">
+    <div class="container text-right">
+        <p class="text-muted">Copyright © tentacle monsters web studio</p>
+    </div>
+</footer>
+</body>
+</html>

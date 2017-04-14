@@ -304,6 +304,11 @@ void CheckDetectorProcessor::FinalizeRequest()
 
 	{
 		Texture2D texture( data, dataSize );
+		if( texture.GetTexture() == 0 ){ 
+			printf(":: failed to create texture\n" );
+			Complete(HttpResponse(MHD_HTTP_BAD_REQUEST));
+	    	return;
+		}
 
 		
 	#if DEBUG
@@ -332,6 +337,11 @@ void CheckDetectorProcessor::FinalizeRequest()
 	    int w = width > 0 ? width : 8;
 	    int h = height > 0 ? height : 1;
 	    Texture2D target( w, h, FORMAT_RGBA );
+	    if( target.GetTexture() == 0 ){
+			printf(":: failed to create target texture\n" );
+			Complete(HttpResponse(MHD_HTTP_BAD_REQUEST));
+	    	return;
+		}
 
 	    BindFramebuffer( target );
 	    Clear( 0.0, 0.0, 0.0, 0.0 );
@@ -345,30 +355,12 @@ void CheckDetectorProcessor::FinalizeRequest()
 		endTime = tp.tv_sec + tp.tv_nsec / 1000000000.0;
 		printf( ":: Time: %f\n", endTime - startTime );
 
-	#if DEBUG
-	    for( int i = 0; i < w * h; i++ ){
-	    		printf( "%02X%02X%02X%02X", target.GetRGBA()[ i ].r, target.GetRGBA()[ i ].g, 
-	            target.GetRGBA()[ i ].b, 
-	            target.GetRGBA()[ i ].a );
-	    }
-	    printf("\n");
-	#endif
-
 	    char *responseData = (char *)target.GetRGBA();
+	    char *dataCopy = new char[w * h * 4];
+	    memcpy(dataCopy, responseData, w * h * 4);
 
-	    if (responseData && responseData[0])
-	    {
-	    	char *dataCopy = new char[w * h * 4];
-	    	memcpy(dataCopy, responseData, w * h * 4);
-
-	    	printf(":: returning response: %.*s\n", w * h * 4, dataCopy);
-			Complete(HttpResponse(MHD_HTTP_OK, dataCopy, w * h * 4));
-	    }
-	    else
-	    {  
-	    	printf(":: returning empty response\n");
-			Complete(HttpResponse(MHD_HTTP_OK));
-		}
+	    printf(":: returning response %d\n", w * h * 4);
+		Complete(HttpResponse(MHD_HTTP_OK, dataCopy, w * h * 4));
 	}
 
 	MakeCurrentNullCtx();

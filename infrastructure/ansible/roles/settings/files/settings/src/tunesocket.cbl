@@ -33,7 +33,7 @@
              by value SOL_SOCKET
              by value SO_REUSEADDR
              by reference YES
-             by value function length(YES)
+             by value function byte-length(YES)
            end-call
            if return-code is less than zero
              call 'logerror' using

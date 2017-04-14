@@ -7,7 +7,7 @@
     User=capter
     Group=capter
     Restart=on-failure
-    RestartSec=3s
+    RestartSec=1s
     CPUQuota=40%
 
 [Install]

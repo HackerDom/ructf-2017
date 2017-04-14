@@ -1,6 +1,6 @@
 .PHONY: all clean c listing clean-all
 
-cblFiles=settings.cbl errnomessage.cbl logerror.cbl logerrorblock.cbl performserverdescriptor.cbl tunesocket.cbl starthandling.cbl processrequest.cbl addsection.cbl fixsection.cbl addapikey.cbl random.cbl getsection.cbl allsection.cbl
+cblFiles=settings.cbl errnomessage.cbl logerror.cbl logerrorblock.cbl performserverdescriptor.cbl tunesocket.cbl starthandling.cbl processrequest.cbl addsection.cbl fixsection.cbl addapikey.cbl random.cbl getsection.cbl allsection.cbl runcommand.cbl
 cpyFiles=sectiondb.cpy sectionrecord.cpy settingdb.cpy settingrecord.cpy
 cFiles=get_errno.c utils.c polling.c
 

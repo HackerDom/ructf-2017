@@ -4,6 +4,7 @@ import sys
 from checker import Checker
 import checker
 from networking import State
+import networking
 import random
 import json
 
@@ -26,12 +27,12 @@ def add(d1, d2):
 def dicts_diff(d1, d2):
 	for k, v in d1.items():
 		if k not in d2:
-			return "element {} present in first dict, but not in second".format(k)
+			return "element {} present in calculated dict, but not in recived".format(k)
 		if v != d2[k]:
 			return "elements for key {} are different: {} vs {}".format(k, v, d2[k])
 	for k, v in d2.items():
 		if k not in d1:
-			return "element {} present in second dict, but not in first".format(k)
+			return "element {} present in recived dict, but not in calculated".format(k)
 		if v != d1[k]:
 			return "elements for key {} are different: {} vs {}".format(k, d1[k], v)
 	return None
@@ -61,12 +62,12 @@ def handler_check(hostname):
 
 		diff = dicts_diff(patches, values)
 		if diff is not None:
-			checker.mumble(error="patches are not equal to stored values: {}".format(diff))
+			checker.mumble(error="patches are not equal to stored values: {}.\n{} vs {}".format(diff, patches, values))
 
 		soc3 = State(hostname)
 		sections = soc3.get_all_sections()
 		if section_name not in sections:
-			checker.mumble(error="not found created section. {}".format(section_name))
+			checker.mumble(error="not found created section. name: {}\n{}".format(section_name, sections))
 
 	checker.ok()
 
@@ -79,16 +80,21 @@ def handler_put(hostname, id, flag):
 	section_name = checker.get_rand_string(20)
 	apikey, section_name = con.create_section(section_name)
 	key = get_random_key(words)
-	con.fix_section(section_name, apikey, [(key, flag)])
-	checker.ok(message=json.dump({'key': apikey, 'section_name': section_name, 'pkey': key}))
+	patch = con.fix_section(section_name, apikey, [(key, flag)])
+	key = patch[0][0]
+	checker.ok(message=json.dumps({'key': apikey.decode(encoding='ascii', errors='ignore'), 'section_name': section_name.decode(encoding='ascii', errors='ignore'), 'pkey': key.decode(encoding='ascii', errors='ignore')}))
 
 def handler_get(hostname, id, flag):
 	id = json.loads(id)
 	section_name = id['section_name']
 	key = id['key']
+	pkey = id['pkey']
 	con = State(hostname)
+	key = networking.get_api_key(key)
+	pkey = networking.get_k(pkey)
+	flag = networking.get_v(flag)
 	values = con.get_full_section(section_name, key)
-	if id['pkey'] not in values or values[id['pkey']] != flag:
+	if pkey not in values or values[pkey] != flag:
 		checker.corrupt(error='flag not found')
 	checker.ok()
 

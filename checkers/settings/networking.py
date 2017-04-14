@@ -30,10 +30,16 @@ def get_patch_bytes(patch):
 		res += k + v
 	return res
 
+def get_k(k):
+	return get_bytes(k, 20)
+
+def get_v(v):
+	return get_bytes(v, 85)
+
 def get_patch(patch):
 	res = []
 	for k, v in patch:
-		res.append((get_bytes(k, 20), get_bytes(v, 85)))
+		res.append((get_k(k), get_v(v)))
 	return res
 
 class State:
@@ -41,7 +47,10 @@ class State:
 		self.hostname = hostname
 		self.port = 12345 if port is None else port
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.socket.connect((self.hostname, self.port))
+		try:
+			self.socket.connect((self.hostname, self.port))
+		except Exception as ex:
+			checker.down(error="can't connect to {}".format(hostname), exception=ex)
 	def __del__(self):
 		self.socket.shutdown(socket.SHUT_RDWR)
 		self.socket.close()
@@ -98,9 +107,9 @@ class State:
 		if type(apikey) == str:
 			apikey = get_api_key(apikey)
 		if start is None:
-			start = bytes([0] * 85)
+			start = bytes([0] * 20)
 		if type(start) == str:
-			start = get_bytes(start, 85)
+			start = get_k(start)
 		self.send_checked('get-section', section_name + apikey + start)
 		res_length = self.recv(1).decode(encoding='ascii')
 		if not res_length.isdigit():

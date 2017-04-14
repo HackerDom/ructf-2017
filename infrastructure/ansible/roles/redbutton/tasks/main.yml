@@ -6,7 +6,9 @@
 
 - name: copy xorg service
   copy: src=systemd/xorg.service dest=/etc/systemd/system/
-  notify: enable and restart xorg
+  notify: 
+    - enable and restart xorg
+    - enable and restart redbutton
 
 - name: copy redbutton service
   copy: src=systemd/redbutton.service dest=/etc/systemd/system/

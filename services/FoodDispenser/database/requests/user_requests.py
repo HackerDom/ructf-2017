@@ -50,4 +50,14 @@ def get_user_groups_list_by_user_id(user_id):
 def user_id_to_username(user_id):
     with db_request("User") as User:
         row = User.select().where(User.id == user_id).first()
+    if row is None:
+        raise ValueError("No such user in db!")
     return row.username
+
+
+def username_to_user_id(username):
+    with db_request("User") as User:
+        row = User.select().where(User.username == username).first()
+    if row is None:
+        raise ValueError("No such user in db!")
+    return row.id

@@ -1,0 +1,9 @@
+- name: enable and restart nginx
+  systemd: name=nginx enabled=yes state=restarted daemon_reload=yes
+
+- name: enable and restart mysql
+  systemd: name=mysql enabled=yes state=restarted daemon_reload=yes
+
+- name: enable and restart php7.0-fpm
+  systemd: name=php7.0-fpm enabled=yes state=restarted daemon_reload=yes
+  

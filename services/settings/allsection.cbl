@@ -57,7 +57,7 @@
 
              add 1 to result-count end-add
              move name to rsection-name(result-count)
-             add 20 to result-length end-add
+             add function byte-length(name) to result-length end-add
           end-perform.
 
        end program all-section.

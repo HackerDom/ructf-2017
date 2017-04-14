@@ -33,7 +33,7 @@ namespace checker.net
 			}
 		}
 
-		public async Task<T> TryWaitMessageAsync<T>(Func<ArraySegment<byte>, (bool, T)> filter, int timeout)
+		public async Task<T> TryWaitMessageAsync<T>(Func<ArraySegment<byte>, Tuple<bool, T>> filter, int timeout)
 		{
 			var buffer = new ArraySegment<byte>(new byte[maxMsgSize]);
 			using(var source = new CancellationTokenSource(timeout))
@@ -42,7 +42,7 @@ namespace checker.net
 				{
 					while(!source.IsCancellationRequested)
 					{
-						while(true)
+						while(client.State == WebSocketState.Open)
 						{
 							var result = await client.ReceiveAsync(buffer, source.Token).ConfigureAwait(false);
 							await Console.Error.WriteLineAsync($"ws {result.MessageType.ToString().ToLowerInvariant()} type, got {result.Count} bytes, {(result.EndOfMessage ? "complete" : "partial")} msg").ConfigureAwait(false);
@@ -57,14 +57,14 @@ namespace checker.net
 							buffer = new ArraySegment<byte>(buffer.Array, offset, buffer.Array.Length - offset);
 						}
 
-						var (stop, item) = filter(buffer);
-						if(stop)
-							return item;
+						var tuple = filter(buffer);
+						if(tuple.Item1)
+							return tuple.Item2;
 					}
 				}
 				catch(Exception e)
 				{
-					if(!(e is OperationCanceledException))
+					if(!(e is OperationCanceledException || e is ObjectDisposedException))
 						await Console.Error.WriteLineAsync($"ws receive error: {e}").ConfigureAwait(false);
 				}
 			}
@@ -72,7 +72,10 @@ namespace checker.net
 			return default(T);
 		}
 
-		public void Dispose() => client.Dispose();
+		public void Dispose()
+		{
+			try { client.Dispose(); } catch { /* ignored */ }
+		}
 
 		private readonly int maxMsgSize;
 		private readonly ClientWebSocket client;

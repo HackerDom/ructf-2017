@@ -100,9 +100,13 @@ namespace checker.net
 		{
 			var request = WebRequest.CreateHttp(new Uri(baseUri, relative));
 			request.Method = method;
+			request.Proxy = null;
+			request.ServicePoint.UseNagleAlgorithm = false;
+			request.ServicePoint.ConnectionLimit = 1024;
 			request.AllowReadStreamBuffering = false;
 			request.AllowWriteStreamBuffering = false;
 			request.KeepAlive = keepAlive;
+			request.ServicePoint.Expect100Continue = false;
 			if(cookies != null)
 				request.CookieContainer = cookies;
 			if(headers != null && headers.Count > 0)

@@ -1,0 +1,2 @@
+- name: enable and restart stargate
+  systemd: name=stargate enabled=yes state=restarted daemon_reload=yes
