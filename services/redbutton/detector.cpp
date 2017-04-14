@@ -5,10 +5,16 @@
 
 Detector::Detector(uuid name, const char *data, size_t length, Detector *previousDetector)
 {
-	this->data = new char[length];
-	this->length = length;
+	const int* pShaderSize = ( const int* )data;
+	const int* pWidth = ( const int* )( data + sizeof( int ) + *pShaderSize );
+	const int* pHeight = ( const int* )( data + sizeof( int ) + *pShaderSize + sizeof( int ) );
 
-	memcpy(this->data, data, length);
+	this->shaderSize = *pShaderSize;
+	this->shader = new char[ shaderSize ];
+	this->targetWidth = *pWidth;
+	this->targetHeight = *pHeight;
+
+	memcpy(this->shader, data + sizeof( int ), this->shaderSize);
 
 	this->name = name;
 	this->previousDetector = previousDetector;
@@ -16,11 +22,8 @@ Detector::Detector(uuid name, const char *data, size_t length, Detector *previou
 
 Detector::~Detector()
 {
-	if (data)
-	{
-		delete[] data;
-		data = NULL;
-	}
+	delete[] shader;
+	shader = NULL;
 }
 
 

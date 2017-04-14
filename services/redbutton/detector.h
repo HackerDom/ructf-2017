@@ -17,8 +17,10 @@ public:
 	virtual ~Detector();
 
 	uuid name;
-	char *data;
-	size_t length;
+	char *shader;
+	size_t shaderSize;
+	int targetWidth;
+	int targetHeight;
 
 	Detector *previousDetector;
 };
