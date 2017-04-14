@@ -22,3 +22,4 @@ addsection.c
 fixsection.c
 random.c
 getsection.c
+allsection.c

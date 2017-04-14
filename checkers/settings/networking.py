@@ -50,7 +50,7 @@ class State:
 			if type(method) is str:
 				method = get_method(method)
 			self.socket.sendall(method + message)
-		except ex:
+		except Exception as ex:
 			checker.down(error="can't send data. {}".format(message), exception=ex)
 	def recv(self, length):
 		buf = bytearray()
@@ -58,7 +58,7 @@ class State:
 			while len(buf) < length:
 				buf += self.socket.recv(length - len(buf))
 			return buf
-		except:
+		except Exception as ex:
 			checker.down(error="can't recive full data. recived: {}".format(buf), exception=ex)
 	def ensure_ok(self, method):
 		status = self.recv(2).decode(encoding='ascii', errors='ignore')
@@ -71,7 +71,7 @@ class State:
 		if type(section_name) == str:
 			section_name = get_section_name(section_name)
 		self.send_checked('add-section', section_name)
-		return self.recv(80)
+		return (self.recv(80), section_name)
 	def add_apikey(self, section_name, old_key, new_key):
 		if type(section_name) == str:
 			section_name = get_section_name(section_name)
@@ -117,4 +117,24 @@ class State:
 			for k, v in r:
 				res[bytes(k)] = v
 			r = self.get_section(section_name, apikey, r[-1][0])
+		return res
+	def get_sections(self, section_name=None):
+		if section_name is None:
+			section_name = bytes([0] * 40)
+		if type(section_name) == str:
+			section_name = get_section_name(section_name)
+		self.send_checked('all-section', section_name)
+		res_length = self.recv(2).decode(encoding='ascii')
+		if not res_length.isdigit():
+			checker.mumble(error="count is not digit '{}'".format(res_length))
+		res = []
+		for i in range(int(res_length)):
+			res.append(self.recv(40))
+		return res
+	def get_all_sections(self):
+		res = []
+		r = self.get_sections()
+		while len(r) > 0:
+			res += r
+			r = self.get_sections(r[-1])
 		return res

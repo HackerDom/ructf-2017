@@ -64,20 +64,17 @@
            move 2 to result-length.
 
        get-data.
+           move 'ok' to rcode
+           move zero to result-count
+           move 3 to result-length
+
            move section-name to ssection-name
            move param-name to sparam-name
            start settings-db 
              key is greater than composite-key
              invalid key
-               move 'ok' to rcode
-               move zero to result-count
-               move 3 to result-length
                goback
            end-start
-
-           move 'ok' to rcode
-           move zero to result-count
-           move 3 to result-length
 
            perform forever
              if result-count is equal to 8

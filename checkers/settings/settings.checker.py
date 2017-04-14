@@ -41,12 +41,11 @@ def handler_check(hostname):
 	with open('words.txt') as f:
 		words = f.readlines()
 
-	soc1 = State(hostname)
-	soc2 = State(hostname)
 	for i in range(2):
 		section_name = checker.get_rand_string(40)
 
-		key1 = soc1.create_section(section_name)
+		soc1 = State(hostname)
+		key1, section_name = soc1.create_section(section_name)
 
 		key2 = checker.get_rand_string(80)
 		soc1.add_apikey(section_name, key1, key2)
@@ -54,6 +53,7 @@ def handler_check(hostname):
 		add(patches, soc1.fix_section(section_name, key1, get_random_patch(words)))
 		add(patches, soc1.fix_section(section_name, key2, get_random_patch(words)))
 
+		soc2 = State(hostname)
 		key3 = checker.get_rand_string(80)
 		soc2.add_apikey(section_name, key2, key3)
 		add(patches, soc2.fix_section(section_name, key3, get_random_patch(words)))
@@ -62,6 +62,11 @@ def handler_check(hostname):
 		diff = dicts_diff(patches, values)
 		if diff is not None:
 			checker.mumble(error="patches are not equal to stored values: {}".format(diff))
+
+		soc3 = State(hostname)
+		sections = soc3.get_all_sections()
+		if section_name not in sections:
+			checker.mumble(error="not found created section. {}".format(section_name))
 
 	checker.ok()
 
@@ -93,7 +98,7 @@ def handler_put_3(hostname, id, flag):
 	con = State(hostname)
 	section_name = checker.get_rand_string(40)
 	apikey = con.create_section(section_name)
-    key = get_random_key(words)
+	key = get_random_key(words)
 	con.fix_section(section_name, apikey, [key, flag])
 	checker.ok(message=json.dump({'key': apikey, 'section_name': section_name, 'pkey': key}))
 
@@ -106,6 +111,7 @@ def handler_get_3(hostname, id, flag):
 	if id['pkey'] not in values or values[id['pkey']] != flag:
 		checker.corrupt(error='flag not found')
 	checker.ok()
+
 
 def main():
 	checker = Checker(handler_check, [(handler_put_1, handler_get), (handler_put_2, handler_get), (handler_put_3, handler_get_3)])
