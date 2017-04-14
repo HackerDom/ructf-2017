@@ -16,6 +16,7 @@
 
        01 buffers-pool.
          02 buffers occurs 1024 times indexed by buffer-number.
+           03 is-admin picture 9.
            03 read-buffer picture x(1024).
            03 read-buffer-length binary-long unsigned.
            03 read-buffer-used binary-long unsigned.
@@ -24,6 +25,7 @@
            03 write-buffer-used binary-long unsigned.
            03 socket binary-int value -1.
 
+       01 is-admin-descriptor picture 9.
        01 flag binary-int unsigned.
        01 need-close picture 9.
        01 is-succes picture 9.
@@ -44,9 +46,12 @@
 
        linkage section.
        01 server-descriptor binary-int.
+       01 admin-descriptor binary-int.
 
-       procedure division using server-descriptor.
+       procedure division using server-descriptor, admin-descriptor.
        start-handling.
+           display 'server: ' server-descriptor end-display
+           display 'admin: ' admin-descriptor end-display
            perform process-event forever.
 
        process-event.
@@ -55,9 +60,15 @@
              by reference event
            end-call
            if fdesc is equal to server-descriptor
+             move zero to is-admin-descriptor
              perform add-new-client
              exit paragraph
            end-if.
+           if fdesc is equal to admin-descriptor
+             move 1 to is-admin-descriptor
+             perform add-new-client
+             exit paragraph
+           end-if
            call 'and' using
              by value event
              by value POLLIN
@@ -84,9 +95,10 @@
 
        add-new-client.
            perform forever
+             display fdesc end-display
              move function length(peer-address) to peer-address-length
              call 'accept' using
-               by value server-descriptor
+               by value fdesc
                by reference peer-address
                by reference peer-address-length
                giving peer-descriptor
@@ -138,6 +150,7 @@
                move function length(read-buffer(buffer-number))
                  to read-buffer-length(buffer-number)
                move peer-descriptor to socket(buffer-number)
+               move is-admin-descriptor to is-admin(buffer-number)
              end-if.
 
 
@@ -183,7 +196,7 @@
                  from read-buffer-length(buffer-number) end-subtract
                set socket(buffer-number) to fdesc
                call 'process-request' using
-                  by reference buffers(buffer-number)
+                 by reference buffers(buffer-number)
                end-call
            end-evaluate.
 

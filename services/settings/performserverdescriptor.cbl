@@ -7,7 +7,7 @@
        01 server-address.
            03  server-family binary-short unsigned.
            03  server-port binary-short unsigned.
-           03  server-ip-address binary-int unsigned.
+           03  server-ip-address binary-long unsigned.
            03  filler picture x(8) value low-values.
 
        77 AF_INET binary-short unsigned value 2.
@@ -17,8 +17,6 @@
        77 BIND_ERROR picture x(64) value "server call 'bind' failed".
        77 LISTEN_ERROR picture x(64) value 
                                           "server call 'listen' failed".
-       77 INIT_POLL_ERROR picture x(64) value 
-                                        "server call 'initPoll' failed".
        77 add_poll_error picture x(64) value 
                                          "server call 'addread' failed".
 
@@ -28,8 +26,10 @@
        linkage section.
        01 port binary-short unsigned.
        01 server-descriptor binary-int.
+       01 command-ip-address binary-int unsigned.
 
-       procedure division using port, server-descriptor.
+       procedure division
+         using command-ip-address, port, server-descriptor.
        start-perform-server.
       D    display "port: ", port end-display
 
@@ -63,7 +63,7 @@
       D    display "binary port: ", server-port end-display
 
            move AF_INET to server-family
-           move 0 to server-ip-address
+           move command-ip-address to server-ip-address
 
            call 'bind' using
              by value server-descriptor
@@ -92,15 +92,7 @@
 
       D    display "start listen" end-display
 
-           call 'initPoll' end-call
-           if return-code is less than zero
-             call 'logerror' using
-               by content INIT_POLL_ERROR
-               by content 1
-             end-call
-           end-if
-
-           call 'addRead' using
+          call 'addRead' using
              by value server-descriptor
            end-call
            if return-code is less than zero
