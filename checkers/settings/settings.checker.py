@@ -80,7 +80,7 @@ def handler_put(hostname, id, flag):
 	apikey, section_name = con.create_section(section_name)
 	key = get_random_key(words)
 	con.fix_section(section_name, apikey, [(key, flag)])
-	checker.ok(message=json.dump({'key': apikey, 'section_name': section_name, 'pkey': key}))
+	checker.ok(message=json.dumps({'key': apikey, 'section_name': section_name, 'pkey': key}))
 
 def handler_get(hostname, id, flag):
 	id = json.loads(id)
