@@ -5,7 +5,7 @@ html, body {
 body {
 	background: #222;
 	font-family: 'Orbitron', sans-serif;
-	font-size: 16px;
+	font-size: 14px;
 	color: #eee;
 	margin: 0;
 	padding: 0;
@@ -81,6 +81,10 @@ svg * {
 	font-size: 14px;
 	overflow: hidden;
 }
+.left-foot {
+	flex: 1;
+	font-size: 75%;
+}
 .right-foot {
 	flex: 1;
 	opacity: 0.3;
@@ -110,7 +114,10 @@ svg * {
 }
 
 @media all and (min-width: 800px) {
-	body { border: 3px solid rgba(0, 255, 255, 0.7); }
+	body {
+		border: 3px solid rgba(0, 255, 255, 0.7);
+		font-size: 16px;
+	}
 
 	.main { flex: 2 0; }
 	.left { order: 1; }

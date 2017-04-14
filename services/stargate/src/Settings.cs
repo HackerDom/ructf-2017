@@ -21,15 +21,17 @@ namespace stargåte
 				Update();
 			}, null);
 
-			if(ConfigRoot["key"] == null)
+			var key = ConfigRoot["key"];
+			if(key == null || !Guid.TryParse(key, out _))
 			{
 				Key = new byte[16];
 				using(var rng = RandomNumberGenerator.Create())
 					rng.GetBytes(Key);
 
-				File.AppendAllText(SettingsFilename, $"key={new Guid(Key)}{Environment.NewLine}");
-				ConfigRoot.Reload();
+				File.WriteAllText(SettingsFilename, $"key={new Guid(Key)}{Environment.NewLine}");
 			}
+
+			ConfigRoot.Reload();
 		}
 
 		public const int MaxFieldLength = 340;
@@ -40,17 +42,18 @@ namespace stargåte
 		public const int MaxSpectrumSize = 16384;
 		public const int MaxTransmissionInfoSize = 1024;
 
+		public static TimeSpan WsPingInterval = TimeSpan.FromSeconds(3);
+
 		public static byte[] Key;
 
 		public static TimeSpan Ttl;
 		public static int ReadWriteTimeout;
 		public static int WsSendTimeout;
 
-		public static TimeSpan WsPingInterval = TimeSpan.FromSeconds(3);
-
 		private static void Update()
 		{
-			Key = Guid.Parse(ConfigRoot["key"]).ToByteArray();
+			if(Guid.TryParse(ConfigRoot["key"], out var key))
+				Key = key.ToByteArray();
 
 			Ttl = ConfigRoot["ttl"].TryParseOrDefault(TimeSpan.FromMinutes(30));
 			ReadWriteTimeout = ConfigRoot["rwTimeout"].TryParseOrDefault(3000);

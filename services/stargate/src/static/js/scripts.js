@@ -102,14 +102,20 @@ var MAX_MSG_COUNT = 30;
 		event.preventDefault();
 		$status.text("Outgoing...");
 
-		var file = event.dataTransfer.files[0];
+		var files = event.dataTransfer.files;
+		if(files.length === 0) {
+			ChangeEventHorizonState(ERROR, "Invalid Substance");
+			return false;
+		}
+
+		var file = files[0];
 		if(file.size > MAXSIZE) {
 			ChangeEventHorizonState(ERROR, "Substance Too Large");
 			return false;
 		}
 
-		var filename = b64Enc(file.name);
-		if(filename > MAXNAMELENGTH) {
+		var b64name = b64Enc(file.name);
+		if(b64name > MAXNAMELENGTH) {
 			ChangeEventHorizonState(ERROR, "Name Too Long");
 			return false;
 		}
@@ -127,15 +133,18 @@ var MAX_MSG_COUNT = 30;
 					$(".right-container").prepend($("<div/>").append($canvas));
 					DrawSpectrum($canvas[0], msg);
 				} else {
-					var error = new TextDecoder("utf-8").decode(new Uint8Array(xhr.response));
+					var error = window.TextDecoder && new TextDecoder("utf-8").decode(new Uint8Array(xhr.response));
 					ChangeEventHorizonState(ERROR, error || "Internal Stargate Error");
 				}
 			}
 		};
 
-		xhr.open('PUT', '/put/');
-		xhr.setRequestHeader("X-SG1-Name", filename);
-		xhr.setRequestHeader("X-SG1-Entropy", file.lastModified.toString(36).substr(2)); // Some secret entropy
+		var entropy = new Uint8Array(16);
+		window.crypto.getRandomValues(entropy);
+
+		xhr.open('PUT', '/send/');
+		xhr.setRequestHeader("X-SG1-Name", b64name);
+		xhr.setRequestHeader("X-SG1-Entropy", btoa(String.fromCharCode.apply(null, entropy))); // Some secret entropy
 		xhr.send(file);
 
 		return true;
