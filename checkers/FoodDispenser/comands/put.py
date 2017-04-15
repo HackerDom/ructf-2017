@@ -82,9 +82,9 @@ def first_vuln_put(host, flag):
             flag_poster_group
         )
     except HTTPError as e:
-        return {"code": DOWN, "private": e}
+        return {"code": DOWN, "private": traceback.format_exc()}
     except KeyError as e:
-        return {"code": MUMBLE, "private": e}
+        return {"code": MUMBLE, "private": traceback.format_exc()}
     return {"code": OK, "flag_id": b64encode(dumps(
         {"group": flag_poster_group, "invites": invites},
         separators=(',', ':')).encode()).decode()}
