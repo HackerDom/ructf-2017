@@ -9,7 +9,7 @@
         function post()
         {
             $login = $_POST['login'];
-            $password = $_POST['password'];
+            $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
             $first_name = $_POST['first_name'];
             $last_name = $_POST['last_name'];
             $giro = $_POST['checkout_bill'];
@@ -23,11 +23,16 @@
                 ]
 
             );
-
-            if (!User::get_by_login($u->login)->id) {
+            $user_array = User::get_by_login($u->login);
+            if (isset($user_array)) {
+                echo parent::render([
+                    'error' => "User already exist"
+                ]);
+            } else {
                 $result = $u->insert_or_update();
+                redirect('/signin/');
+
             }
-            redirect('/signin/');
         }
 
         function get()

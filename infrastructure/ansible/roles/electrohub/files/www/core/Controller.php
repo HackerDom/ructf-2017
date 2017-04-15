@@ -6,7 +6,12 @@
     class Controller
     {
         public $template;
+        protected $option;
 
+        function __construct($option = [])
+        {
+            $this->option = $option;
+        }
 
         function get_context():array
         {

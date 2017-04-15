@@ -1,0 +1,23 @@
+{% extends 'base.twig' %}
+
+{% block title %}Order add{% endblock %}
+{% block extend_css %}
+
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <form method="post">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Name">
+            </div>
+            <div class="form-group">
+                <label for="secret_code">Secret Code</label>
+                <input type="text" class="form-control" id="secret_code" name="secret_code" placeholder="Secret Code">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+
+{% endblock %}

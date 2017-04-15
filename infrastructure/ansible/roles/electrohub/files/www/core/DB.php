@@ -11,7 +11,7 @@
         function __construct(
             string $db_host = '127.0.0.1',
             string $db_user = 'root',
-            string $db_password = '',
+            string $db_password = 'mysql',
             string $db_name = 'ructf'
         )
         {
@@ -26,6 +26,7 @@
                 $this->db_password,
                 $this->db_name
             );
+
             if ($this->connect->connect_error) {
                 throw new Exception($this->connect->connect_errno . ': ' . $this->connect->connect_error);
             }
@@ -39,13 +40,13 @@
         public function query(string $query)
         {
             $result = $this->connect->query($query);
-            if ($result === false)
-                error('DB query error: ' . $this->connect->error);
             return $result;
         }
 
-        public function escape_value($value)
+        public function escape_value($value):string
         {
             return "'" . $this->connect->real_escape_string($value) . "'";
         }
     }
+
+    new DB();

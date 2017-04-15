@@ -1,6 +1,7 @@
 <?php
     require_once __DIR__ . '/../core/Controller.php';
     require_once __DIR__ . '/../core/Utils.php';
+
     class Signup extends Controller
     {
         public $template = 'signup.twig';
@@ -8,22 +9,30 @@
         function post()
         {
             $login = $_POST['login'];
-            $password = $_POST['password'];
+            $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
             $first_name = $_POST['first_name'];
             $last_name = $_POST['last_name'];
-            $checkout_bill = $_POST['checkout_bill'];
+            $giro = $_POST['checkout_bill'];
             $u = new User(
                 [
                     'login' => $login,
                     'password' => $password,
                     'first_name' => $first_name,
                     'last_name' => $last_name,
-                    'checkout_bill' => $checkout_bill
+                    'giro' => $giro
                 ]
 
             );
-            $result = $u->insert();
-            redirect('/signin/');
+            $user_array = User::get_by_login($u->login);
+            if (isset($user_array)) {
+                echo parent::render([
+                    'error' => "User already exist"
+                ]);
+            } else {
+                $result = $u->insert_or_update();
+                redirect('/signin/');
+
+            }
         }
 
         function get()

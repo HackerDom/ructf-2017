@@ -1,0 +1,30 @@
+{% extends 'base.twig' %}
+
+{% block title %}Order Item Add{% endblock %}
+{% block extend_css %}
+
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <form method="post">
+            <div class="form-group">
+                <label for="position_x">Map position x</label>
+                <input type="text" class="form-control" id="position_x" name="position_x" placeholder="Map position x">
+            </div>
+            <div class="form-group">
+                <label for="position_y">Map position y</label>
+                <input type="text" class="form-control" id="position_y" name="position_y" placeholder="Map position y">
+            </div>
+            <div class="form-group">
+                <label for="quantity_energy">Quantity energy</label>
+                <input type="number" class="form-control" id="quantity_energy" name="quantity_energy"
+                       min="1" max="100"
+                       placeholder="Quantity energy"
+                >
+            </div>
+            <button type="submit" class="btn btn-primary">Add order item</button>
+        </form>
+    </div>
+
+{% endblock %}

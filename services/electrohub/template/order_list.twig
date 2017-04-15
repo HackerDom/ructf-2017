@@ -1,0 +1,38 @@
+{% extends 'base.twig' %}
+
+{% block title %}Order List{% endblock %}
+{% block extend_css %}
+
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Secret</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for order in order_list %}
+                <tr>
+                    <th scope="row">
+                        <a href="/order/{{ order.id }}/">{{ order.id }}</a>
+                    </th>
+                    <th>{{ order.name }}</th>
+                    <th>{{ order.secret }}</th>
+                    <th>
+                        <a href="/order/{{ order.id }}/add_item/">
+                            Add order item
+                        </a>
+                    </th>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

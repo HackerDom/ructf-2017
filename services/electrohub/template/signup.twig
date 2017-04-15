@@ -7,6 +7,11 @@
 
 {% block content %}
     <div class="container">
+        {% if error %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endif %}
         <form class="form-signin" method="post">
             <h2 class="form-signin-heading">Please sign up</h2>
             <label for="login" class="sr-only">Login</label>
