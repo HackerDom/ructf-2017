@@ -7,12 +7,10 @@ namespace checker.stargate
 {
 	internal class DirectBitmap : IDisposable
 	{
-		public unsafe DirectBitmap(Bitmap bmp)
+		public unsafe DirectBitmap(Bitmap bmp, int x, int y, int width, int height)
 		{
 			this.bmp = bmp;
-			if(bmp.PixelFormat != PixelFormat.Format32bppArgb)
-				throw new ArgumentException($"Unsupported pixel format '{bmp.PixelFormat}'", nameof(bmp));
-			data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, bmp.PixelFormat);
+			data = bmp.LockBits(new Rectangle(x, y, width, height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 			ptr = (int*)data.Scan0;
 		}
 
@@ -43,7 +41,6 @@ namespace checker.stargate
 		public void Dispose()
 		{
 			bmp.UnlockBits(data);
-			bmp.Dispose();
 		}
 
 		public int Width => data.Width;

@@ -5,8 +5,8 @@ import * as THREE_particle from "./particle";
 import Stats from "stats.js";
 import _ from "underscore";
 
-const countdown_start = new Date(2017, 3, 16, 9, 0, 0); // month from 0
-const countdown_end = new Date(2017, 3, 16, 21, 0, 0);
+const countdown_start = new Date(2017, 3, 16, 10, 0, 0); // month from 0
+const countdown_end = new Date(2017, 3, 16, 20, 0, 0);
 const YEKT_timezone_offset = 5 * 60 * 60 * 1000;
 const sprite_coeff = 3;
 const canvasWidth = 182 * sprite_coeff;

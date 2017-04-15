@@ -1,14 +1,13 @@
 <?php
 
-    function redirect($url)
+    function redirect(string $url)
     {
-        $url = str_replace('\n', '', $url);
-        $url = str_replace('\r', '', $url);
+        $url = trim(preg_replace('/\s+/', ' ', $url));
         header('Location: ' . $url);
         exit;
     }
 
-    function error($http_code)
+    function error(int $http_code)
     {
         http_response_code($http_code);
         echo '<h1>Error ' . $http_code . '</h1>';
