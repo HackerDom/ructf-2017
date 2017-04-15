@@ -38,8 +38,7 @@ namespace checker.stargate
 
 			await Console.Error.WriteLineAsync($"name '{name}', b64name '{b64Name}', entropy '{b64Entropy}'").ConfigureAwait(false);
 
-			var bmp = new Bitmap(64, 64, PixelFormat.Format32bppArgb);
-
+			using(var bmp = RndBitmap.RndBmp(RndUtil.ThreadStaticRnd.Next(32) + 96, RndUtil.ThreadStaticRnd.Next(32) + 96))
 			using(var wsClient = await AsyncWebSocketClient.TryConnectAsync(GetBaseWsUri(host), MaxWsMsgSize, NetworkOpTimeout).ConfigureAwait(false))
 			{
 				if(wsClient == null)
@@ -76,9 +75,6 @@ namespace checker.stargate
 					throw new CheckerException(ExitCode.MUMBLE, $"invalid {PutRelative} response");
 
 				var expectedSpectrum = bmp.CalcSpectrum();
-
-				await Console.Error.WriteLineAsync(expectedSpectrum.ToText()).ConfigureAwait(false);
-				await Console.Error.WriteLineAsync(spectrum.ToText()).ConfigureAwait(false);
 
 				if(!spectrum.ComponentEquals(expectedSpectrum))
 					throw new CheckerException(ExitCode.MUMBLE, $"invalid {PutRelative} response");

@@ -54,6 +54,7 @@
     <Compile Include="net\HttpStatusToExitCode.cs" />
     <Compile Include="IChecker.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="rnd\RndBitmap.cs" />
     <Compile Include="rnd\RndDbg.cs" />
     <Compile Include="rnd\RndUtil.cs" />
     <Compile Include="rnd\RndText.cs" />
