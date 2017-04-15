@@ -19,13 +19,13 @@
 
 - name: copy service files
   synchronize: 
-    src: go
+    src: "{{ playbook_dir }}/../../services/capter/go"
     dest: /home/capter/
     rsync_opts: "--chmod=D0770 --chmod=F0660 --chown=capter:capter"
   notify: enable and restart services
 
 - name: copy capterca
-  copy: src=capterca dest=/srv/
+  copy: src="{{ playbook_dir }}/../../services/capter/capterca/capterca" dest=/srv/
   notify: enable and restart services
 
 - name: fix permissions for capterca
