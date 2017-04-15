@@ -54,7 +54,7 @@ class HttpCheckerBase(object):
 
         try:
             if command == 'info':
-                print('vulns: 1:1')
+                print('vulns: 1')
                 exit(EXITCODE_OK)
 
             if len(sys.argv) < 3:
@@ -97,7 +97,7 @@ class HttpCheckerBase(object):
         except socket.error as e:
             self.debug(e)
             if isinstance(e, socket.timeout) or 'errno' in dir(
-                e) and e.errno == 111:
+                    e) and e.errno == 111:
                 print('connection problem')
                 exit(EXITCODE_DOWN)
             print('socket error')

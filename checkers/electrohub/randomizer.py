@@ -10,6 +10,8 @@ class Randomizer(object):
         return {
             'login': self.randlogin() + uuid.uuid4().hex,
             'password': password,
+            'first_name': self.randNames(),
+            'last_name': self.randUrnames()
         }
 
     def randword(self):
