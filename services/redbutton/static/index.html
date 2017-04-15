@@ -109,12 +109,12 @@
 
         $("#checkResult").html("Check succeeded.").css('visibility', 'visible');
 
-        if (data.length == 32)
+        if (data.length == 0)
+          $("#detectionResult").html($('<span class="text-success centered"></span>'.text("No threats detected")));
+        else
           $("#detectionResult").html($('<div class="text-block"></div>')
             .append($('<p class="text-danger blink"></p>').html("<strong>Attack detected!</strong>"))
             .append($('<p class="text-danger"></p>').text("Missile launch approved, code: " + data)));
-        else
-          $("#detectionResult").html($('<span class="text-success centered"></span>'.text("No threats detected")));
 
       }).fail(function(xhr, status, error) {
 
