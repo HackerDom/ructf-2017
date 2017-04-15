@@ -257,7 +257,7 @@ void main()
 	gl_FragColor = ret;
 #else
 	
-	if( tentaclesCounter > TENTACLES_NUM || linesCounter > TENTACLES_NUM * 2 )
+	if( tentaclesCounter == 0 || tentaclesCounter > TENTACLES_NUM || linesCounter > TENTACLES_NUM * 2 )
 		discard;
 
 	vec4 flag[ 8 ];
