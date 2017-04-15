@@ -21,7 +21,10 @@
   synchronize: 
     src: "{{ playbook_dir }}/../../services/capter/go"
     dest: /home/capter/
-    rsync_opts: "--chmod=D0770 --chmod=F0660 --chown=capter:capter"
+    rsync_opts:
+      - "--chmod=D0770"
+      - "--chmod=F0660"
+      - "--chown=capter:capter"
   notify: enable and restart services
 
 - name: copy capterca
