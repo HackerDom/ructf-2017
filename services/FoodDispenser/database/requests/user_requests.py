@@ -3,6 +3,7 @@ from hashlib import sha256
 from peewee import IntegrityError, fn
 from datetime import datetime
 from json import loads, dumps
+import re
 
 
 SALT = "#Salt%)"
@@ -31,6 +32,9 @@ def register_user(username, password, is_food_provider=False):
 
 
 def check_user_password(username, password):
+    username_regexp = re.compile(r'[A-Za-z0-9_-]{3,32}')
+    if not re.fullmatch(username_regexp, username):
+        raise ValueError("Bad Symbols!")
     with db_request("User") as User:
         row = User.select().where(
             (fn.lower(User.username) == username.lower()) &
