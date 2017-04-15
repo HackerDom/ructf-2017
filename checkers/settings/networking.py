@@ -52,7 +52,6 @@ class State:
 		except Exception as ex:
 			checker.down(error="can't connect to {}".format(hostname), exception=ex)
 	def __del__(self):
-		self.socket.shutdown(socket.SHUT_RDWR)
 		self.socket.close()
 	def send(self, method, message):
 		try:
