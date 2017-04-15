@@ -52,6 +52,6 @@ namespace stargåte.handlers
 
 		private static readonly byte[] HelloMessage = Encoding.ASCII.GetBytes("hi");
 		private static readonly ConcurrentDictionary<WebSocket, SemaphoreSlim> Clients = new ConcurrentDictionary<WebSocket, SemaphoreSlim>();
-		private static readonly ReusableObjectPool<byte[]> ResponsePool = new ReusableObjectPool<byte[]>(() => new byte[Settings.MaxTransmissionInfoSize], null, 512);
+		private static readonly ReusableObjectPool<byte[]> ResponsePool = new ReusableObjectPool<byte[]>(() => new byte[Settings.MaxTransmissionInfoSize], null, 128);
 	}
 }

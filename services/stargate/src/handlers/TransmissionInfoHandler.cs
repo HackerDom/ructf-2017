@@ -20,9 +20,16 @@ namespace stargåte.handlers
 			if(string.IsNullOrEmpty(key))
 				return new HttpResult {StatusCode = 403, Message = "Access Denied"};
 
-			using(var hmac = new HMACSHA256(Settings.Key))
-			if(!hmac.ComputeHash(Convert.FromBase64String(name)).FastTimingSecureEquals(Convert.FromBase64String(key)))
+			try
+			{
+				using(var hmac = new HMACSHA256(Settings.Key))
+				if(!hmac.ComputeHash(Convert.FromBase64String(name)).FastTimingSecureEquals(Convert.FromBase64String(key)))
+					return new HttpResult {StatusCode = 403, Message = "Access Denied"};
+			}
+			catch(FormatException)
+			{
 				return new HttpResult {StatusCode = 403, Message = "Access Denied"};
+			}
 
 			Transmission info;
 			if((info = TransmissionsDb.Find(name)) == null)
