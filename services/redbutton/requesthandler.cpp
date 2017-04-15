@@ -30,7 +30,7 @@ Context GetContext()
 		if (g_contexts[i].thread == tid)
 		{
 			ctx = g_contexts[i].context;
-			printf( ":: old thread %lx ctx %d\n", tid, i );
+			//printf( ":: old thread %lx ctx %d\n", tid, i );
 			found = true;
 			break;
 		}
@@ -44,7 +44,7 @@ Context GetContext()
 			{
 				g_contexts[i].thread = tid;
 				ctx = g_contexts[i].context;
-				printf( ":: new thread %lx ctx %d\n", tid, i );
+				//printf( ":: new thread %lx ctx %d\n", tid, i );
 				found = true;
 				break;
 			}
@@ -107,7 +107,7 @@ HttpResponse RequestHandler::HandlePost(HttpRequest request, HttpPostProcessor *
 
 	if (ParseUrl(request.url, 2, "detectors", "add"))
 	{
-		printf(":: setting up AddDetectorProcessor\n");
+		//printf(":: setting up AddDetectorProcessor\n");
 
 		*postProcessor = new AddDetectorProcessor(request, detectors);
 
@@ -118,17 +118,17 @@ HttpResponse RequestHandler::HandlePost(HttpRequest request, HttpPostProcessor *
 	memset(idBuffer, 0, sizeof(idBuffer));
 	if (ParseUrl(request.url, 3, "detectors", OUT(idBuffer), "check"))
 	{
-		uuid id;
-		uuid_parse(idBuffer, id.bytes);
+		//uuid id;
+		//uuid_parse(idBuffer, id.bytes);
 
-		printf(":: searching for detector %s...\n", idBuffer);
+		//printf(":: searching for detector %s...\n", idBuffer);
 
 		Detector *detector = detectors->GetDetector(id);
 
 		if (!detector)
 			return HttpResponse(MHD_HTTP_NOT_FOUND);
 
-		printf(":: setting up CheckDetectorProcessor\n");
+		//printf(":: setting up CheckDetectorProcessor\n");
 
 		*postProcessor = new CheckDetectorProcessor(request, detector);
 
@@ -158,7 +158,7 @@ int AddDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key, c
 
 	if (!strcmp(key, "detector") && size > 0)
 	{
-		printf(":: found detector data, length = %d\n", size);
+		//printf(":: found detector data, length = %d\n", size);
 
 		this->data = new char[size];
 
@@ -172,7 +172,7 @@ int AddDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key, c
 
 void AddDetectorProcessor::FinalizeRequest()
 {
-	printf(":: finalizing request\n");
+	//printf(":: finalizing request\n");
 
 	if (!data)
 	{
@@ -183,7 +183,7 @@ void AddDetectorProcessor::FinalizeRequest()
 	uuid id;
 	uuid_generate(id.bytes);
 
-	printf(":: adding detector: %d\n", dataSize );
+	//printf(":: adding detector: %d\n", dataSize );
 
 	detectors->AddDetector(id, data, dataSize);
 
@@ -191,7 +191,7 @@ void AddDetectorProcessor::FinalizeRequest()
 	uuid_unparse(id.bytes, responseData);
 	strcat(responseData, "\n");
 
-	printf(":: added detector: %s", responseData);
+	//printf(":: added detector: %s", responseData);
 
 	Complete(HttpResponse(MHD_HTTP_OK, responseData, strlen(responseData)));
 }
@@ -213,12 +213,12 @@ CheckDetectorProcessor::~CheckDetectorProcessor()
 
 int CheckDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key, const char *filename, const char *contentType, const char *transferEncoding, const char *data, uint64_t offset, size_t size)
 {
-	printf(":: iterating post fields, current = %s\n", key);
+	//printf(":: iterating post fields, current = %s\n", key);
 
 	if (!strcmp(key, "image") && size > 0)
 	{
-		printf(":: found image data, length = %d\n", size);
-		printf(":: filename = %s\n", filename);
+		//printf(":: found image data, length = %d\n", size);
+		//printf(":: filename = %s\n", filename);
 
 		this->data = new char[size];
 
@@ -232,7 +232,7 @@ int CheckDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key,
 
 void CheckDetectorProcessor::FinalizeRequest()
 {
-	printf(":: finalizing request, data = %p\n", data);
+	//printf(":: finalizing request, data = %p\n", data);
 
 	if (!data)
 	{
@@ -272,7 +272,7 @@ void CheckDetectorProcessor::FinalizeRequest()
 	{
 		Texture2D texture( data, dataSize );
 		if( texture.GetTexture() == 0 ){ 
-			printf(":: failed to create texture\n" );
+			//printf(":: failed to create texture\n" );
 			Complete(HttpResponse(MHD_HTTP_BAD_REQUEST));
 	    	return;
 		}
@@ -327,7 +327,7 @@ void CheckDetectorProcessor::FinalizeRequest()
 	    char *dataCopy = new char[ targetSize ];
 	    memcpy(dataCopy, responseData, targetSize );
 
-	    printf(":: returning response %d\n", targetSize );
+	    //printf(":: returning response %d\n", targetSize );
 		Complete(HttpResponse(MHD_HTTP_OK, dataCopy, targetSize ));
 	}
 
