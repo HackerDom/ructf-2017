@@ -64,9 +64,9 @@ if __name__ == '__main__':
         COMMANDS.get(sys.argv[1], not_found)(*sys.argv[2:])
     except URLError as e:
         close(DOWN, "Bad command address", "Checksystem fail {}"
-              .format(traceback.format_exc(e)))
+              .format(traceback.format_exc()))
     except OSError as e:
         close(DOWN, "Socket I/O error", "SOCKET ERROR: {}".format(
-            traceback.format_exc(e)))
+            traceback.format_exc()))
     except Exception as e:
         close(CHECKER_ERROR, "Unknown error", "INTERNAL ERROR: {}".format(e))
