@@ -34,6 +34,7 @@ namespace stargåte
 			ConfigRoot.Reload();
 		}
 
+		public const int MinFieldLength = 8;
 		public const int MaxFieldLength = 340;
 
 		public const int MaxIncomingSize = 65536;
