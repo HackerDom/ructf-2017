@@ -17,7 +17,7 @@ namespace checker.stargate
 
 		public static Spectrum CalcSpectrum(this Bitmap bmp)
 		{
-			using(var dbmp = new DirectBitmap(bmp))
+			using(var dbmp = new DirectBitmap(bmp, 0, 0, bmp.Width, bmp.Height))
 				return dbmp.CalcSpectrum();
 		}
 	}
