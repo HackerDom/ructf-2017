@@ -10,7 +10,7 @@ namespace checker.stargate
 		public unsafe DirectBitmap(Bitmap bmp, int x, int y, int width, int height)
 		{
 			this.bmp = bmp;
-			data = bmp.LockBits(new Rectangle(x, y, width, height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+			data = bmp.LockBits(new Rectangle(x, y, width, height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
 			ptr = (int*)data.Scan0;
 		}
 
