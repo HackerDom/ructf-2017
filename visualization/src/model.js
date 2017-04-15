@@ -33,6 +33,7 @@ export class GameModel {
 					score: 0,
 					place: null,
 					status: 0,
+					lastExplosionTime: 0,
 					servicesStatuses: new Array(SERVICES_COUNT)
 				});
 				const num = this.teams.length - 1;

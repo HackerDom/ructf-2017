@@ -147,6 +147,9 @@ export default class View {
 		const posTo = arrowData.to.pos.clone();
 		const spline_points = View.getSplinePoints(posFrom.normalize().multiplyScalar(44), posTo.normalize().multiplyScalar(44));
 		this.createArrow(spline_points, arrowData.svc.color);
+		setTimeout(function() {
+			arrowData.to.lastExplosionTime = new Date().getTime();
+		}, 3000);
 	}
 
 	createArrow(points, color) {
@@ -366,20 +369,31 @@ export default class View {
 				const material = materials[0];
 				material.map = stationDiffuseTex;
 				material.bumpMap = stationBumpTex;
-				const node = new THREE.Mesh( geometry, material );
-				node.scale.set( 1.2, 1.2, 1.2 );
+				const node = new THREE.Mesh(geometry.clone(), material);
+				node.scale.set(1.2, 1.2, 1.2);
 				node.castShadow = true;
 				node.receiveShadow = true;
 				const myDirectionVector = new THREE.Vector3(team.point[0], team.point[1], team.point[2]);
-				const nodePosition = myDirectionVector.clone().multiplyScalar(44);
-				node.position.set(nodePosition.x, nodePosition.y, nodePosition.z);
-				let mx = new THREE.Matrix4().lookAt(new THREE.Vector3(0, 0, 0), myDirectionVector, new THREE.Vector3(0, 1, 0));
-				let qt = new THREE.Quaternion().setFromRotationMatrix(mx);
-				node.rotateY((90 * Math.PI)/180);
-				node.quaternion.copy(qt);
+				const nodePosition = setNodePosition(node, myDirectionVector, 44);
 				team.node = node;
 				team.pos = nodePosition;
 				planetGroup.add(node);
+
+				const nodeGlossMaterial = new THREE.MeshPhongMaterial(
+					{
+						bumpMap : stationBumpTex,
+						opacity : 0,
+						color: 0xff0000,
+						side: THREE.FrontSide,
+						transparent: true
+					}
+				);
+				const nodeGloss = new THREE.Mesh(geometry.clone(), nodeGlossMaterial);
+				nodeGloss.scale.set(1.22, 1.22, 1.22);
+				const glossPosition = setNodePosition(nodeGloss, myDirectionVector, 44.012);
+				nodeGloss.position.set(glossPosition.x, glossPosition.y, glossPosition.z);
+				planetGroup.add(nodeGloss);
+				team.glossMaterial = nodeGlossMaterial;
 
 				const sprite = makeTextSprite(team);
 				const spritePosition = myDirectionVector.clone().multiplyScalar(52);
@@ -396,6 +410,16 @@ export default class View {
 			window.addEventListener('resize', onWindowResized, false);
 			document.addEventListener('mousedown', onDocumentMouseDown, false);
 			document.addEventListener('wheel', onDocumentMouseWheel, false);
+		}
+
+		function setNodePosition(node, myDirectionVector, coeff) {
+			const nodePosition = myDirectionVector.clone().multiplyScalar(coeff);
+			node.position.set(nodePosition.x, nodePosition.y, nodePosition.z);
+			let mx = new THREE.Matrix4().lookAt(new THREE.Vector3(0, 0, 0), myDirectionVector, new THREE.Vector3(0, 1, 0));
+			let qt = new THREE.Quaternion().setFromRotationMatrix(mx);
+			node.rotateY((90 * Math.PI)/180);
+			node.quaternion.copy(qt);
+			return nodePosition;
 		}
 
 		function calculateNodesPositions() {
@@ -541,6 +565,18 @@ export default class View {
 				} else
 					arrow.timer += delta / 3;
 				arrow.particleSystem.update(arrow.timer);
+			}
+
+			for (let i = 0; i< _this.model.teams.length; i++) {
+				const team = _this.model.teams[i];
+				if (team.lastExplosionTime === 0)
+					continue;
+				if (team.lastExplosionTime <= now && team.lastExplosionTime + 1000 >= now) {
+					team.glossMaterial.opacity = 0.45 - (now - team.lastExplosionTime) / 1000 * 0.45;
+				} else {
+					team.glossMaterial.opacity = 0;
+					team.lastExplosionTime = 0;
+				}
 			}
 
 			renderer.render(scene, camera);
