@@ -4,7 +4,6 @@ from comands import OK, MUMBLE, DOWN, CORRUPT, CHECKER_ERROR
 from json import loads
 from urllib.error import HTTPError
 from base64 import b64decode
-import traceback
 
 
 def get(host, flag_id, flag, vuln):
@@ -40,7 +39,6 @@ def get_first_vuln(host, flag_id, flag):
     except HTTPError:
         return {"code": DOWN}
     except KeyError:
-        print(traceback.format_exc())
         return {"code": MUMBLE}
 
 
