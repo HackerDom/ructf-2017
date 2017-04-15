@@ -8,7 +8,7 @@
 - name: copy motd
   copy: src=motd dest=/etc/motd
 
-- name: download golang
+- name: distribute golang
   unarchive:
     src: go1.8.1.linux-armv6l.tar.gz
     dest: /usr/local/
