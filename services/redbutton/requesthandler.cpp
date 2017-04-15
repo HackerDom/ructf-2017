@@ -118,8 +118,8 @@ HttpResponse RequestHandler::HandlePost(HttpRequest request, HttpPostProcessor *
 	memset(idBuffer, 0, sizeof(idBuffer));
 	if (ParseUrl(request.url, 3, "detectors", OUT(idBuffer), "check"))
 	{
-		//uuid id;
-		//uuid_parse(idBuffer, id.bytes);
+		uuid id;
+		uuid_parse(idBuffer, id.bytes);
 
 		//printf(":: searching for detector %s...\n", idBuffer);
 
