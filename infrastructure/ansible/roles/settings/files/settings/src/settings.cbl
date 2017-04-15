@@ -14,7 +14,7 @@
          copy settingrecord.
 
          fd random-dev is external.
-         01 buffer picture x(80).
+         01 buffer picture x(40).
 
        working-storage section.
          01 server-descriptor binary-int.

@@ -14,13 +14,15 @@
          
        working-storage section.
          01 need-more picture 9.
-         01 ind picture 9.
+         01 current-key-index picture 99.
+
+         77 default-api-key picture x(40) value all '*'.
 
        linkage section.
          01 argc binary-long unsigned.
          01 argv.
            02 section-name picture x(20).
-           02 skey picture x(40).
+           02 section-api-key picture x(40).
            02 param-name picture x(20).
            02 filler picture x(933).
          01 result.
@@ -37,32 +39,33 @@
          using argc, argv, result, result-length 
          returning need-more.
        start-get-section.
-           if argc is less than 80
-             move 1 to need-more
-             goback
-           else
-             move zero to need-more
-           end-if
+            if argc is less than 80
+              move 1 to need-more
+              goback
+            else
+              move zero to need-more
+            end-if
 
-           move section-name to name
-           read sections-db record
-             invalid key
-               move 'bn' to rcode
-               move 2 to result-length
-               goback
-           end-read
+            move section-name to name
+            read sections-db record
+              invalid key
+                move 'bn' to rcode
+                move 2 to result-length
+                goback
+            end-read
 
-           perform 
-             varying ind 
-               from 1 by 1 until ind is greater than api-keys-count
-             if skey is equal to api-key(ind)
-               perform get-data
-               goback
-             end-if
-           end-perform
+            perform
+              varying current-key-index
+                from 1 by 1 until current-key-index is greater than 9
+              if section-api-key is equal to api-key(current-key-index) and section-api-key is not equal to default-api-key
+                perform get-data
+                goback
+              end-if
+            end-perform
 
            move 'na' to rcode
-           move 2 to result-length.
+           move 2 to result-length
+           goback.
 
        get-data.
            move 'ok' to rcode

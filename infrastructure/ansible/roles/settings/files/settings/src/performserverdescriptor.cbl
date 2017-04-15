@@ -89,7 +89,5 @@
                by content ADD_POLL_ERROR
                by content 1
              end-call
-           end-if
-
-           goback.
+           end-if.
        end program perform-server-descriptor.

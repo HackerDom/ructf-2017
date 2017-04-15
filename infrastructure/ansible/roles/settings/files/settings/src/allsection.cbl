@@ -21,8 +21,7 @@
          01 result.
            02 rcode picture x(2).
            02 result-count picture 99.
-           02 results occurs 51.
-             03 rsection-name picture x(20).
+           02 rsection-name picture x(20) occurs 51 times.
          01 result-length binary-long unsigned.
 
        procedure division 
