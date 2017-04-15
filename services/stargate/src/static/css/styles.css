@@ -116,11 +116,9 @@ svg * {
 .msg-key {
 	font-size: 80%;
 }
-.canvas {
-	background-color: #333;
-}
 .spectrum {
 	cursor: pointer;
+	background-color: #223030;
 }
 
 #status-wrap {

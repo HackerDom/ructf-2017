@@ -84,6 +84,8 @@ var OPEN = "rgba(127,127,0,0.5)";
 
 var MAX_MSG_COUNT = 30;
 
+var KEY_LENGTH = 44;
+
 function showMessage($container, time, name, key, spectrum, error) {
 	var $msgs = $container.find(".msg");
 	var $msg = ($msgs.length > MAX_MSG_COUNT ? $msgs.last().remove() : $('<div class="msg"><div class="msg-text"/><div class="msg-error"/><canvas class="spectrum" width="' + WIDTH + '" height="' + HEIGHT + '"></canvas><div class="msg-key"/></div>'));
@@ -108,9 +110,13 @@ function showMessage($container, time, name, key, spectrum, error) {
 		xhr.onreadystatechange = (event) => {
 			if(xhr.readyState === XMLHttpRequest.DONE) {
 				if(event.target.status === 200) {
-					var msg = Transmission.decode(new Uint8Array(xhr.response));
-					var time = new Date(ticksToDate(msg.Timestamp)).toLocaleTimeString();
-					swal({ title: b64Dec(msg.Name), text: time + "\r\n\r\n" + tryB64Dec(msg.Entropy), type: "success" });
+					try {
+						var msg = Transmission.decode(new Uint8Array(xhr.response));
+						var time = new Date(ticksToDate(msg.Timestamp)).toLocaleTimeString();
+						swal({ title: b64Dec(msg.Name), text: time + "\r\n\r\n" + tryB64Dec(msg.Entropy), type: "success" });
+					} catch (e) {
+						console.log(e);
+					}
 				} else {
 					var error = window.TextDecoder && new TextDecoder("utf-8").decode(new Uint8Array(xhr.response)) || "Internal Stargåte Error";
 					swal({ type: "error", title: "Cancelled", text: error, timer: 2000 });
@@ -132,7 +138,7 @@ function showMessage($container, time, name, key, spectrum, error) {
 		else {
 			swal({title: "Enter the key", type: "input", showCancelButton: true, closeOnConfirm: false, inputPlaceholder: "SG1 key"}, function(inputValue) {
 				if(inputValue === false) return false;
-				if(inputValue === "") { swal.showInputError("Invalid SG1 key"); return false; }
+				if(inputValue.length !== KEY_LENGTH) { swal.showInputError("Invalid SG1 key"); return false; }
 				find(name, inputValue);
 			});
 		}
@@ -196,8 +202,12 @@ function showMessage($container, time, name, key, spectrum, error) {
 			if(xhr.readyState === XMLHttpRequest.DONE) {
 				if(event.target.status === 200) {
 					ChangeEventHorizonState(SUCCESS, "Substance Passed");
-					var spectrum = Spectrum.decode(new Uint8Array(xhr.response));
-					showMessage($(".right-container"), new Date().toLocaleTimeString(), b64name, xhr.getResponseHeader("X-SG1-Key"), spectrum);
+					try {
+						var spectrum = Spectrum.decode(new Uint8Array(xhr.response));
+						showMessage($(".right-container"), new Date().toLocaleTimeString(), b64name, xhr.getResponseHeader("X-SG1-Key"), spectrum);
+					} catch (e) {
+						console.log(e);
+					}
 				} else {
 					var error = window.TextDecoder && new TextDecoder("utf-8").decode(new Uint8Array(xhr.response));
 					showMessage($(".right-container"), new Date().toLocaleTimeString(), b64name, null, null, error);
@@ -233,9 +243,13 @@ function showMessage($container, time, name, key, spectrum, error) {
 			if(event.data.length === 2 && event.data[0] === 'h' && event.data[1] === 'i')
 				console.log("ws connected");
 			else {
-				var msg = Transmission.decode(new Uint8Array(event.data));
-				var time = new Date(ticksToDate(msg.Timestamp)).toLocaleTimeString();
-				showMessage($(".left-container"), time, msg.Name, null, msg.Spectrum);
+				try {
+					var msg = Transmission.decode(new Uint8Array(event.data));
+					var time = new Date(ticksToDate(msg.Timestamp)).toLocaleTimeString();
+					showMessage($(".left-container"), time, msg.Name, null, msg.Spectrum);
+				} catch (e) {
+					console.log(e);
+				}
 			}
 		}
 	};
