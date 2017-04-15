@@ -309,6 +309,8 @@ void CheckDetectorProcessor::FinalizeRequest()
 
 		
 	#if DEBUG
+		printf( ":: source dim: %dx%d\n", texture.GetWidth(), texture.GetHeight() );
+
 		save_png( "input.png", texture.GetRGBA(), texture.GetWidth(), texture.GetHeight() );
 		{
 			FILE* f = fopen( "flag.bin", "w" );
@@ -343,6 +345,9 @@ void CheckDetectorProcessor::FinalizeRequest()
 			Complete(HttpResponse(MHD_HTTP_BAD_REQUEST));
 	    	return;
 		}
+#if DEBUG
+		printf( ":: target dim: %dx%d\n", w, h );
+#endif
 
 	    BindFramebuffer( target );
 	    Clear( 0.0, 0.0, 0.0, 0.0 );
@@ -355,6 +360,10 @@ void CheckDetectorProcessor::FinalizeRequest()
 	    clock_gettime( CLOCK_REALTIME, &tp );
 		endTime = tp.tv_sec + tp.tv_nsec / 1000000000.0;
 		printf( ":: Time: %f\n", endTime - startTime );
+
+#if DEBUG
+		save_png( "output.png", target.GetRGBA(), target.GetWidth(), target.GetHeight() );
+#endif
 
 	    bool empty = true;
 	    for( int i = 0; i < w * h; i++ )
