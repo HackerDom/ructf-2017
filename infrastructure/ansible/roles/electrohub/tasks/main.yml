@@ -23,9 +23,9 @@
     - enable and restart nginx
     - enable and restart php7.0-fpm
 
-- name: Create a new database with name 'ructf'
-  mysql_db:
-    name: ructf
-    state: present
-  notify:
-    - enable and restart mysql
+#- name: Create a new database with name 'ructf'
+#  mysql_db:
+#    name: ructf
+#    state: present
+#  notify:
+#    - enable and restart mysql
