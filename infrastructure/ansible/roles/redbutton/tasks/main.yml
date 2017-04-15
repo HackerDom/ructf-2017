@@ -1,0 +1,42 @@
+- hostname:
+    name: redbutton
+
+- name: copy motd
+  copy: src=motd dest=/etc/motd
+
+- name: copy xorg service
+  copy: src=systemd/xorg.service dest=/etc/systemd/system/
+  notify: 
+    - enable and restart xorg
+    - enable and restart redbutton
+
+- name: copy redbutton service
+  copy: src=systemd/redbutton.service dest=/etc/systemd/system/
+  notify: enable and restart redbutton
+
+- name: copy service files
+  synchronize: 
+    src: root/
+    dest: /root/
+    rsync_opts: "--chmod=0660 --chown=root:root"
+  notify: enable and restart redbutton
+
+- name: make service executable
+  file: path={{item}} mode=0755
+  with_items:
+    - /root/redbutton
+  notify: enable and restart redbutton
+
+- name: copy nginx configs
+  copy: src=nginx/{{item}} dest=/etc/nginx/{{item}}
+  with_items:
+    - nginx.conf
+    - sites-available/default
+  notify: enable and restart nginx
+
+- name: copy static dir
+  synchronize: 
+    src: static
+    dest: /var/www/html/
+    rsync_opts: "--chown=root:root"
+  notify: enable and restart nginx

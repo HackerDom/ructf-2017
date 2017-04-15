@@ -1,0 +1,31 @@
+- hostname:
+    name: electrohub
+
+- name: create user
+  user: name=electrohub shell=/bin/false
+
+- name: copy motd
+  copy: src=motd dest=/etc/motd
+
+- name: copy service files
+  synchronize: 
+    src: www/
+    dest: /var/www/
+    rsync_opts: "--chmod=D0775 --chmod=F0665 --chown=electrohub:electrohub"
+  notify:
+    - enable and restart php7.0-fpm
+    - enable and restart nginx
+    - enable and restart mysql
+
+- name: copy nginx configs
+  copy: src=default dest=/etc/nginx/sites-available/default
+  notify:
+    - enable and restart nginx
+    - enable and restart php7.0-fpm
+
+- name: Create a new database with name 'ructf'
+  mysql_db:
+    name: ructf
+    state: present
+  notify:
+    - enable and restart mysql

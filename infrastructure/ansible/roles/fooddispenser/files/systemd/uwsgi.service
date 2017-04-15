@@ -1,0 +1,13 @@
+[Unit]
+    Description=uWSGI
+
+[Service]
+    ExecStart=/usr/bin/uwsgi food_dispenser.ini
+    WorkingDirectory=/home/fooddispenser
+    User=fooddispenser
+    Group=fooddispenser
+    Restart=on-failure
+    RestartSec=1s
+    
+[Install]
+    WantedBy=multi-user.target

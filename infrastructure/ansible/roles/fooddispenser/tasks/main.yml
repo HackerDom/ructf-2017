@@ -1,0 +1,26 @@
+- hostname:
+    name: fooddispenser
+
+- name: create user
+  user: name=fooddispenser shell=/bin/false
+
+- name: copy motd
+  copy: src=motd dest=/etc/motd
+
+- name: copy service files
+  synchronize: 
+    src: fooddispenser/
+    dest: /home/fooddispenser/
+    rsync_opts: "--chmod=D0775 --chmod=F0665 --chown=fooddispenser:fooddispenser"
+  notify: enable and restart nginx
+
+- name: copy uwsgi service
+  copy: src=systemd/uwsgi.service dest=/etc/systemd/system/
+  notify: 
+    - enable and restart uwsgi
+    - enable and restart nginx
+
+- name: copy nginx configs
+  copy: src=default dest=/etc/nginx/sites-available/default
+  notify:
+    - enable and restart nginx

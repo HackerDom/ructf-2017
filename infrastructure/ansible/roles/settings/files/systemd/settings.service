@@ -1,0 +1,14 @@
+[Unit]
+    Description=Settings service
+
+[Service]
+    ExecStart=/home/settings/settings 12345 54321
+    WorkingDirectory=/home/settings
+    User=settings
+    Group=settings
+    Restart=on-failure
+    RestartSec=1s
+    Environment=DB_PATH=/home/settings
+    
+[Install]
+    WantedBy=multi-user.target

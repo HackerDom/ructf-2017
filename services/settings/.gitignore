@@ -1,0 +1,26 @@
+settings
+
+*.swp
+*.c.l.h
+*.c.h
+*.i
+*.lst
+*.dat
+
+#generated files
+
+settings.c
+errnomessage.c
+logerror.c
+logerrorblock.c
+performserverdescriptor.c
+starthandling.c
+tunesocket.c
+processrequest.c
+addapikey.c
+addsection.c
+fixsection.c
+random.c
+getsection.c
+allsection.c
+runcommand.c

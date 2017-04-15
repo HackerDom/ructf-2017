@@ -1,0 +1,36 @@
+- hostname:
+    name: stargate
+
+- name: create user
+  user: name=stargate shell=/bin/false
+
+- name: copy motd
+  copy: src=motd dest=/etc/motd
+
+- name: copy service files
+  synchronize: 
+    src: stargate/
+    dest: /home/stargate/
+    rsync_opts: "--chmod=D0770 --chmod=F0660 --chown=stargate:stargate"
+  notify: enable and restart stargate
+
+- name: unpack service arch
+  unarchive:
+    src: runtime.tar.gz
+    dest: /home/stargate
+    creates: /home/stargate/System.Native.a
+  notify: enable and restart stargate
+
+- name: fix permissions for stargate
+  file: name=/home/stargate owner=stargate group=stargate recurse=yes state=directory
+  notify: enable and restart stargate
+
+- name: make service executable
+  file: path={{item}} mode=0755
+  with_items:
+    - /home/stargate/stargåte
+  notify: enable and restart stargate
+
+- name: copy stargate service
+  copy: src=systemd/stargate.service dest=/etc/systemd/system/
+  notify: enable and restart stargate
