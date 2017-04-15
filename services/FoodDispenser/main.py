@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template, redirect
-from uwsgidecorators import cron
+#from uwsgidecorators import cron
 from json import loads, JSONDecodeError, dumps
 from config import config
 from api import api_hub
@@ -112,10 +112,10 @@ def get_request_json():
         return None
 
 
-@cron(-1, -1, -1, -1, -1)
+#@cron(-1, -1, -1, -1, -1)
 def dynamically_load_config_changes(_):
     config.update_config()
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=80)
+    app.run(host="0.0.0.0", port=8080)

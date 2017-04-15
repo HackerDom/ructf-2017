@@ -69,5 +69,4 @@ if __name__ == '__main__':
         close(DOWN, "Socket I/O error", "SOCKET ERROR: {}".format(
             traceback.format_exc(e)))
     except Exception as e:
-        close(CHECKER_ERROR, "Unknown error", "INTERNAL ERROR: {}"
-              .format(traceback.format_exc(e)))
+        close(CHECKER_ERROR, "Unknown error", "INTERNAL ERROR: {}".format(e))
