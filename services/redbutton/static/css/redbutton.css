@@ -1,0 +1,38 @@
+.spaced-block {
+	margin-top: 70px;
+}
+
+.striped {
+	background-image: url('/img/stripe.png');
+	background-repeat: repeat;
+}
+
+.detection-result {
+	border: 1px solid black;
+	border-radius: 5px;
+	width: 300px;
+	height: 170px;
+	background: rgba(0, 0, 0, 0.1);
+	text-align: center;
+}
+
+.detection-result .text-block {
+	margin-top: 50px;
+}
+
+.detection-result .centered {
+	line-height: 170px;
+}
+
+.blink {
+  animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {  
+  50% { opacity: 0; }
+}
+
+.result-box {
+	margin-top: 15px;
+	visibility: hidden;
+}
