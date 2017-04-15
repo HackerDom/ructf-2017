@@ -17,18 +17,6 @@
 - name: add go bin to PATH
   copy: src=go_env.sh dest=/etc/profile.d/go_env.sh owner=root mode=0755
 
-#- name: add sources
-#  become: yes
-#  become_user: capter
-#  copy:
-#    src: "{{ playbook_dir }}/../../services/capter/{{ item }}"
-#    dest: "/home/capter/go/src/"
-#    owner: capter
-#    group: capter
-#  with_items:
-#    - capter
-#    - capterca
-
 - name: copy service files
   synchronize: 
     src: go
@@ -49,27 +37,6 @@
     - /home/capter/go/bin/capter
     - /srv/capterca
   notify: enable and restart services
-
-#- name: build services
-#  notify: enable and restart services
-#  become: yes
-#  become_user: capter
-#  shell: . /etc/profile.d/go_env.sh && /usr/local/go/bin/go get && CGO_ENABLED=0 /usr/local/go/bin/go build
-#  args:
-#    chdir: "/home/capter/go/src/{{ item }}"
-#  with_items:
-#    - capter
-#    - capterca
-
-#- name: remove capterca sources
-#  file: name=/home/capter/go/src/capterca state=absent
-
-- name: remove capterca sources
-  file: name=/home/capter/go/src/capter/Dockerfile state=absent
-
-#- name: move capterca to /srv/
-#  command: mv /home/capter/go/bin/capterca /srv/
-#  notify: enable and restart services
 
 - name: add service files
   copy: src={{ item }}.service dest=/etc/systemd/system/{{ item }}.service
