@@ -52,11 +52,11 @@ def special_check(host):
         for rating in ratings:
             if rating["comment"] == phrase:
                 return {"code": OK}
-        return {"code": MUMBLE, "private": traceback.format_exc()}
-    except HTTPError:
-        return {"code": DOWN, "private": traceback.format_exc()}
-    except KeyError:
-        return {"code": MUMBLE, "private": traceback.format_exc()}
+        return {"code": MUMBLE}
+    except HTTPError as e:
+        return {"code": DOWN, "private": traceback.format_exc(e)}
+    except KeyError as e:
+        return {"code": MUMBLE, "private": traceback.format_exc(e)}
 
 
 def first_vuln_put(host, flag):
@@ -81,10 +81,10 @@ def first_vuln_put(host, flag):
             randomize.rand_word(15),  # todo clever word
             flag_poster_group
         )
-    except HTTPError:
-        return {"code": DOWN, "private": traceback.format_exc()}
-    except KeyError:
-        return {"code": MUMBLE, "private": traceback.format_exc()}
+    except HTTPError as e:
+        return {"code": DOWN, "private": traceback.format_exc(e)}
+    except KeyError as e:
+        return {"code": MUMBLE, "private": traceback.format_exc(e)}
     return {"code": OK, "flag_id": b64encode(dumps(
         {"group": flag_poster_group, "invites": invites},
         separators=(',', ':')).encode()).decode()}
@@ -115,7 +115,7 @@ def second_vuln_put(host, flag):
 
         fd_api.Service.add_service_personal_info(host, service_token, flag)
         return {"code": OK, "flag_id": service_token}
-    except HTTPError:
-        return {"code": DOWN, "private": traceback.format_exc()}
-    except KeyError:
-        return {"code": MUMBLE, "private": traceback.format_exc()}
+    except HTTPError as e:
+        return {"code": DOWN, "private": traceback.format_exc(e)}
+    except KeyError as e:
+        return {"code": MUMBLE, "private": traceback.format_exc(e)}

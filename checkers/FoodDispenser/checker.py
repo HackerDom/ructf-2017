@@ -62,12 +62,12 @@ def not_found(*args):
 if __name__ == '__main__':
     try:
         COMMANDS.get(sys.argv[1], not_found)(*sys.argv[2:])
-    except URLError:
+    except URLError as e:
         close(DOWN, "Bad command address", "Checksystem fail {}"
-              .format(traceback.format_exc()))
-    except OSError:
+              .format(traceback.format_exc(e)))
+    except OSError as e:
         close(DOWN, "Socket I/O error", "SOCKET ERROR: {}".format(
-            traceback.format_exc()))
-    except Exception:
+            traceback.format_exc(e)))
+    except Exception as e:
         close(CHECKER_ERROR, "Unknown error", "INTERNAL ERROR: {}"
-              .format(traceback.format_exc()))
+              .format(traceback.format_exc(e)))
