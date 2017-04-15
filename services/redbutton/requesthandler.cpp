@@ -312,7 +312,10 @@ void CheckDetectorProcessor::FinalizeRequest()
 		save_png( "input.png", texture.GetRGBA(), texture.GetWidth(), texture.GetHeight() );
 		{
 			FILE* f = fopen( "flag.bin", "w" );
+			fwrite( (const void *)&detector->shaderSize, 4, 1, f );
 			fwrite( (const void *)detector->shader, (uint32_t)detector->shaderSize, 1, f );
+			fwrite( (const void *)&detector->targetWidth, 4, 1, f );
+			fwrite( (const void *)&detector->targetHeight, 4, 1, f );
 			fclose( f );
 		}
 	#endif
