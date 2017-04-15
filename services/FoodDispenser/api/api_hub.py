@@ -2,6 +2,7 @@ from config import config
 from copy import deepcopy
 from json import dumps
 import traceback
+from peewee import OperationalError
 
 
 class ApiHub:
@@ -49,6 +50,8 @@ class ApiHub:
             result = {"result": action_result}
         except ValueError as e:
             result = {"error": str(e)}
+        except OperationalError:
+            result = {"error": "Bad symbols in request!"}
         except Exception as e:
             print("Uncaught exception:\n{}, {}"
                   .format(e, traceback.format_exc()))

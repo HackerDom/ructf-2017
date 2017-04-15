@@ -79,8 +79,7 @@ def login_page():
 def cabinet_page():
     try:
         user_tuple = check_cookie()
-    except ValueError as e:
-        print(e)
+    except ValueError:
         return redirect("/#badcookie")
     service_id, username = user_tuple
     list_of_comments = \
