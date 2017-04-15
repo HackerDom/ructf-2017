@@ -203,17 +203,21 @@ void AddDetectorProcessor::FinalizeRequest()
 	printf(":: adding detector: %d\n", dataSize );
 #endif
 
-	detectors->AddDetector(id, data, dataSize);
-
-	char *responseData = new char[64];
-	uuid_unparse(id.bytes, responseData);
-	strcat(responseData, "\n");
+	if( detectors->AddDetector(id, data, dataSize) ){
+		char *responseData = new char[64];
+		uuid_unparse(id.bytes, responseData);
+		strcat(responseData, "\n");
 
 #if DEBUG
-	printf(":: added detector: %s", responseData);
+		printf(":: added detector: %s", responseData);
 #endif
 
-	Complete(HttpResponse(MHD_HTTP_OK, responseData, strlen(responseData)));
+		Complete(HttpResponse(MHD_HTTP_OK, responseData, strlen(responseData)));
+	}
+	else {
+		printf(":: invalid detector\n" );
+		Complete(HttpResponse(MHD_HTTP_BAD_REQUEST));
+	}
 }
 
 CheckDetectorProcessor::CheckDetectorProcessor(HttpRequest request, Detector *detector ) : HttpPostProcessor(request)
@@ -349,14 +353,28 @@ void CheckDetectorProcessor::FinalizeRequest()
 		endTime = tp.tv_sec + tp.tv_nsec / 1000000000.0;
 		printf( ":: Time: %f\n", endTime - startTime );
 
-	    char *responseData = (char *)target.GetRGBA();
-	    char *dataCopy = new char[ targetSize ];
-	    memcpy(dataCopy, responseData, targetSize );
+	    bool empty = true;
+	    for( int i = 0; i < w * h; i++ )
+	    	if( target.GetRGBA()[ i ].rgba != 0u ){
+	    		empty = false;
+	    		break;
+	    	}
 
+	    if( !empty ){
 #if DEBUG
-	    printf(":: returning response %d\n", targetSize );
+	    	printf(":: returning response %d\n", targetSize );
 #endif
-		Complete(HttpResponse(MHD_HTTP_OK, dataCopy, targetSize ));
+
+		    char *responseData = (char *)target.GetRGBA();
+		    char *dataCopy = new char[ targetSize ];
+		    memcpy(dataCopy, responseData, targetSize );
+		    Complete(HttpResponse(MHD_HTTP_OK, dataCopy, targetSize ));
+		} else {
+#if DEBUG
+			printf(":: returning empty response\n");
+#endif
+  			Complete(HttpResponse(MHD_HTTP_OK));
+		}
 	}
 
 	MakeCurrentNullCtx();
