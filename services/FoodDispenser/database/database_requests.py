@@ -1,15 +1,10 @@
 from contextlib import contextmanager
-from playhouse.pool import PooledMySQLDatabase
-from config import config as config_object
+from peewee import MySQLDatabase, OperationalError
 from database.models import init_models
 
 
-config = config_object.data
-
-db = PooledMySQLDatabase(
+db = MySQLDatabase(
     "dispenser",
-    max_connections=32,
-    stale_timeout=300,
     user="root",
     port=3306,
 )
@@ -20,7 +15,10 @@ init_db()
 @contextmanager
 def db_request(request_type):
     try:
-        db.connect()
+        try:
+            db.connect()
+        except OperationalError:
+            pass
         if request_type == "User":
             yield User
         elif request_type == "TicketStorage":

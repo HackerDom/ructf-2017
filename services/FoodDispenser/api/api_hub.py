@@ -50,7 +50,8 @@ class ApiHub:
             result = {"result": action_result}
         except ValueError as e:
             result = {"error": str(e)}
-        except OperationalError:
+        except OperationalError as e:
+            print(traceback.format_exc())
             result = {"error": "Bad symbols in request!"}
         except Exception as e:
             print("Uncaught exception:\n{}, {}"
