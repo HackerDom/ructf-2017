@@ -42,10 +42,10 @@ def get_first_vuln(host, flag_id, flag):
                 return {"code": CORRUPT}
 
         return {"code": CORRUPT}
-    except HTTPError:
-        return {"code": DOWN, "private": traceback.format_exc()}
-    except KeyError:
-        return {"code": MUMBLE, "private": traceback.format_exc()}
+    except HTTPError as e:
+        return {"code": DOWN, "private": traceback.format_exc(e)}
+    except KeyError as e:
+        return {"code": MUMBLE, "private": traceback.format_exc(e)}
 
 
 def get_second_vuln(host, flag_id, flag):
