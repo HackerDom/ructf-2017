@@ -82,7 +82,7 @@ export default class View {
 		const $container = $("#container");
 		const img_height = Math.max(Math.ceil(($container.height() - 60) / this.model.teams.length - 10), 3);
 		const place_size = Math.max(img_height - 4, 3);
-		const teams = _.sortBy(this.model.teams, function(t){ return t.score; }).reverse();
+		const teams = _.sortBy(this.model.teams, function(t){ return parseFloat(t.score); }).reverse();
 		for (let i=0; i<teams.length; i++) {
 			const team = teams[i];
 			table.append($(`<tr><td><div class="place" style="width:${place_size}px;height:${place_size}px;line-height:${place_size}px;">${i + 1}</div></td>

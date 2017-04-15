@@ -92,7 +92,7 @@ def scoreboard_page():
         "scoreboard": [
             {
                 "name": team_names[t],
-                "score": scores[team_(t)],
+                "score": str(scores[team_(t)]) + ".12",
                 "services": [
                     {
                         "flags": cround()*2 + 1,
@@ -190,7 +190,7 @@ def gen_state():
         "scoreboard": [
             {
                 "name": team_names[t],
-                "score": scores[team_(t)],
+                "score": str(scores[team_(t)]) + ".12",
                 "services": [
                     {
                         "flags": random.choice((1, 2, 3)),
