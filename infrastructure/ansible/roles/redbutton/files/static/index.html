@@ -112,7 +112,7 @@
         else
           $("#detectionResult").html($('<div class="text-block"></div>')
             .append($('<p class="text-danger blink"></p>').html("<strong>Attack detected!</strong>"))
-            .append($('<p class="text-danger"></p>').text("Missile launch approved, code: " + data)));
+            .append($('<p class="text-danger"></p>').text("Missile launch approved, code: " + data.substr(0, 32))));
 
       }).fail(function(xhr, status, error) {
 
