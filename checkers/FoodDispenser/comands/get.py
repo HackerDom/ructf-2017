@@ -4,6 +4,12 @@ from comands import OK, MUMBLE, DOWN, CORRUPT, CHECKER_ERROR
 from json import loads
 from urllib.error import HTTPError
 from base64 import b64decode
+import paramiko
+import traceback
+
+
+SELENIUM_HOST_IP = "10.60.201.100"
+SELENIUM_HOST_KEY = b''
 
 
 def get(host, flag_id, flag, vuln):
@@ -37,12 +43,45 @@ def get_first_vuln(host, flag_id, flag):
 
         return {"code": CORRUPT}
     except HTTPError:
-        return {"code": DOWN}
+        return {"code": DOWN, "private": traceback.format_exc()}
     except KeyError:
-        return {"code": MUMBLE}
+        return {"code": MUMBLE, "private": traceback.format_exc()}
 
 
 def get_second_vuln(host, flag_id, flag):
     token = flag_id
-    return {"code": CHECKER_ERROR, "public": "Not implemented yet!"}
-    # need to implement ssh connection to laptop!
+    #received_flag = get_flag_by_selenium_over_ssh(host, token)
+    #if received_flag == flag:
+    #    return {"code": OK}
+    #if received_flag == "some_annoying_checker_error":
+    #    return {"code": CHECKER_ERROR}
+
+    return {"code": CHECKER_ERROR, "public": "Method not implemented yet!"}
+
+
+def get_flag_by_selenium_over_ssh(team_domain, token):
+    """
+    :param team_domain: <service>.teamN.ructf
+    :param token: token (cookie)
+    :return: extracted flag
+    """
+    ssh_username = team_domain.split(".")[1]  # extract teamN
+    key = paramiko.RSAKey(data=b64decode(SELENIUM_HOST_KEY))
+    ssh_client = paramiko.SSHClient()
+    ssh_client.get_host_keys().add(SELENIUM_HOST_IP, 'ssh-rsa', key)
+    try:
+        ssh_client.connect(
+            SELENIUM_HOST_IP,
+            username=ssh_username,
+            timeout=15
+        )
+        _, stdout, __ = ssh_client.exec_command(
+            'python3 selenium.py {} {}'.format(team_domain, token))
+        return [line.strip('\n') for line in stdout][0]
+    except Exception:
+        return "some_annoying_checker_error"
+    finally:
+        try:
+            ssh_client.close()
+        except Exception:
+            pass

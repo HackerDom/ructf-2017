@@ -7,6 +7,13 @@ import traceback
 
 
 def close(code, public="", private="", flag_id=""):
+    """
+    :param code: answer code
+    :param public: anyone will see it
+    :param private: only for admins
+    :param flag_id: cache for put->get
+    :return:
+    """
     print(code)
     if flag_id:
         print(flag_id)
@@ -16,13 +23,6 @@ def close(code, public="", private="", flag_id=""):
     if private:
         print(private, file=sys.stderr)
     exit(code)
-
-
-class CheckerException(Exception):
-    """Custom checker error"""
-
-    def __init__(self, msg):
-        super(CheckerException, self).__init__(msg)
 
 
 def on_check(command_ip):
@@ -56,20 +56,19 @@ def not_found(*args):
     close(
         CHECKER_ERROR,
         "Checker error",
-        "Unsupported command %s" % sys.argv[1]
+        "Unsupported command {}".format(sys.argv[1])
     )
 
 
 if __name__ == '__main__':
     try:
         COMMANDS.get(sys.argv[1], not_found)(*sys.argv[2:])
-    except CheckerException as e:
-        close(DOWN, "Service did not work as expected",
-              "Checker exception: %s" % e)
-    except URLError as e:
-        close(DOWN, "Bad command address", "Checksystem fail {}".format(traceback.format_exc()))
-    except OSError as e:
-        close(DOWN, "Socket I/O error", "SOCKET ERROR: %s" % e)
-    except Exception as e:
-        close(CHECKER_ERROR, "Unknown error", "INTERNAL ERROR: %s"
-              % traceback.format_exc())
+    except URLError:
+        close(DOWN, "Bad command address", "Checksystem fail {}"
+              .format(traceback.format_exc()))
+    except OSError:
+        close(DOWN, "Socket I/O error", "SOCKET ERROR: {}".format(
+            traceback.format_exc()))
+    except Exception:
+        close(CHECKER_ERROR, "Unknown error", "INTERNAL ERROR: {}"
+              .format(traceback.format_exc()))
