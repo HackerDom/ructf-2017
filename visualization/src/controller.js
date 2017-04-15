@@ -96,6 +96,7 @@ export default class Controller extends EventEmitter {
 			const teamData = state.scoreboard[i];
 			for (let j = 0; j < teamData.services.length; j++) {
 				const serviceData = teamData.services[j];
+				serviceData.id = serviceData.id.toString();
 				if (serviceData.id === Invisible_service_id) {
 					teamData.services.splice(j, 1);
 					break;
