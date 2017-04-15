@@ -1,6 +1,7 @@
 [Unit]
     Description=uWSGI
-
+    After=mysql.service
+    
 [Service]
     ExecStart=/usr/bin/uwsgi food_dispenser.ini
     WorkingDirectory=/home/fooddispenser

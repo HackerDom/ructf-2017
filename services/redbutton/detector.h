@@ -38,7 +38,7 @@ public:
 	virtual ~DetectorStorage();
 	
 	Detector *GetDetector(uuid name);
-	void AddDetector(uuid name, const char *data, size_t length);
+	bool AddDetector(uuid name, const char *data, size_t length);
 	uuid *ListDetectors(int *count);
 
 private:
@@ -49,5 +49,5 @@ private:
 
 	pthread_mutex_t sync = PTHREAD_MUTEX_INITIALIZER;
 
-	void AddDetectorInternal(uuid name, const char *data, size_t length);
+	bool AddDetectorInternal(uuid name, const char *data, size_t length);
 };

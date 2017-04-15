@@ -473,6 +473,7 @@ Transmission = (function() {
      * @property {number|Long} [Timestamp] Transmission Timestamp.
      * @property {string} [Name] Transmission Name.
      * @property {string} [Entropy] Transmission Entropy.
+     * @property {Spectrum$Properties} [Spectrum] Transmission Spectrum.
      */
 
     /**
@@ -507,6 +508,12 @@ Transmission = (function() {
     Transmission.prototype.Entropy = "";
 
     /**
+     * Transmission Spectrum.
+     * @type {(Spectrum$Properties|null)}
+     */
+    Transmission.prototype.Spectrum = null;
+
+    /**
      * Creates a new Transmission instance using the specified properties.
      * @param {Transmission$Properties=} [properties] Properties to set
      * @returns {Transmission} Transmission instance
@@ -530,6 +537,8 @@ Transmission = (function() {
             writer.uint32(/* id 2, wireType 2 =*/18).string(message.Name);
         if (message.Entropy != null && message.hasOwnProperty("Entropy"))
             writer.uint32(/* id 3, wireType 2 =*/26).string(message.Entropy);
+        if (message.Spectrum != null && message.hasOwnProperty("Spectrum"))
+            Spectrum.encode(message.Spectrum, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
         return writer;
     };
 
@@ -566,6 +575,9 @@ Transmission = (function() {
                 break;
             case 3:
                 message.Entropy = reader.string();
+                break;
+            case 4:
+                message.Spectrum = Spectrum.decode(reader, reader.uint32());
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -605,6 +617,11 @@ Transmission = (function() {
         if (message.Entropy != null && message.hasOwnProperty("Entropy"))
             if (!$util.isString(message.Entropy))
                 return "Entropy: string expected";
+        if (message.Spectrum != null && message.hasOwnProperty("Spectrum")) {
+            var error = Spectrum.verify(message.Spectrum);
+            if (error)
+                return "Spectrum." + error;
+        }
         return null;
     };
 
@@ -630,6 +647,11 @@ Transmission = (function() {
             message.Name = String(object.Name);
         if (object.Entropy != null)
             message.Entropy = String(object.Entropy);
+        if (object.Spectrum != null) {
+            if (typeof object.Spectrum !== "object")
+                throw TypeError(".Transmission.Spectrum: object expected");
+            message.Spectrum = Spectrum.fromObject(object.Spectrum);
+        }
         return message;
     };
 
@@ -660,6 +682,7 @@ Transmission = (function() {
                 object.Timestamp = options.longs === String ? "0" : 0;
             object.Name = "";
             object.Entropy = "";
+            object.Spectrum = null;
         }
         if (message.Timestamp != null && message.hasOwnProperty("Timestamp"))
             if (typeof message.Timestamp === "number")
@@ -670,6 +693,8 @@ Transmission = (function() {
             object.Name = message.Name;
         if (message.Entropy != null && message.hasOwnProperty("Entropy"))
             object.Entropy = message.Entropy;
+        if (message.Spectrum != null && message.hasOwnProperty("Spectrum"))
+            object.Spectrum = Spectrum.toObject(message.Spectrum, options);
         return object;
     };
 

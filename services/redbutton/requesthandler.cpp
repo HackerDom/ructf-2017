@@ -30,7 +30,9 @@ Context GetContext()
 		if (g_contexts[i].thread == tid)
 		{
 			ctx = g_contexts[i].context;
+#if DEBUG
 			printf( ":: old thread %lx ctx %d\n", tid, i );
+#endif
 			found = true;
 			break;
 		}
@@ -44,7 +46,9 @@ Context GetContext()
 			{
 				g_contexts[i].thread = tid;
 				ctx = g_contexts[i].context;
+#if DEBUG
 				printf( ":: new thread %lx ctx %d\n", tid, i );
+#endif
 				found = true;
 				break;
 			}
@@ -107,7 +111,9 @@ HttpResponse RequestHandler::HandlePost(HttpRequest request, HttpPostProcessor *
 
 	if (ParseUrl(request.url, 2, "detectors", "add"))
 	{
+#if DEBUG
 		printf(":: setting up AddDetectorProcessor\n");
+#endif
 
 		*postProcessor = new AddDetectorProcessor(request, detectors);
 
@@ -121,14 +127,18 @@ HttpResponse RequestHandler::HandlePost(HttpRequest request, HttpPostProcessor *
 		uuid id;
 		uuid_parse(idBuffer, id.bytes);
 
+#if DEBUG
 		printf(":: searching for detector %s...\n", idBuffer);
+#endif
 
 		Detector *detector = detectors->GetDetector(id);
 
 		if (!detector)
 			return HttpResponse(MHD_HTTP_NOT_FOUND);
 
+#if DEBUG
 		printf(":: setting up CheckDetectorProcessor\n");
+#endif
 
 		*postProcessor = new CheckDetectorProcessor(request, detector);
 
@@ -154,11 +164,15 @@ AddDetectorProcessor::~AddDetectorProcessor()
 
 int AddDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key, const char *filename, const char *contentType, const char *transferEncoding, const char *data, uint64_t offset, size_t size)
 {
+#if DEBUG
 	printf(":: iterating post fields, current = %s\n", key);
+#endif
 
 	if (!strcmp(key, "detector") && size > 0)
 	{
+#if DEBUG
 		printf(":: found detector data, length = %d\n", size);
+#endif
 
 		this->data = new char[size];
 
@@ -172,7 +186,9 @@ int AddDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key, c
 
 void AddDetectorProcessor::FinalizeRequest()
 {
+#if DEBUG
 	printf(":: finalizing request\n");
+#endif
 
 	if (!data)
 	{
@@ -183,17 +199,25 @@ void AddDetectorProcessor::FinalizeRequest()
 	uuid id;
 	uuid_generate(id.bytes);
 
+#if DEBUG
 	printf(":: adding detector: %d\n", dataSize );
+#endif
 
-	detectors->AddDetector(id, data, dataSize);
+	if( detectors->AddDetector(id, data, dataSize) ){
+		char *responseData = new char[64];
+		uuid_unparse(id.bytes, responseData);
+		strcat(responseData, "\n");
 
-	char *responseData = new char[64];
-	uuid_unparse(id.bytes, responseData);
-	strcat(responseData, "\n");
+#if DEBUG
+		printf(":: added detector: %s", responseData);
+#endif
 
-	printf(":: added detector: %s", responseData);
-
-	Complete(HttpResponse(MHD_HTTP_OK, responseData, strlen(responseData)));
+		Complete(HttpResponse(MHD_HTTP_OK, responseData, strlen(responseData)));
+	}
+	else {
+		printf(":: invalid detector\n" );
+		Complete(HttpResponse(MHD_HTTP_BAD_REQUEST));
+	}
 }
 
 CheckDetectorProcessor::CheckDetectorProcessor(HttpRequest request, Detector *detector ) : HttpPostProcessor(request)
@@ -213,12 +237,16 @@ CheckDetectorProcessor::~CheckDetectorProcessor()
 
 int CheckDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key, const char *filename, const char *contentType, const char *transferEncoding, const char *data, uint64_t offset, size_t size)
 {
+#if DEBUG
 	printf(":: iterating post fields, current = %s\n", key);
+#endif
 
 	if (!strcmp(key, "image") && size > 0)
 	{
+#if DEBUG
 		printf(":: found image data, length = %d\n", size);
 		printf(":: filename = %s\n", filename);
+#endif
 
 		this->data = new char[size];
 
@@ -232,7 +260,9 @@ int CheckDetectorProcessor::IteratePostData(MHD_ValueKind kind, const char *key,
 
 void CheckDetectorProcessor::FinalizeRequest()
 {
+#if DEBUG
 	printf(":: finalizing request, data = %p\n", data);
+#endif
 
 	if (!data)
 	{
@@ -282,7 +312,10 @@ void CheckDetectorProcessor::FinalizeRequest()
 		save_png( "input.png", texture.GetRGBA(), texture.GetWidth(), texture.GetHeight() );
 		{
 			FILE* f = fopen( "flag.bin", "w" );
+			fwrite( (const void *)&detector->shaderSize, 4, 1, f );
 			fwrite( (const void *)detector->shader, (uint32_t)detector->shaderSize, 1, f );
+			fwrite( (const void *)&detector->targetWidth, 4, 1, f );
+			fwrite( (const void *)&detector->targetHeight, 4, 1, f );
 			fclose( f );
 		}
 	#endif
@@ -323,12 +356,28 @@ void CheckDetectorProcessor::FinalizeRequest()
 		endTime = tp.tv_sec + tp.tv_nsec / 1000000000.0;
 		printf( ":: Time: %f\n", endTime - startTime );
 
-	    char *responseData = (char *)target.GetRGBA();
-	    char *dataCopy = new char[ targetSize ];
-	    memcpy(dataCopy, responseData, targetSize );
+	    bool empty = true;
+	    for( int i = 0; i < w * h; i++ )
+	    	if( target.GetRGBA()[ i ].rgba != 0u ){
+	    		empty = false;
+	    		break;
+	    	}
 
-	    printf(":: returning response %d\n", targetSize );
-		Complete(HttpResponse(MHD_HTTP_OK, dataCopy, targetSize ));
+	    if( !empty ){
+#if DEBUG
+	    	printf(":: returning response %d\n", targetSize );
+#endif
+
+		    char *responseData = (char *)target.GetRGBA();
+		    char *dataCopy = new char[ targetSize ];
+		    memcpy(dataCopy, responseData, targetSize );
+		    Complete(HttpResponse(MHD_HTTP_OK, dataCopy, targetSize ));
+		} else {
+#if DEBUG
+			printf(":: returning empty response\n");
+#endif
+  			Complete(HttpResponse(MHD_HTTP_OK));
+		}
 	}
 
 	MakeCurrentNullCtx();

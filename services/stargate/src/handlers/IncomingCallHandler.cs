@@ -63,23 +63,24 @@ namespace stargåte.handlers
 			info = Serializer.DeepClone(info); //NOTE: remove secrets from broadcast
 			info.Entropy = null;
 
-			await WsHandler.BroadcastAsync(info, context.RequestAborted);
-
 			context.Response.ContentType = "application/protobuf";
 
 			using(var dbmp = new DirectBitmap(bmp))
-				return await ProcessRequestInternal(context, name, dbmp).ConfigureAwait(false);
+				return await ProcessRequestInternal(context, name, dbmp, info).ConfigureAwait(false);
 		}
 
-		private static async Task<HttpResult> ProcessRequestInternal(HttpContext context, string name, DirectBitmap dbmp)
+		private static async Task<HttpResult> ProcessRequestInternal(HttpContext context, string name, DirectBitmap dbmp, Transmission info)
 		{
 			using(var hmac = new HMACSHA256(Settings.Key))
 			using(var pooled = await OutputPool.AcquireAsync())
 			{
-				var (hist, buffer) = pooled.Item;
-				hist.CalcSpectrum(dbmp);
+				var (spectrum, buffer) = pooled.Item;
+				spectrum.CalcSpectrum(dbmp);
 
-				var length = ProtoBufHelper.Serialize(buffer, hist);
+				info.Spectrum = spectrum;
+				await WsHandler.BroadcastAsync(info, context.RequestAborted);
+
+				var length = ProtoBufHelper.Serialize(buffer, spectrum);
 
 				context.Response.Headers["X-SG1-Key"] = Convert.ToBase64String(hmac.ComputeHash(Convert.FromBase64String(name)));
 				context.Response.ContentLength = length;

@@ -4,10 +4,24 @@
 #include <string.h>
 
 Detector::Detector(uuid name, const char *data, size_t length, Detector *previousDetector)
+	: shaderSize( 0 ), shader( nullptr ), targetWidth( 0 ), targetHeight( 0 ), previousDetector( nullptr )
 {
+    // [shader size] [         shader        ] [target width] [target height]
+    //     4 bytes    shader size, min 4bytes     4 bytes        4 bytes
+	if( length < sizeof( int ) * 4 ) 
+		return;
+
 	const int* pShaderSize = ( const int* )data;
+	if( *pShaderSize < 4 || *pShaderSize > 8 * 1024 )
+		return;
+
 	const int* pWidth = ( const int* )( data + sizeof( int ) + *pShaderSize );
+	if( *pWidth <= 0 || *pWidth > 4096 )
+		return;
+
 	const int* pHeight = ( const int* )( data + sizeof( int ) + *pShaderSize + sizeof( int ) );
+	if( *pHeight <= 0 || *pHeight > 4096 )
+		return;
 
 	this->shaderSize = *pShaderSize;
 	this->shader = new char[ shaderSize ];
@@ -72,28 +86,39 @@ DetectorStorage::~DetectorStorage()
 	fclose(backingFile);
 }
 
-void DetectorStorage::AddDetector(uuid name, const char *data, size_t length)
+bool DetectorStorage::AddDetector(uuid name, const char *data, size_t length)
 {
 	pthread_mutex_lock(&sync);
 
-	DetectorHeader header;
+	bool ret = AddDetectorInternal(name, data, length);
+	if( ret ){
+		DetectorHeader header;
 
-	header.length = length;
-	header.name = name;
+		header.length = length;
+		header.name = name;
 
-	fwrite(&header, sizeof(header), 1, backingFile);
-	fwrite(data, 1, length, backingFile);
-	fflush(backingFile);
-
-	AddDetectorInternal(name, data, length);
+		fwrite(&header, sizeof(header), 1, backingFile);
+		fwrite(data, 1, length, backingFile);
+		fflush(backingFile);
+	}
 
 	pthread_mutex_unlock(&sync);
+
+	return ret;
 }
 
-void DetectorStorage::AddDetectorInternal(uuid name, const char *data, size_t length)
+bool DetectorStorage::AddDetectorInternal(uuid name, const char *data, size_t length)
 {
-	detectors = new Detector(name, data, length, detectors);
+	Detector* d = new Detector(name, data, length, detectors);
+	if( d->shader == nullptr ){
+		delete d;
+		return false;
+	}
+
+	detectors = d;
 	detectorCount++;
+
+	return true;
 }
 
 uuid *DetectorStorage::ListDetectors(int *count)

@@ -3,7 +3,7 @@
 #include <microhttpd.h>
 
 
-#define THREADPOOL_SIZE 4
+#define THREADPOOL_SIZE 16
 
 class HttpRequestState;
 class HttpRequestHandler;

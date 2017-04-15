@@ -7,33 +7,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>RedButton control panel</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/redbutton.css">
     <script type="text/javascript" src="/js/jquery-3.2.1.min.js"></script>
   </head>
-  <body>
+  <body class="striped">
     <div class="container">
-      <div class="row" style="margin-top: 50px">
+      <div class="row">
+        <div class="spaced-block"></div>
         <div class="col-sm-4">
-          <form action="#" id="newForm">
-            <div class="form-group">
-              <label for="detector">Upload new detector:</label>
-              <input class="form-control" type="file" name="detector" id="detector">
-            </div>
-            <button type="submit" class="btn btn-default">Upload</button>
-          </form>
-          <div id="newResult"></div>
-          <div style="margin-top: 50px"></div>
           <form action="#" id="checkForm">
             <div class="form-group">
               <label for="image">Check image for threats:</label>
               <input class="form-control" type="file" name="image" id="image">
               <label for="detectorId">Detector ID</label>
               <select class="form-control" name="detector" id="detectorId"></select>
-              <input type="hidden" name="w" value="8">
-              <input type="hidden" name="h" value="1">
             </div>
-            <button type="submit" class="btn btn-default">Check</button>
+            <button type="submit" class="btn btn-danger">Check</button>
+            <div class="result-box well well-sm" id="checkResult"></div>
           </form>
-          <div id="checkResult"></div>
+          <div class="spaced-block"></div>
+          <form action="#" id="newForm">
+            <div class="form-group">
+              <label for="detector">Upload new detector:</label>
+              <input class="form-control" type="file" name="detector" id="detector">
+            </div>
+            <button type="submit" class="btn btn-default">Upload</button>
+            <div class="result-box well well-sm" id="newResult"></div>
+          </form>
+        </div>
+        <div class="col-sm-4">
+          <div class="detection-result" id="detectionResult">
+            <span class="text-muted centered">&#x2573;</span>
+          </div>
         </div>
       </div>
     </div>
@@ -75,12 +80,12 @@
 
       posting.done(function(data) {
 
-        $("#newResult").html("Success, new detector saved with ID " + data);
+        $("#newResult").html("Success, new detector saved with ID " + data).css('visibility', 'visible');
         updateDetectors();
 
       }).fail(function(xhr, status, error) {
 
-        $("#newResult").html("Failed to upload detector: " + error);
+        $("#newResult").html("Failed to upload detector: " + error).css('visibility', 'visible');
 
       });
     });
@@ -100,14 +105,18 @@
 
       posting.done(function(data) {
 
-        if (data.length == 32)
-          $("#checkResult").html("Missile lauch is approved, code: " + data);
+        $("#checkResult").html("Check succeeded.").css('visibility', 'visible');
+
+        if (data.length == 0)
+          $("#detectionResult").html($('<span class="text-success centered"></span>').text("No threats detected"));
         else
-          $("#checkResult").html("No threats detected.");
+          $("#detectionResult").html($('<div class="text-block"></div>')
+            .append($('<p class="text-danger blink"></p>').html("<strong>Attack detected!</strong>"))
+            .append($('<p class="text-danger"></p>').text("Missile launch approved, code: " + data)));
 
       }).fail(function(xhr, status, error) {
 
-        $("#checkResult").html("Failed to check image: " + error);
+        $("#checkResult").html("Failed to check image: " + error).css('visibility', 'visible');
         
       });
     });

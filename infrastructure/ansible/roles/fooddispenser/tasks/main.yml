@@ -12,13 +12,17 @@
     src: fooddispenser/
     dest: /home/fooddispenser/
     rsync_opts: "--chmod=D0775 --chmod=F0665 --chown=fooddispenser:fooddispenser"
-  notify: enable and restart nginx
+  notify: 
+    - enable and restart uwsgi
+    - enable and restart nginx
+    - enable and restart mysql
 
 - name: copy uwsgi service
   copy: src=systemd/uwsgi.service dest=/etc/systemd/system/
   notify: 
     - enable and restart uwsgi
     - enable and restart nginx
+    - enable and restart mysql
 
 - name: copy nginx configs
   copy: src=default dest=/etc/nginx/sites-available/default
