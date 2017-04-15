@@ -43,7 +43,9 @@ void HttpServer::Start(uint32_t port)
 		exit(1);
 	}
 
-	//printf(":: current thread id = %lX\n", pthread_self());
+#if DEBUG
+	printf(":: current thread id = %lX\n", pthread_self());
+#endif
 
 	printf("Listening on port %d...\n", port);
 
@@ -64,7 +66,9 @@ int HttpServer::HandleRequest(void *param, MHD_Connection *connection, const cha
 {
 	HttpServer *self = (HttpServer *)param;
 
-	//printf(":: current thread id = %ld\n", pthread_self());
+#if DEBUG
+	printf(":: current thread id = %ld\n", pthread_self());
+#endif
 
 	printf("Received request: %s %s\n", method, url);
 
@@ -125,7 +129,9 @@ int HttpServer::HandleRequest(void *param, MHD_Connection *connection, const cha
 
 void HttpServer::PostProcessRequest(void *param, MHD_Connection *connection, void **context, MHD_RequestTerminationCode toe)
 {
-	//printf(":: post process request started\n");
+#if DEBUG
+	printf(":: post process request started\n");
+#endif
 
 	HttpPostProcessor *postProcessor = (HttpPostProcessor *)*context;
 
@@ -138,7 +144,9 @@ void HttpServer::PostProcessRequest(void *param, MHD_Connection *connection, voi
 
 int HttpServer::SendResponse(MHD_Connection *connection, HttpResponse response)
 {
-	//printf(":: send response");
+#if DEBUG
+	printf(":: send response");
+#endif
 
 	MHD_Response *mhdResponse = MHD_create_response_from_buffer(response.contentLength, response.content, MHD_RESPMEM_MUST_COPY);
 
