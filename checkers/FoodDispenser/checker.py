@@ -14,7 +14,6 @@ def close(code, public="", private="", flag_id=""):
     :param flag_id: cache for put->get
     :return:
     """
-    print(code)
     if flag_id:
         print(flag_id)
         exit(code)
