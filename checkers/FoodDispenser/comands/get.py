@@ -45,4 +45,4 @@ def get_first_vuln(host, flag_id, flag):
 def get_second_vuln(host, flag_id, flag):
     token = flag_id
     return {"code": CHECKER_ERROR, "public": "Not implemented yet!"}
-    # need to implement ssh connection to notebook!
+    # need to implement ssh connection to laptop!
