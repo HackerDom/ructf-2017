@@ -13,7 +13,7 @@ def init_models(db):
         password_hash = CharField(max_length=64)
         registration_date = DateTimeField(default=datetime.now)
         is_food_service = BooleanField(default=False)
-        user_groups = CharField(max_length=32, default='["standard"]')
+        user_groups = TextField(default='["standard"]')
         user_meta = TextField(default="")
 
     class TicketStorage(AbstractTable):
