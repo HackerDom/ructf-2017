@@ -54,9 +54,9 @@ def special_check(host):
                 return {"code": OK}
         return {"code": MUMBLE}
     except HTTPError as e:
-        return {"code": DOWN, "private": traceback.format_exc(e)}
+        return {"code": DOWN, "private": traceback.format_exc()}
     except KeyError as e:
-        return {"code": MUMBLE, "private": traceback.format_exc(e)}
+        return {"code": MUMBLE, "private": traceback.format_exc()}
 
 
 def first_vuln_put(host, flag):
@@ -82,9 +82,9 @@ def first_vuln_put(host, flag):
             flag_poster_group
         )
     except HTTPError as e:
-        return {"code": DOWN, "private": traceback.format_exc(e)}
+        return {"code": DOWN, "private": traceback.format_exc()}
     except KeyError as e:
-        return {"code": MUMBLE, "private": traceback.format_exc(e)}
+        return {"code": MUMBLE, "private": traceback.format_exc()}
     return {"code": OK, "flag_id": b64encode(dumps(
         {"group": flag_poster_group, "invites": invites},
         separators=(',', ':')).encode()).decode()}
@@ -116,6 +116,6 @@ def second_vuln_put(host, flag):
         fd_api.Service.add_service_personal_info(host, service_token, flag)
         return {"code": OK, "flag_id": service_token}
     except HTTPError as e:
-        return {"code": DOWN, "private": traceback.format_exc(e)}
+        return {"code": DOWN, "private": traceback.format_exc()}
     except KeyError as e:
-        return {"code": MUMBLE, "private": traceback.format_exc(e)}
+        return {"code": MUMBLE, "private": traceback.format_exc()}

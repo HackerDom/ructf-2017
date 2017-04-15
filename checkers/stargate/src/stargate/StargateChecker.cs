@@ -13,7 +13,7 @@ namespace checker.stargate
 	{
 		public async Task<string> Info()
 		{
-			var vulns = "vulns: 1:1";
+			var vulns = "vulns: 1:2";
 			await Console.Out.WriteLineAsync(vulns).ConfigureAwait(false);
 
 			return vulns;
@@ -30,10 +30,13 @@ namespace checker.stargate
 
 		public async Task<string> Put(string host, string id, string flag, int vuln)
 		{
-			var b64Name = Convert.ToBase64String(Encoding.ASCII.GetBytes(Guid.NewGuid().ToString()));
+			var len = vuln == 1 ? RndUtil.Choice(11, 14) : RndUtil.Choice(12, 15);
+			var name = RndText.RandomWord(len);
+
+			var b64Name = Convert.ToBase64String(Encoding.ASCII.GetBytes(name));
 			var b64Entropy = Convert.ToBase64String(Encoding.ASCII.GetBytes(flag));
 
-			await Console.Error.WriteLineAsync($"name {b64Name}, entropy {b64Entropy}").ConfigureAwait(false);
+			await Console.Error.WriteLineAsync($"name '{name}', b64name '{b64Name}', entropy '{b64Entropy}'").ConfigureAwait(false);
 
 			var bmp = new Bitmap(64, 64, PixelFormat.Format32bppArgb);
 
