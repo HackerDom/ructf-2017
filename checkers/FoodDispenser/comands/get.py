@@ -97,7 +97,7 @@ def get_flag_by_selenium_over_ssh(team_domain, token):
     :return: extracted flag
     """
     ssh_username = team_domain.split(".")[1]  # extract teamN
-    key = paramiko.RSAKey(data=b64decode(SELENIUM_HOST_KEY))
+    key = paramiko.RSAKey(data=b64decode(SELENIUM_HOST_KEY.replace(b'\n', b'')))
     ssh_client = paramiko.SSHClient()
     ssh_client.get_host_keys().add(SELENIUM_HOST_IP, 'ssh-rsa', key)
     try:
