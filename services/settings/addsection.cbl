@@ -12,6 +12,7 @@
 
        working-storage section.
        01 need-more picture 9.
+       77 default-api-key picture x(360) value all '*'.
 
        linkage section.
        01 argc binary-long unsigned.
@@ -36,8 +37,9 @@
             end-if
 
             move section-name to name
+            move default-api-key to api-keys
             move 1 to api-keys-count
-            call 'random-string' using by reference api-key(1) end-call
+            call 'random-string' using by reference api-keys end-call
             write ssection
               invalid key
                 move 'fl' to rcode

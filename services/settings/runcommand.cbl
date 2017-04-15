@@ -15,8 +15,8 @@
        01 command picture x(100).
        01 command-length picture 9999.
        01 name-length picture 99.
-       01 apikey picture x(40).
-       01 apikey-length picture x(40).
+       01 new-api-key picture x(40).
+       01 api-key-length picture x(40).
        01 start-pointer picture 9999.
 
        78 UNSUPPORTED_COMMAND value is 'Unsupported command: '.
@@ -57,12 +57,12 @@
            unstring argv
              delimited by all spaces
              into name count in name-length
-                  apikey count in apikey-length
+                  new-api-key count in api-key-length
              with pointer start-pointer
            end-unstring
 
            if name-length is equal to zero 
-               or apikey-length is equal to zero
+               or api-key-length is equal to zero
              move 1 to need-more
              goback
            end-if
@@ -77,7 +77,7 @@
            end-if
 
            move zero to need-more
-           move apikey to api-key(api-keys-count)
+           move new-api-key to api-key(api-keys-count)
            rewrite ssection
              invalid key
                write ssection

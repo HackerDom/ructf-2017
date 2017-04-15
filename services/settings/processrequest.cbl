@@ -84,7 +84,5 @@
             move 1 to sended
             call 'addWrite' using
               by value socket
-            end-call
-
-            goback.
+            end-call.
        end program process-request.
