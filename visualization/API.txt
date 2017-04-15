@@ -1,0 +1,60 @@
+/api/info =>
+    {
+        "teams": {"team_id": "team_name", ...}
+        "services": {"service_id": "service_name", ...}
+        "start": "time(millisec)"
+    }
+
+/api/scoreboard =>
+    {
+        "table": {"team_id": "score", ...},
+        "status": "0"|... (0 — NOT_STARTED, 1 — PLAYING, 2 — SUSPEND, 3 — FINISHED),
+        "round": "current_round"
+    }
+
+/api/events?from=<round> =>
+    [
+        ["round", "time(millisec)", "service_id", "attacker_id", "victim_id"]
+        ...
+    ]
+
+/scoreboard.json =>
+    {
+        "round": "round#"
+        "scoreboard": [
+            {
+                "name": "team_name",
+                "score": "score",
+                "services": [
+                    {
+                        "flags": "flags#",
+                        "status": 101|..., (101:OK, 102:CORRUPT, 103:MUMBLE, 104:DOWN, else:CHECKER_ERROR)
+                        "id": "service_id"
+                    },
+                    ...
+                ]
+            },
+            ...
+        ]
+    }
+
+Обновления:
+
+Из старых api планирую использовать только /api/info для инициализации
+
+/apiws/events => 
+    {
+        "type": "attack" | "state",
+        "value" : class attack | state
+    }
+
+class attack { // Отправляется в момент, когда произошла атака. Это данные из /api/events
+    "round": number,
+    "service_id": string or number,
+    "attacker_id": string or number,
+    "victim_id": string or numbrt,
+}
+
+class state { // Отправляется в момент окончания раунда, содержит информацию за прошедший раунд, плюс отправляется в момент открытия соединения websocket
+    // То же, что есть в /scoreboard.json
+}
