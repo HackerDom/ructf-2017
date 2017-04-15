@@ -95,6 +95,7 @@ svg * {
 	padding: 12px 4px;
 	font-size: 14px;
 	overflow: hidden;
+	overflow-wrap: break-word;
 }
 .left-foot {
 	flex: 1;
@@ -106,13 +107,18 @@ svg * {
 	font-size: 75%;
 }
 .msg {
-	margin-bottom: 8px;
+	margin-bottom: 12px;
+	font-size: 90%;
 }
-.canvas {
-	background-color: #333;
+.msg-error {
+	color: #fa8072;
+}
+.msg-key {
+	font-size: 80%;
 }
 .spectrum {
 	cursor: pointer;
+	background-color: #223030;
 }
 
 #status-wrap {
