@@ -116,7 +116,7 @@ export default class View {
 
 	drawServicesStatusesAndStat() {
 		const _this = this;
-		let teamsWithAliveService = 0; // количество команд с хотя бы 1 сервисом
+		let teamsWithAliveService = 0; // number of commands with at least 1 service
 		this.model.teams.forEach(function (nData) {
 			let hasUp = false;
 			for (let i = 0; i < _this.model.services.length; i++) {
