@@ -2,6 +2,28 @@ import _ from "underscore";
 
 const SERVICE_NAME_TO_COLOR = {"capter": "#E2C551", "electrohub": "#9549E4", "fooddispenser": "#3FD637", "redbutton": "#D85D40", "settings": "#1E31FF", "stargate": "#7CDFD8"};
 const SERVICES_COUNT = 6;
+const LOGO_URL_PREFIX = PRODUCTION ? "./../../st/" : "./originals/teams/";
+const DEFAULT_LOGO = "default.png";
+const TEAM_NAME_TO_LOGO = {
+	"Bushwhackers" : "bushwhackers.png",
+	"c00kies@venice" : "cookie.png",
+	"ENOFLAG" : "enoflag.png",
+	"Teamspin" : "teamspin.png",
+	"Espacio" : "espacio.png",
+	"Переподвысмотрит" : "andgein.png",
+	"SiBears" : "sibears.png",
+	"Honeypot" : "honeypot.png",
+	"Lights Out" : "lights.png",
+	"girav" : "girav.png",
+	"saarsec" : "saarsec.png",
+	"keva" : "keva.png",
+	"WE_0WN_Y0U" : "we_own_you.png",
+	"LC↯BC" : "lcbc.png",
+	"Shadow Servants" : "servants.png",
+	"VoidHack" : "void.png",
+	"Destructive Voice" : "voice.png",
+	"[censored]" : "censored.png",
+};
 
 export class GameModel {
 	constructor(info) {
@@ -34,6 +56,7 @@ export class GameModel {
 					place: null,
 					status: 0,
 					lastExplosionTime: 0,
+					logoUrl: LOGO_URL_PREFIX + (TEAM_NAME_TO_LOGO[name] === undefined ? DEFAULT_LOGO : TEAM_NAME_TO_LOGO[name]),
 					servicesStatuses: new Array(SERVICES_COUNT)
 				});
 				const num = this.teams.length - 1;

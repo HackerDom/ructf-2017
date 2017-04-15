@@ -15,8 +15,8 @@ import threading
 ROUND_TIME = 60*1000
 service_names = ["capter", "electrohub", "fooddispenser", "redbutton", "settings", "stargate", "pool"]
 team_names = ['Invisible', "saarsec", "Bushwhackers", "LC↯BC", "c00kies@venice", "ENOFLAG", "WE_0WN_Y0U",
-              "Teamspin", "Magic-Hat", "Espacio", "Destructive Voice", "Переподвысмотрит", "[censored]",
-              "SiBears", "Lights Out", "Shadow Servants", "BSUIR", "girav", "Tower Of Hanoi", "keva", "VoidHack", "MSHP SSL: The Elite Firm"]
+              "Teamspin", "Honeypot", "Espacio", "Destructive Voice", "Переподвысмотрит", "[censored]",
+              "SiBears", "Lights Out", "Shadow Servants", "BSUIR", "girav", "Tower Of Hanoi", "keva", "VoidHack", "MSHP SSL: The Elite Firm", "Гостевая 1", "Гостевая 2"]
 
 def team_(x): return 't{}'.format(x)
 def service_(x): return 's{}'.format(x)

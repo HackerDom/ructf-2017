@@ -1,5 +1,4 @@
 import $ from "jquery";
-import md5 from "md5";
 import * as THREE from "three";
 import station from "./station";
 import * as THREE_particle from "./particle";
@@ -56,15 +55,25 @@ export default class View {
 
 	loadLogos() {
 		for (let i=0; i<this.model.teams.length; i++) {
-			const team = this.model.teams[i];
-			const logoImg = new Image();
-			logoImg.src = View.getLogo(team);
-			team.logoImage = logoImg;
-			logoImg.onload = function(){
+			View.loadLogo(this.model.teams[i]);
+		}
+	}
+
+	static loadLogo(team) {
+		const logoImg = new Image();
+		logoImg.src = team.logoUrl;
+		team.logoImage = logoImg;
+		logoImg.onload = function(){
+			if (logoImg.naturalWidth > 0) {
 				View.drawSpriteTexture(team);
 				team.texture.needsUpdate = true;
-			};
-		}
+			}
+		};
+		logoImg.onerror = function() {
+			setTimeout(function() {
+				View.loadLogo(team);
+			}, 1);
+		};
 	}
 
 	drawScoreboard() {
@@ -77,7 +86,7 @@ export default class View {
 		for (let i=0; i<teams.length; i++) {
 			const team = teams[i];
 			table.append($(`<tr><td><div class="place" style="width:${place_size}px;height:${place_size}px;line-height:${place_size}px;">${i + 1}</div></td>
-<td><img height='${img_height}' width='${img_height}' src='${View.getLogo(team)}'/></td><td><div>${View.escape(team.name)}</div></td><td><div>${team.score}</div></td></tr>`));
+<td><img height='${img_height}' width='${img_height}' src='${team.logoUrl}'/></td><td><div>${View.escape(team.name)}</div></td><td><div>${team.score}</div></td></tr>`));
 		}
 		this.scoreboardContainer.append(table);
 	}
@@ -127,11 +136,6 @@ export default class View {
 				teamsWithAliveService++;
 		});
 		$("#alive-value").text(teamsWithAliveService);
-	}
-
-	static getLogo(nodeData) {
-		//return "https://ructfe.org/logos/" + md5(nodeData.name) + ".png"; // TODO
-		return "./static/img/logo-example.png";
 	}
 
 	static escape(text) {
@@ -195,8 +199,9 @@ export default class View {
 		context.fillStyle = "rgba(34, 3, 71, 0.59)";
 		context.fillRect(borderWidth, borderWidth, canvasWidth - borderWidth * 2, canvasHeight - borderWidth * 2);
 
-		if (team.logoImage !== undefined && team.logoImage.complete && team.logoImage.naturalWidth > 0)
-			context.drawImage(team.logoImage, 6*sprite_coeff, 6*sprite_coeff, 50*sprite_coeff, 50*sprite_coeff);
+		if (team.logoImage !== undefined && team.logoImage.complete && team.logoImage.naturalWidth > 0) {
+			context.drawImage(team.logoImage, 6 * sprite_coeff, 6 * sprite_coeff, 50 * sprite_coeff, 50 * sprite_coeff);
+		}
 
 		const textLeftOffset = (6 + 50 + 6) * sprite_coeff;
 
@@ -297,8 +302,8 @@ export default class View {
 
 			camera = new THREE.PerspectiveCamera(55, aspect, 1, 1000);
 
-			const light = new THREE.PointLight(0xdddddd, 1.4, 200, 1);
-			light.position.set(75, 20, 85);
+			const light = new THREE.PointLight(0xdddddd, 1.5, 200, 1);
+			light.position.set(65, 20, 85);
 			light.shadow.mapSize.width = 2048;
 			light.shadow.mapSize.height = 2048;
 			light.castShadow = true;

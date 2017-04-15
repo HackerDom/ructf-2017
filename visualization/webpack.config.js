@@ -11,7 +11,6 @@ const generalConfig =  {
 			"underscore",
 			"stats.js",
 			"three",
-			"md5",
 			"event-emitter-es6",
 			"whatwg-fetch"]
 	},

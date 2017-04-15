@@ -12,7 +12,6 @@
     "three": "^0.84.0",
     "event-emitter-es6": "^1.1.5",
     "jquery": "^3.1.1",
-    "md5": "^2.2.1",
     "underscore": "^1.8.3",
     "whatwg-fetch": "^2.0.2",
     "stats.js": "^0.17.0"
