@@ -58,10 +58,10 @@ def check(*args):
 	VARIANT1 = random.randint( 0, 1 )
 	VARIANT2 = random.randint( 0, 1 )
 
-	R = random.randint( 0, 255 )
-	G = random.randint( 0, 255 )
-	B = random.randint( 0, 255 )
-	A = 255#random.randint( 0, 255 )
+	R = random.randint( 48, 90 )
+	G = random.randint( 48, 90 )
+	B = random.randint( 48, 90 )
+	A = random.randint( 48, 90 )
 
 	WH = [ 8, 16, 32, 64, 128 ]
 	W = WH[ random.randint( 0, 4 ) ]
