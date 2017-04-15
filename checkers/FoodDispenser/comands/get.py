@@ -5,6 +5,7 @@ from json import loads
 from urllib.error import HTTPError
 from base64 import b64decode
 import paramiko
+import traceback
 
 
 SELENIUM_HOST_IP = "10.60.201.100"
@@ -42,20 +43,20 @@ def get_first_vuln(host, flag_id, flag):
 
         return {"code": CORRUPT}
     except HTTPError:
-        return {"code": DOWN}
+        return {"code": DOWN, "private": traceback.format_exc()}
     except KeyError:
-        return {"code": MUMBLE}
+        return {"code": MUMBLE, "private": traceback.format_exc()}
 
 
 def get_second_vuln(host, flag_id, flag):
     token = flag_id
-    received_flag = get_flag_by_selenium_over_ssh(host, token)
-    if received_flag == flag:
-        return {"code": OK}
-    if received_flag == "some_annoying_checker_error":
-        return {"code": CHECKER_ERROR}
+    #received_flag = get_flag_by_selenium_over_ssh(host, token)
+    #if received_flag == flag:
+    #    return {"code": OK}
+    #if received_flag == "some_annoying_checker_error":
+    #    return {"code": CHECKER_ERROR}
 
-    return {"code": CHECKER_ERROR, "public": "Not implemented yet!"}
+    return {"code": CHECKER_ERROR, "public": "Method not implemented yet!"}
 
 
 def get_flag_by_selenium_over_ssh(team_domain, token):

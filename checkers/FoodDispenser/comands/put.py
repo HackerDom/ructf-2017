@@ -4,6 +4,7 @@ from comands import OK, MUMBLE, DOWN
 from json import dumps
 from urllib.error import HTTPError
 from base64 import b64encode
+import traceback
 
 
 def put(host, id, flag, vuln):
@@ -29,8 +30,10 @@ def special_check(host):
         client_password = randomize.generate_random_hash()
         service_name = randomize.generate_random_passenger_name()
         service_password = randomize.generate_random_hash()
-        fd_api.Registration.register_service(host, service_name, service_password)
-        fd_api.Registration.register_user(host, client_name, client_password)
+        fd_api.Registration.register_service(
+            host, service_name, service_password)
+        fd_api.Registration.register_user\
+            (host, client_name, client_password)
 
         service_token = fd_api.Tokens.get_service_token(
             host, service_name, service_password)
@@ -49,11 +52,11 @@ def special_check(host):
         for rating in ratings:
             if rating["comment"] == phrase:
                 return {"code": OK}
-        return {"code": MUMBLE}
+        return {"code": MUMBLE, "private": traceback.format_exc()}
     except HTTPError:
-        return {"code": DOWN}
+        return {"code": DOWN, "private": traceback.format_exc()}
     except KeyError:
-        return {"code": MUMBLE}
+        return {"code": MUMBLE, "private": traceback.format_exc()}
 
 
 def first_vuln_put(host, flag):
@@ -79,9 +82,9 @@ def first_vuln_put(host, flag):
             flag_poster_group
         )
     except HTTPError:
-        return {"code": DOWN}
+        return {"code": DOWN, "private": traceback.format_exc()}
     except KeyError:
-        return {"code": MUMBLE}
+        return {"code": MUMBLE, "private": traceback.format_exc()}
     return {"code": OK, "flag_id": b64encode(dumps(
         {"group": flag_poster_group, "invites": invites},
         separators=(',', ':')).encode()).decode()}
@@ -105,11 +108,14 @@ def second_vuln_put(host, flag):
         services_list = fd_api.Service.get_services_list(
             host, client_token)["result"]["services"]
         if service_name not in services_list:
-            return {"code": MUMBLE}
+            return {
+                "code": MUMBLE,
+                "public": "Could not find my server in servers list!"
+            }
 
         fd_api.Service.add_service_personal_info(host, service_token, flag)
         return {"code": OK, "flag_id": service_token}
     except HTTPError:
-        return {"code": DOWN}
+        return {"code": DOWN, "private": traceback.format_exc()}
     except KeyError:
-        return {"code": MUMBLE}
+        return {"code": MUMBLE, "private": traceback.format_exc()}
