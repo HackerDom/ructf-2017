@@ -8,7 +8,23 @@
             width: 100%;
             background-size: cover;
         }
+
+        #grad3 {
+            height: 20px;
+            width: 150px;
+            display: inline-block;
+            vertical-align: middle;
+            background: red;
+            background: -webkit-linear-gradient(right, rgba(255, 0, 0, 0), rgba(255, 0, 0, 1));
+            background: -o-linear-gradient(right, rgba(255, 0, 0, 0), rgba(255, 0, 0, 1));
+            background: -moz-linear-gradient(right, rgba(255, 0, 0, 0), rgba(255, 0, 0, 1));
+            background: linear-gradient(to right, rgba(255, 0, 0, 0), rgba(255, 0, 0, 1));
+        }
     </style>
+    <div>
+
+        {{ min_energy }}<span id="grad3"></span>{{ max_energy }}
+    </div>
     <div id="map">
 
     </div>

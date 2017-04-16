@@ -11,6 +11,7 @@
         {
             $all_order_item = OrderItem::get_all();
             $cahr_string = '0123456789abcdefghijklmnopqrstuvwxyz';
+
             $map = [];
 
             foreach (str_split($cahr_string) as $char_x) {

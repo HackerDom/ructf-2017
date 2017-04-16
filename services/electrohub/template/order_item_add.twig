@@ -8,6 +8,11 @@
 {% block content %}
     <div class="container">
         <form method="post">
+            {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endif %}
             <div class="form-group">
                 <label for="position_x">Map position x</label>
                 <input type="text" class="form-control" id="position_x" name="position_x" placeholder="Map position x">

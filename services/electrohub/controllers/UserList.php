@@ -14,7 +14,7 @@
             $user_list = User::get_all();
             foreach ($user_list as $user) {
                 $check_user = $_SESSION['user_id'] && $user->id === $_SESSION['user_id'];
-                $user->print_giro = !$user->private_type ? $user->giro : $check_user ? $user->giro : 'private';
+                $user->print_giro = !$user->private_type ? $user->giro : $check_user ? $user->giro : substr($user->giro, -4);
             }
 
             echo parent::render(

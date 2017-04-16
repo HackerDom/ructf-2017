@@ -24,6 +24,14 @@
                     <a class="nav-link" href="/signup/">Sign up</a>
                 {% endif %}
             </li>
+            {% if is_auth %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/order/">Order</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/order/add/">Add order</a>
+                </li>
+            {% endif %}
         </ul>
         <form class="form-inline mt-2 mt-md-0">
             <ul class="navbar-nav mr-auto">
