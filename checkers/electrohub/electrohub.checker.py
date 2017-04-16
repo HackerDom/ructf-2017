@@ -62,7 +62,6 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
     def checkSignin(self, result):
         try:
             exit_element = result["page"].find_all("a")
-            print(result["page"].find_all("a"))
             if len(exit_element):
                 for element in exit_element:
                     if element.text.strip() == 'Sign out':
@@ -170,14 +169,18 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
         return EXITCODE_OK
 
     def get(self, addr, flag_id, flag, vuln):
-
         session = self.session(addr)
         parts = flag_id.split(':', 3)
         user = {
             'login': parts[0],
             'password': parts[1]
         }
-        result = self.spost(session, addr, 'signin/', user)
+        result = self.spost(
+            session, addr, 'signin/', {
+                'login': parts[0],
+                'password': parts[1]
+            }
+        )
         check_signin = self.checkSignin(result)
         if check_signin:
             print('login failed')
