@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,7 +29,7 @@ namespace checker.stargate
 		public async Task<string> Put(string host, string id, string flag, int vuln)
 		{
 			var len = vuln == 1 ? RndUtil.Choice(11, 14) : RndUtil.Choice(12, 15);
-			var name = RndText.RandomWord(len);
+			var name = RndText.RandomWord(len).RandomLeet().RandomUpperCase();
 
 			var b64Name = Convert.ToBase64String(Encoding.ASCII.GetBytes(name));
 			var b64Entropy = Convert.ToBase64String(Encoding.ASCII.GetBytes(flag));
@@ -69,7 +67,7 @@ namespace checker.stargate
 
 				var key = result.Headers?["X-SG1-Key"];
 				if(string.IsNullOrEmpty(key))
-					throw new CheckerException(ExitCode.MUMBLE, $"put {PutRelative} failed, no key");
+					throw new CheckerException(ExitCode.MUMBLE, $"invalid {PutRelative} response");
 
 				if(!ProtoBufHelper.TryDeserialize(result.Body, out Spectrum spectrum))
 					throw new CheckerException(ExitCode.MUMBLE, $"invalid {PutRelative} response");
@@ -85,7 +83,7 @@ namespace checker.stargate
 				if(msg == null || msg.Name != b64Name)
 					throw new CheckerException(ExitCode.MUMBLE, "await msg failed");
 
-				var flagid = $"{b64Name}:{key}";
+				var flagid = $"{b64Name}:{Convert.ToBase64String(Encoding.ASCII.GetBytes(key))}";
 				await Console.Out.WriteLineAsync(flagid).ConfigureAwait(false);
 
 				return flagid;
@@ -99,7 +97,7 @@ namespace checker.stargate
 			var parts = id.Split(new[] {':'}, 2);
 
 			var b64Name = parts[0];
-			var key = parts[1];
+			var key = Encoding.ASCII.GetString(Convert.FromBase64String(parts[1]));
 
 			var result = await httpClient.DoRequestAsync(WebRequestMethods.Http.Get, GetRelative, new WebHeaderCollection {{"X-SG1-Name", b64Name}, {"X-SG1-Key", key}}, null, NetworkOpTimeout, MaxHttpBodySize).ConfigureAwait(false);
 			if(result.StatusCode != HttpStatusCode.OK)
