@@ -16,7 +16,7 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
         s = r.Session()
         s.headers[
             'User-Agent'
-        ] = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0'
+        ] = self.randUserAgent()
         s.headers['Accept'] = '*/*'
         s.headers['Accept-Language'] = 'en-US,en;q=0.5'
         return s
