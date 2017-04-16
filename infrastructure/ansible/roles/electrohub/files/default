@@ -6,13 +6,15 @@ server {
 
 	index index.php;
 
+	location /static/ {
+        root /var/www/;
+    }
+
 	location / {
         fastcgi_pass unix:/run/php/php7.0-fpm.sock;
 		fastcgi_param SCRIPT_FILENAME $document_root/index.php;
         include fastcgi_params;
     }
 
-    location /static/ {
-        root /var/www/static/;
-    }
+
 }
