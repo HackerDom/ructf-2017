@@ -313,5 +313,35 @@ namespace checker.rnd
 			}
 			return builder.ToString().ToLower();
 		}
+
+		public static string RandomUpperCase(this string value)
+		{
+			var chars = value.ToCharArray();
+			for(int i = 0; i < chars.Length; i++)
+			{
+				if(RndUtil.ThreadStaticRnd.Next(4) == 0)
+					chars[i] = char.ToUpperInvariant(chars[i]);
+			}
+			return new string(chars);
+		}
+
+		public static string RandomLeet(this string value)
+		{
+			var chars = value.ToCharArray();
+			for(int i = 0; i < chars.Length; i++)
+			{
+				if(Leet.TryGetValue(chars[i], out var c) && RndUtil.ThreadStaticRnd.Next(4) == 0)
+					chars[i] = c;
+			}
+			return new string(chars);
+		}
+
+		private static readonly Dictionary<char, char> Leet = new Dictionary<char, char>
+		{
+			{'o', '0'},
+			{'l', '1'},
+			{'e', '3'},
+			{'t', '7'},
+		};
 	}
 }

@@ -29,7 +29,7 @@ namespace checker.stargate
 		public async Task<string> Put(string host, string id, string flag, int vuln)
 		{
 			var len = vuln == 1 ? RndUtil.Choice(11, 14) : RndUtil.Choice(12, 15);
-			var name = RndText.RandomWord(len);
+			var name = RndText.RandomWord(len).RandomLeet().RandomUpperCase();
 
 			var b64Name = Convert.ToBase64String(Encoding.ASCII.GetBytes(name));
 			var b64Entropy = Convert.ToBase64String(Encoding.ASCII.GetBytes(flag));
