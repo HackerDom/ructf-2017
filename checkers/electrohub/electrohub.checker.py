@@ -61,9 +61,13 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
 
     def checkSignin(self, result):
         try:
-            exit_element = result["page"].find("a")
-            if exit_element and exit_element.text.strip() == 'Sign out':
-                return False
+            exit_element = result["page"].find_all("a")
+            print(result["page"].find_all("a"))
+            if len(exit_element):
+                for element in exit_element:
+                    if element.text.strip() == 'Sign out':
+                        return False
+                return True
             return True
         except (AttributeError, TypeError):
             return True
