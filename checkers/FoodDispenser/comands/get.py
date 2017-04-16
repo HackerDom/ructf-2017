@@ -8,7 +8,7 @@ import paramiko
 import traceback
 
 
-SELENIUM_HOST_IP = "10.60.201.100"
+SELENIUM_HOST_IP = "10.60.200.100"
 
 
 def get(host, flag_id, flag, vuln):
