@@ -6,7 +6,7 @@ import Stats from "stats.js";
 import _ from "underscore";
 
 const countdown_start = new Date(2017, 3, 16, 10, 0, 0); // month from 0
-const countdown_end = new Date(2017, 3, 16, 20, 0, 0);
+const countdown_end = new Date(2017, 3, 16, 20, 20, 0);
 const YEKT_timezone_offset = 5 * 60 * 60 * 1000;
 const sprite_coeff = 3;
 const canvasWidth = 182 * sprite_coeff;
@@ -192,7 +192,7 @@ export default class View {
 		canvas.height = canvasHeight;
 		const context = canvas.getContext('2d');
 
-		context.fillStyle = "rgba(255, 255, 255, 0.2)";
+		context.fillStyle = "rgba(255, 255, 255, 0.5)";
 		context.fillRect(0, 0, canvasWidth, canvasHeight);
 
 		const borderWidth = 1.5 * sprite_coeff;
@@ -225,7 +225,7 @@ export default class View {
 		context.fillText(team.score, textLeftOffset, 52 * sprite_coeff);
 
 		if (team.place !== null) {
-			context.fillStyle = "rgba(86, 138, 255, 1.0)";
+			context.fillStyle = "rgba(175, 197, 255, 1.0)";
 			context.font = "Bold " + (14 * sprite_coeff) + "px Roboto";
 			let place = team.place;
 			const dashIndex = place.indexOf("-");
@@ -275,7 +275,7 @@ export default class View {
 			colorRandomness: 0,
 			turbulence: 0.5,
 			lifetime: 0.8,
-			size: 5,
+			size: 6,
 			sizeRandomness: 3
 		};
 
@@ -304,8 +304,8 @@ export default class View {
 
 			const light = new THREE.PointLight(0xdddddd, 1.5, 200, 1);
 			light.position.set(65, 20, 85);
-			light.shadow.mapSize.width = 2048;
-			light.shadow.mapSize.height = 2048;
+			light.shadow.mapSize.width = 1024;
+			light.shadow.mapSize.height = 1024;
 			light.castShadow = true;
 			light.shadow.camera.left = -45;
 			light.shadow.camera.right = 45;
@@ -317,7 +317,7 @@ export default class View {
 			//scene.add(light.shadowCameraHelper);
 
 
-			scene.add(new THREE.AmbientLight(0x333333));
+			scene.add(new THREE.AmbientLight(0x444444));
 
 			//planetBumpTex.magFilter = THREE.LinearMipMapLinearFilter;
 			//planetDiffuseTex.magFilter = THREE.LinearMipMapLinearFilter;
@@ -352,7 +352,7 @@ export default class View {
 						{
 							"c":   { type: "f", value: 1.0 },
 							"p":   { type: "f", value: 1.4 },
-							glowColor: { type: "c", value: new THREE.Color(0xd65ec8) },
+							glowColor: { type: "c", value: new THREE.Color(0xff4fea) },
 							viewVector: { type: "v3", value: camera.position }
 						},
 					vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
@@ -577,7 +577,7 @@ export default class View {
 				if (team.lastExplosionTime === 0)
 					continue;
 				if (team.lastExplosionTime <= now && team.lastExplosionTime + 1000 >= now) {
-					team.glossMaterial.opacity = 0.45 - (now - team.lastExplosionTime) / 1000 * 0.45;
+					team.glossMaterial.opacity = 0.65 - (now - team.lastExplosionTime) / 1000 * 0.65;
 				} else {
 					team.glossMaterial.opacity = 0;
 					team.lastExplosionTime = 0;

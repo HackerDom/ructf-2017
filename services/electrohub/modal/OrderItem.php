@@ -26,13 +26,3 @@
             return self::$db->query($query);
         }
     }
-
-    $order_item = new OrderItem(
-        [
-            'order_id' => 1,
-            'position_x' => 'x',
-            'position_y' => 'y',
-            'quantity_energy' => 100
-        ]
-    );
-    $order_item->insert_or_update();

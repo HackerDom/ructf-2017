@@ -11,7 +11,7 @@
         function __construct(
             string $db_host = '127.0.0.1',
             string $db_user = 'root',
-            string $db_password = 'mysql',
+            string $db_password = '',
             string $db_name = 'ructf'
         )
         {

@@ -88,10 +88,12 @@
         public function insert_or_update()
         {
             self::$db->connect->begin_transaction();
+            echo '<br>';
             if (isset($this->id)) {
                 $result = $this->update($this->id);
             } else {
                 $result = $this->insert();
+                echo  var_dump(self::$db->connect).'<br>';
                 if ($result) {
                     $this->id = self::$db->connect->insert_id;
                 }
@@ -107,6 +109,16 @@
             return self::$db->query($query)->num_rows;
         }
 
+        public static function get_all()
+        {
+            $query = "SELECT * FROM " . self::get_table_name();
+
+            $result = self::$db->query($query);
+            if ($result) {
+                return self::load_objects($result);
+            }
+            return [];
+        }
 
         public static function get_by_id(int $id)
         {

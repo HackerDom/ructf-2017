@@ -17,7 +17,7 @@
                     'user_id' => $_SESSION['user_id'],
                 ]);
                 $order->insert_or_update();
-
+                redirect('/order/' . $order->id.'/');
             } else {
                 redirect('/signin/');
             }

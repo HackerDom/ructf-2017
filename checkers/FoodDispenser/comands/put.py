@@ -71,9 +71,14 @@ def first_vuln_put(host, flag):
 
         flag_poster_group = randomize.generate_random_hash()
         fd_api.Groups.create_group(host, flag_poster_token, flag_poster_group)
-
-        invites = fd_api.Groups.group_get_invites(
-            host, flag_poster_token, flag_poster_group)["result"]["invites"]
+        invites_list = []
+        for i in range(3):
+            invites_list += fd_api.Groups.group_get_invites(
+                host,
+                flag_poster_token,
+                flag_poster_group,
+                invites_amount=6
+            )["result"]["invites"]
         fd_api.Tickets.add_tickets(
             host,
             flag_poster_token,
@@ -86,7 +91,7 @@ def first_vuln_put(host, flag):
     except KeyError as e:
         return {"code": MUMBLE, "private": traceback.format_exc()}
     return {"code": OK, "flag_id": b64encode(dumps(
-        {"group": flag_poster_group, "invites": invites},
+        {"group": flag_poster_group, "invites": invites_list},
         separators=(',', ':')).encode()).decode()}
 
 

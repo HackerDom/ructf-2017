@@ -13,6 +13,17 @@
         {
             if (Session::is_authenticated()) {
                 $order = Order::get_by_id($this->option['order_id']);
+                $x = $_POST['position_x'];
+                $cahr_string = '0123456789abcdefghijklmnopqrstuvwxyz';
+                $y = $_POST['position_y'];
+                if (!in_array(strtolower($x), str_split($cahr_string))) {
+                    echo parent::render(['error'=>'Error in field map position x.']);
+                    exit();
+                }
+                if (!in_array(strtolower($y), str_split($cahr_string))) {
+                    echo parent::render(['error'=>'Error in field map position y.']);
+                    exit();
+                }
                 if ($order && $order['user_id'] === $_SESSION['user_id']) {
                     $order_item = new OrderItem([
                         'order_id' => $this->option['order_id'],

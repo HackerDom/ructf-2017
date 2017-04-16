@@ -1,6 +1,6 @@
 {% extends 'base.twig' %}
 
-{% block title %}Order List{% endblock %}
+{% block title %}User List{% endblock %}
 {% block extend_css %}
 
 {% endblock %}
@@ -11,22 +11,20 @@
             <thead>
             <tr>
                 <th>#</th>
-                <th>Name</th>
-                <th>Action</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Giro</th>
             </tr>
             </thead>
             <tbody>
-            {% for order in order_list %}
+            {% for user in user_list %}
                 <tr>
                     <th scope="row">
-                        <a href="/order/{{ order.id }}/">{{ order.id }}</a>
+                        {{ user.id }}
                     </th>
-                    <th>{{ order.name }}</th>
-                    <th>
-                        <a href="/order/{{ order.id }}/add_item/">
-                            Add order item
-                        </a>
-                    </th>
+                    <th>{{ user.first_name }}</th>
+                    <th>{{ user.last_name }}</th>
+                    <th>{{ user.print_giro }}</th>
                 </tr>
             {% endfor %}
             </tbody>
