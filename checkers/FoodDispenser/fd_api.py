@@ -1,8 +1,9 @@
 from urllib.request import urlopen, Request
 from json import loads, dumps
 from user_agents import get as get_user_agent
+from socket import timeout
 
-TIMEOUT = 5
+TIMEOUT = 7
 API_PREFIX = "/api/v1"
 
 
@@ -11,7 +12,10 @@ def make_request(url, json):
     request_object.data = dumps(json).encode()
     request_object.add_header("Content-Type", "text/plain")
     request_object.add_header('User-Agent', get_user_agent())
-    result = urlopen(request_object, timeout=5).read().decode()
+    try:
+        result = urlopen(request_object, timeout=TIMEOUT).read().decode()
+    except timeout:
+        result = urlopen(request_object, timeout=TIMEOUT).read().decode()
     return loads(result)
 
 
@@ -161,5 +165,8 @@ class Service:
         request.add_header("User-Agent", get_user_agent())
         request.add_header("Cookie", "token={}".format(token))
         request.method = "GET"
-        answer = urlopen(request, timeout=TIMEOUT).read().decode()
+        try:
+            answer = urlopen(request, timeout=TIMEOUT).read().decode()
+        except timeout:
+            answer = urlopen(request, timeout=TIMEOUT).read().decode()
         return answer
