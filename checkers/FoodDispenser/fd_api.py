@@ -11,7 +11,7 @@ def make_request(url, json):
     request_object.data = dumps(json).encode()
     request_object.add_header("Content-Type", "text/plain")
     request_object.add_header('User-Agent', get_user_agent())
-    result = urlopen(request_object, timeout=5).read().decode()
+    result = urlopen(request_object, timeout=10).read().decode()
     return loads(result)
 
 
