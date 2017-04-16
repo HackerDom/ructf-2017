@@ -73,13 +73,12 @@ def first_vuln_put(host, flag):
         fd_api.Groups.create_group(host, flag_poster_token, flag_poster_group)
         invites_list = []
         for i in range(3):
-            invites_list.append(
-                fd_api.Groups.group_get_invites(
-                    host,
-                    flag_poster_token,
-                    flag_poster_group,
-                    invites_amount=6
-                )["result"]["invites"])
+            invites_list += fd_api.Groups.group_get_invites(
+                host,
+                flag_poster_token,
+                flag_poster_group,
+                invites_amount=6
+            )["result"]["invites"]
         fd_api.Tickets.add_tickets(
             host,
             flag_poster_token,
