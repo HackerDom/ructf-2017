@@ -37,11 +37,11 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
             raise response.exceptions.HTTPError('failed to parse response')
 
     def spost(self, s, addr, suffix_post, data=None):
-        response = s.post(self.url(addr, suffix_post), data, timeout=5)
+        response = s.post(self.url(addr, suffix_post), data, timeout=10)
         return self.parse_response(response)
 
     def sget(self, s, addr, suffix):
-        response = s.get(self.url(addr, suffix), timeout=5)
+        response = s.get(self.url(addr, suffix), timeout=10)
         return self.parse_response(response)
 
     def randword(self):
