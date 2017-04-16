@@ -8,7 +8,7 @@ namespace checker.net
 		{
 			if((int)status >= 200 && (int)status < 300)
 				return ExitCode.OK;
-			if(status == HttpStatusCode.NotFound || (int)status >= 500 || status == 0)
+			if(status == HttpStatusCode.NotFound || (int)status >= 500 || (int)status == 499 || status == 0)
 				return ExitCode.DOWN;
 			return ExitCode.MUMBLE;
 		}
