@@ -38,9 +38,9 @@ def get_first_vuln(host, flag_id, flag):
                 for ticket in tickets:
                     if flag == ticket["code"]:
                         return {"code": OK}
-                return {"code": CORRUPT}
+                return {"code": CORRUPT, "public": "No same tickets!"}
 
-        return {"code": CORRUPT}
+        return {"code": CORRUPT, "public": "No codes found!"}
     except HTTPError as e:
         return {"code": DOWN, "private": traceback.format_exc()}
     except KeyError as e:
