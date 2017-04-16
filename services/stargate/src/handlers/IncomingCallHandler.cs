@@ -59,6 +59,7 @@ namespace stargåte.handlers
 			if(bmp.Width * bmp.Height > Settings.MaxIncomingDimensions)
 				return new HttpResult {StatusCode = 413, Message = "Substance Too Large"};
 
+			// VULN: Uniqueness by Base64-encoded string whilst HMAC by raw bytes
 			var info = new Transmission {Name = name, Entropy = secret, Timestamp = DateTime.UtcNow.Ticks};
 			if(!await TransmissionsDb.TryAdd(info))
 				return new HttpResult {StatusCode = 409, Message = "Substance Conflict"};
@@ -74,6 +75,7 @@ namespace stargåte.handlers
 
 		private static async Task<HttpResult> ProcessRequestInternal(HttpContext context, string name, DirectBitmap dbmp, Transmission info)
 		{
+			// NOTE: To make the vuln with DirectBitmap work spectrum calc must be between HMAC creating and disposing
 			using(var hmac = new HMACSHA256(Settings.Key))
 			using(var pooled = await OutputPool.AcquireAsync())
 			{

@@ -10,6 +10,7 @@ namespace stargåte.utils
 		public unsafe DirectBitmap(Bitmap bmp)
 		{
 			this.bmp = bmp;
+			// VULN: Bitmap data cosidered as int* whilst PixelFormat not checked to be 32bpp
 			data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, bmp.PixelFormat);
 			ptr = (int*)data.Scan0;
 		}
