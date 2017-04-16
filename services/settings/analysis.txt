@@ -1,0 +1,14 @@
+Settings - простое кеу-value хранилище написанное на gnu cobol
+
+Для обноружения первой уязвимости было достаточно понять, что компилятор можно попросить генерировать предупреждения. Если их включить, то компилятор выдаёт сообщения:
+
+fixsection.cbl: 65: warning: source text after program-text area (column 72)
+addapikey.cbl: 59: warning: source text after program-text area (column 72)
+getsection.cbl: 60: warning: source text after program-text area (column 72)
+
+На википедии (https://en.wikipedia.org/wiki/COBOL#Code_format) написано "Program name area 	73– 	Historically up to column 80 for punched cards, it is used to identify the program or sequence the card belongs to". То есть всё после 72-го символа игнорируется. 
+
+В данном случае это часть условия "and current-api-key is not equal to default-api-key", которое проверяет, что ключ, с которым делается запрос, не равен ключу по умолчанию.
+
+
+Вторая уязвимость состоит в том, что в коболе вызов функции происходит по вычислимому имени. В данном случае функции, обрабатывающие запросы к api вызываются по имени, которое получается от пользователя, при этом проводится очень слабая проверка валидности этого имени. Валидация состоит в проверке на равенство четвёртого символа имени функции и дефиса. Под этот паттерн подходит функция, обрабатывающая запрос к админке. Он позваляет добавить любой ключ к любой секции.
