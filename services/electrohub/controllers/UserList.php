@@ -15,7 +15,7 @@
             foreach ($user_list as $user) {
                 $check_user = $_SESSION['user_id'] && $user->id === $_SESSION['user_id'];
                 $half_len = intval(strlen($user->giro) / 2);
-                $user->print_giro = !$user->private_type ? $user->giro : $check_user ? substr($user->giro, -$half_len) : substr($user->giro, -$half_len);
+                $user->print_giro = !$user->private_type ? $user->giro : $check_user ? substr($user->giro, $half_len) : substr($user->giro, -$half_len);
             }
 
             echo parent::render(
