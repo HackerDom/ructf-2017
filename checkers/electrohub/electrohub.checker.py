@@ -116,6 +116,7 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
         }
         flag_order_item = uuid.uuid4().hex
         if vuln == 1:
+            user['private_type'] = 'on'
             user['giro'] = flag
             order_items = self.getOrderItem(flag_order_item[:16])
             order['secret_code'] = flag_order_item[16:]
@@ -175,18 +176,24 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
             'login': parts[0],
             'password': parts[1]
         }
+
         result = self.spost(
             session, addr, 'signin/', {
                 'login': parts[0],
                 'password': parts[1]
             }
         )
+
         check_signin = self.checkSignin(result)
         if check_signin:
             print('login failed')
             return EXITCODE_MUMBLE
         if vuln == 1:
             pass
+            # result = self.sget(session, addr, 'user/')
+            # if result["page"].text.find(flag[16:]) <= -1:
+            #     print('flag not found user')
+            #     return EXITCODE_CORRUPT
         else:
             result = self.sget(session, addr, 'order/{}/'.format(parts[2]))
             check_add_order_item = self.checkAddOrderItem(
@@ -200,6 +207,52 @@ class StrongboxChecker(HttpCheckerBase, Randomizer):
 
     def check(self, addr):
         session = self.session(addr)
+        user = self.randUser()
+        order = {
+            'name': self.randword()
+        }
+
+        flag_order_item = uuid.uuid4().hex
+        user['private_type'] = 'on'
+        user['giro'] = uuid.uuid4().hex
+        order_items = self.getOrderItem(flag_order_item[:16])
+        order['secret_code'] = flag_order_item[16:]
+        result = self.spost(session, addr, 'signup/', user)
+
+        check_signup = self.checkSignup(result)
+        if check_signup:
+            print('registration failed')
+            return EXITCODE_MUMBLE
+        result = self.spost(session, addr, 'signin/', {
+            'login': user['login'],
+            'password': user['password']
+        })
+        check_signin = self.checkSignin(result)
+
+        if check_signin:
+            print('login failed')
+            return EXITCODE_MUMBLE
+        result = self.spost(session, addr, 'order/add/', order)
+        check_add_order = self.checkAddOrder(result, order)
+        if check_add_order:
+            print('add order failed')
+            return EXITCODE_MUMBLE
+        order['id'] = self.getOrderId(result)
+        check_add_order = self.checkAddOrder(result, order)
+        for order_item in order_items:
+            result = self.spost(
+                session, addr,
+                'order/{}/add_item/'.format(order['id']),
+                order_item
+            )
+        result = self.sget(session, addr, 'order/{}/'.format(order['id']))
+        check_add_order_item = self.checkAddOrderItem(
+            result,
+            flag_order_item
+        )
+        if check_add_order_item:
+            print('add order item failed')
+            return EXITCODE_MUMBLE
         return EXITCODE_OK
 
 
