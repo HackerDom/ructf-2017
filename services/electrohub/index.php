@@ -13,17 +13,23 @@
     require_once __DIR__ . '/controllers/OrderItemAdd.php';
     require_once __DIR__ . '/controllers/OrderList.php';
     require_once __DIR__ . '/controllers/OrderDetail.php';
+    require_once __DIR__ . '/controllers/UserList.php';
     $route = new Router();
 
-    $route->add_route('/', Index);
-    $route->add_route('/index/', Index);
-    $route->add_route('/order/add/', OrderAdd);
-    $route->add_route('/order/:order_id/', OrderDetail);
-    $route->add_route('/order/:order_id/add_item/', OrderItemAdd);
-    $route->add_route('/order/', OrderList);
-    $route->add_route('/signin/', Login);
-    $route->add_route('/signup/', Signup);
-    $route->add_route('/signout/', Signout);
+    $route->add_route('/', 'Index');
+    $route->add_route('/index/', 'Index');
+
+    $route->add_route('/order/add/', 'OrderAdd');
+    $route->add_route('/order/:order_id/', 'OrderDetail');
+    $route->add_route('/order/:order_id/add_item/', 'OrderItemAdd');
+    $route->add_route('/order/', 'OrderList');
+
+    $route->add_route('/signin/', 'Login');
+    $route->add_route('/signup/', 'Signup');
+    $route->add_route('/signout/', 'Signout');
+
+    $route->add_route('/user/', 'UserList');
+
     $url = $_SERVER['REQUEST_URI'];
 
     if (substr($url, -1) !== '/') {

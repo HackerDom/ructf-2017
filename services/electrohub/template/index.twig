@@ -1,15 +1,10 @@
 {% extends 'base.twig' %}
 
 {% block content %}
-    {% if is_auth %}
-        <a href="/signout/">Sign out</a>
-    {% else %}
-        <a href="/signin/">Sign in</a>
-    {% endif %}
     <style>
         #map table {
             table-layout: fixed;
-            background-image: url(/static/img/Bump.jpg);
+            background-image: url(/static/img/planet.png);
             width: 100%;
             background-size: cover;
         }
@@ -17,6 +12,7 @@
     <div id="map">
 
     </div>
+
     <script>
         var table_map = "<table>";
         var map = {{ map|json_encode()|raw }};
@@ -28,7 +24,7 @@
                 table_map += '<tr>';
                 for (var y in map[x]) {
                     if (map[x].hasOwnProperty(x)) {
-                        table_map += '<th style="background: rgba(0, 255,0, ' + map[x][y] / (max_energy / 100) + ')">&#160;</th>';
+                        table_map += '<th style="background: rgba(255, 0,0, ' + map[x][y] / (max_energy / 100) + ');border: 1px solid white;">&#160;</th>';
                     }
                 }
                 table_map += '</tr>';
@@ -38,4 +34,5 @@
         var $map = document.getElementById('map');
         $map.innerHTML = table_map;
     </script>
+
 {% endblock %}

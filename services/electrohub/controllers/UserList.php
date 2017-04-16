@@ -4,7 +4,7 @@
     require_once __DIR__ . '/../core/Utils.php';
     require_once __DIR__ . '/../modal/User.php';
 
-    class OrderList extends Controller
+    class UserList extends Controller
     {
         public $template = 'user_list.twig';
 
@@ -14,10 +14,11 @@
             $user_list = User::get_all();
             foreach ($user_list as $user) {
                 $check_user = $_SESSION['user_id'] && $user->id === $_SESSION['user_id'];
-                $user->print_giro = !$user->privet_type ? $user->giro : $check_user ? $user->giro : 'privet';
+                $user->print_giro = !$user->private_type ? $user->giro : $check_user ? $user->giro : 'private';
             }
+
             echo parent::render(
-                ['user_list' => User::get_all()]
+                ['user_list' => $user_list]
             );
 
         }

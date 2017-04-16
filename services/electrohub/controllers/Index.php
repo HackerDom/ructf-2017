@@ -21,20 +21,22 @@
             }
             $max_energy = 0;
             foreach ($all_order_item as $order_item) {
+                $x = strtolower($order_item->position_x);
+                $y = strtolower($order_item->position_y);
                 if (!isset($map[$order_item->position_x][$order_item->position_y])) {
-                    $map[$order_item->position_x][$order_item->position_y] = 0;
-                    $map[$order_item->position_x][$order_item->position_y] += $order_item->quantity_energy;
+
+                    $map[$x][$y] = 0;
+                    $map[$x][$y] += $order_item->quantity_energy;
                 } else {
-                    $map[$order_item->position_x][$order_item->position_y] += $order_item->quantity_energy;
+                    $map[$x][$y] += $order_item->quantity_energy;
 
                 }
-                if ($map[$order_item->position_x][$order_item->position_y] > $max_energy) {
-                    $max_energy = $map[$order_item->position_x][$order_item->position_y];
+                if ($map[$x][$y] > $max_energy) {
+                    $max_energy = $map[$x][$y];
                 }
             }
             echo parent::render(
                 [
-                    'is_auth' => Session::is_authenticated(),
                     'map' => $map,
                     'max_energy' => $max_energy,
                     'min_energy' => 0

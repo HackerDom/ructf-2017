@@ -11,7 +11,7 @@
             'first_name',
             'last_name',
             'password',
-            'privet_type',
+            'private_type',
             'giro'
         ];
         public static $table_name = 'users';
@@ -25,7 +25,7 @@
             $query .= 'first_name VARCHAR(255) NOT NULL,';
             $query .= 'last_name VARCHAR(255) NOT NULL,';
             $query .= 'password VARCHAR(255) NOT NULL,';
-            $query .= 'privet_type BOOLEAN NOT NULL default 0,';
+            $query .= 'private_type BOOLEAN NOT NULL default 0,';
             $query .= 'giro VARCHAR(255) NOT NULL';
             $query .= ')';
             return self::query($query, $create = true);
@@ -41,14 +41,16 @@
 
         public static function check_login_and_password($login, $password)
         {
+            $user_obj = User::get_by_login($login);
+            if ($user_obj) {
+                $user = new User(User::get_by_login($login));
 
-            $user = new User(User::get_by_login($login));
-
-            if (password_verify($password, $user->password)) {
-                return $user;
-            } else {
-                return false;
+                if (password_verify($password, $user->password)) {
+                    return $user;
+                }
             }
+            return false;
+
         }
     }
 

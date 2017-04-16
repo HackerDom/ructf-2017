@@ -88,10 +88,12 @@
         public function insert_or_update()
         {
             self::$db->connect->begin_transaction();
+            echo '<br>';
             if (isset($this->id)) {
                 $result = $this->update($this->id);
             } else {
                 $result = $this->insert();
+                echo  var_dump(self::$db->connect).'<br>';
                 if ($result) {
                     $this->id = self::$db->connect->insert_id;
                 }

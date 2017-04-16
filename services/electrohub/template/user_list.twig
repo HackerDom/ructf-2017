@@ -20,7 +20,7 @@
             {% for user in user_list %}
                 <tr>
                     <th scope="row">
-                        <a href="/user/{{ user.id }}/">{{ user.id }}</a>
+                        {{ user.id }}
                     </th>
                     <th>{{ user.first_name }}</th>
                     <th>{{ user.last_name }}</th>

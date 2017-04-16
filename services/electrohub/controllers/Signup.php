@@ -13,18 +13,21 @@
             $first_name = $_POST['first_name'];
             $last_name = $_POST['last_name'];
             $giro = $_POST['giro'];
+            $private = isset($_POST['private']) ? 1: 0;
+
             $u = new User(
                 [
                     'login' => $login,
                     'password' => $password,
                     'first_name' => $first_name,
                     'last_name' => $last_name,
-                    'giro' => $giro
+                    'giro' => $giro,
+                    'private_type' => $private
                 ]
 
             );
-            $user_array = User::get_by_login($u->login);
-            if (isset($user_array)) {
+            $user_obj = User::get_by_login($u->login);
+            if ($user_obj) {
                 echo parent::render([
                     'error' => "User already exist"
                 ]);
