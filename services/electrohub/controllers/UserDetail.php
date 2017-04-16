@@ -5,10 +5,11 @@
 
     class Index extends Controller
     {
-        public $template = 'index.twig';
+        public $template = 'user_detail.twig';
 
         function get()
         {
+
             $all_order_item = OrderItem::get_all();
             $cahr_string = '0123456789abcdefghijklmnopqrstuvwxyz';
             $map = [];

@@ -107,6 +107,16 @@
             return self::$db->query($query)->num_rows;
         }
 
+        public static function get_all()
+        {
+            $query = "SELECT * FROM " . self::get_table_name();
+
+            $result = self::$db->query($query);
+            if ($result) {
+                return self::load_objects($result);
+            }
+            return [];
+        }
 
         public static function get_by_id(int $id)
         {

@@ -6,4 +6,36 @@
     {% else %}
         <a href="/signin/">Sign in</a>
     {% endif %}
+    <style>
+        #map table {
+            table-layout: fixed;
+            background-image: url(/static/img/Bump.jpg);
+            width: 100%;
+            background-size: cover;
+        }
+    </style>
+    <div id="map">
+
+    </div>
+    <script>
+        var table_map = "<table>";
+        var map = {{ map|json_encode()|raw }};
+        var max_energy = {{ max_energy }};
+        var min_energy = {{ min_energy }};
+
+        for (var x in map) {
+            if (map.hasOwnProperty(x)) {
+                table_map += '<tr>';
+                for (var y in map[x]) {
+                    if (map[x].hasOwnProperty(x)) {
+                        table_map += '<th style="background: rgba(0, 255,0, ' + map[x][y] / (max_energy / 100) + ')">&#160;</th>';
+                    }
+                }
+                table_map += '</tr>';
+            }
+        }
+        table_map += '</table>';
+        var $map = document.getElementById('map');
+        $map.innerHTML = table_map;
+    </script>
 {% endblock %}

@@ -12,7 +12,7 @@
             $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
             $first_name = $_POST['first_name'];
             $last_name = $_POST['last_name'];
-            $giro = $_POST['checkout_bill'];
+            $giro = $_POST['giro'];
             $u = new User(
                 [
                     'login' => $login,
