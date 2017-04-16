@@ -11,6 +11,7 @@
             'first_name',
             'last_name',
             'password',
+            'private_type',
             'giro'
         ];
         public static $table_name = 'users';
@@ -24,23 +25,10 @@
             $query .= 'first_name VARCHAR(255) NOT NULL,';
             $query .= 'last_name VARCHAR(255) NOT NULL,';
             $query .= 'password VARCHAR(255) NOT NULL,';
+            $query .= 'private_type BOOLEAN NOT NULL default 0,';
             $query .= 'giro VARCHAR(255) NOT NULL';
             $query .= ')';
             return self::query($query, $create = true);
-        }
-
-
-
-        protected function update()
-        {
-            $query = "UPDATE " . self::get_table_name() . " SET ";
-            $query .= "login=" . self::$db->escape_value($this->login) . ", ";
-            $query .= "first_name=" . self::$db->escape_value($this->first_name) . ", ";
-            $query .= "last_name=" . self::$db->escape_value($this->last_name) . ", ";
-            $query .= "password=" . self::$db->escape_value($this->password) . ", ";
-            $query .= "giro=" . self::$db->escape_value($this->giro);
-            $query .= " WHERE id=$this->id";
-            return self::query($query);
         }
 
 
@@ -53,14 +41,16 @@
 
         public static function check_login_and_password($login, $password)
         {
+            $user_obj = User::get_by_login($login);
+            if ($user_obj) {
+                $user = new User(User::get_by_login($login));
 
-            $user = new User(User::get_by_login($login));
-
-            if (password_verify($password, $user->password)) {
-                return $user;
-            } else {
-                return false;
+                if (password_verify($password, $user->password)) {
+                    return $user;
+                }
             }
+            return false;
+
         }
     }
 

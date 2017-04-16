@@ -22,6 +22,7 @@
         {
             $loader = new Twig_Loader_Filesystem(__DIR__ . '/../template/');
             $twig = new Twig_Environment($loader);
+            $context['is_auth'] = Session::is_authenticated();
             return $twig->render($this->template, $context);
         }
 
