@@ -53,11 +53,11 @@ def get_second_vuln(host, flag_id, flag):
     if received_flag == flag:
         return {"code": OK}
     if received_flag == "Couldn't find flag":
-        return {"code": MUMBLE}
+        return {"code": MUMBLE, "public": "Couldn't find flag!"}
     if received_flag == "Couldn't init driver":
-        return {"code": CHECKER_ERROR}
+        return {"code": CHECKER_ERROR, "private": "can't init driver"}
     if received_flag == "Service response timed out":
-        return {"code": DOWN}
+        return {"code": DOWN, "public": "Response timed out"}
     if received_flag == "Unhandled exception":
         return {"code": CHECKER_ERROR}
     return {"code": CHECKER_ERROR}
