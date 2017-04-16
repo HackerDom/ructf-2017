@@ -1,5 +1,6 @@
 from urllib.request import urlopen, Request
 from json import loads, dumps
+from user_agents import get as get_user_agent
 
 TIMEOUT = 5
 API_PREFIX = "/api/v1"
@@ -9,6 +10,7 @@ def make_request(url, json):
     request_object = Request("http://" + url)
     request_object.data = dumps(json).encode()
     request_object.add_header("Content-Type", "text/plain")
+    request_object.add_header('User-Agent', get_user_agent())
     result = urlopen(request_object, timeout=5).read().decode()
     return loads(result)
 
@@ -156,6 +158,7 @@ class Service:
         url = "http://" + host + "/set_location?location={}"\
             .format(servers_location)
         request = Request(url)
+        request.add_header("User-Agent", get_user_agent())
         request.add_header("Cookie", "token={}".format(token))
         request.method = "GET"
         answer = urlopen(request, timeout=TIMEOUT).read().decode()

@@ -1,10 +1,13 @@
 from contextlib import contextmanager
-from peewee import MySQLDatabase, OperationalError
+from peewee import OperationalError
 from database.models import init_models
+from playhouse.pool import PooledMySQLDatabase
 
 
-db = MySQLDatabase(
+db = PooledMySQLDatabase(
     "dispenser",
+    max_connections=32,
+    stale_timeout=300,
     user="root",
     port=3306,
 )
