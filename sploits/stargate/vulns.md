@@ -76,4 +76,16 @@ https://en.wikipedia.org/wiki/Base64
 ### Buffer over-read
 [DirectBitmap](https://github.com/HackerDom/ructf-2017/blob/master/services/stargate/src/utils/DirectBitmap.cs#L13) class uses unsafe int* pointer to raw pixels however image PixelFormat isn't checked to be 32bpp. This allows to over-read data on unmanaged heap. Data is used later for histogram aka "spectrum" calculation. With some good probability HMAC256 openssl implementation allocated immediately after image data. As a result ones can use histograms statistics in response on 8bpp/16bpp/24bpp image upload requests to brute-force 128 bit of the HMAC key. HSL channels help to reduce number of possible color combinations.
 
+```
+Possible number colors: 77
+Total number of checks: 35153041
+Brute-force em all...
+Done 100000 - 0,28%
+Done 200000 - 0,57%
+Done 300000 - 0,85%
+...
+Done 17600000 - 50,07%
+Key found: 9A-8A-10-78-88-EE-43-05-9A-C4-71-A0-DE-30-88-02, elapsed 00:00:26.7847779
+```
+
 [POC](https://github.com/HackerDom/ructf-2017/blob/master/sploits/stargate/poc/Program.cs)
