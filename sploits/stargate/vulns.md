@@ -1,6 +1,6 @@
-# Stargate vulns
+## Stargate vulns
 
-## Check some data but use others
+### Check some data but use others
 Stargate authorization mechanism uses HMAC256 value calculated by raw bytes of transmission name. However internal index use Base64 string representation of this bytes for maintaining uniqueness of transmissions. The question is, are there any Base64 strings that represents the same bytes sequences of the name? The answer is, of course, it depends on implementation.
 First of all .net implementation ignores [ \t\n\r] chars, but this way to exploit was closed by removing all whitespaces in header value.
 The second way depends on string length and output padding. Look at this example:
@@ -73,5 +73,7 @@ byte[2] { 77, 97 }
 
 https://en.wikipedia.org/wiki/Base64
 
-## Buffer over-read
-[DirectBitmap](https://github.com/HackerDom/ructf-2017/blob/master/services/stargate/src/utils/DirectBitmap.cs#L13) class uses unsafe int* pointer to raw pixels however image PixelFormat isn't checked to be 32bpp. This allows to over-read data on unmanaged heap. Data is used later for histogram aka "spectrum" calculation. With some good probability HMAC256 openssl implementation allocated immediately after image data. As a result ones can use histograms statistics in response on image upload requests to brute-force 128 bit of the HMAC key.
+### Buffer over-read
+[DirectBitmap](https://github.com/HackerDom/ructf-2017/blob/master/services/stargate/src/utils/DirectBitmap.cs#L13) class uses unsafe int* pointer to raw pixels however image PixelFormat isn't checked to be 32bpp. This allows to over-read data on unmanaged heap. Data is used later for histogram aka "spectrum" calculation. With some good probability HMAC256 openssl implementation allocated immediately after image data. As a result ones can use histograms statistics in response on 8bpp/16bpp/24bpp image upload requests to brute-force 128 bit of the HMAC key. HSL channels help to reduce number of possible color combinations.
+
+[POC](https://github.com/HackerDom/ructf-2017/blob/master/sploits/stargate/poc/Program.cs)
