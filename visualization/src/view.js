@@ -5,8 +5,8 @@ import * as THREE_particle from "./particle";
 //import Stats from "stats.js";
 import _ from "underscore";
 
-const countdown_start = new Date();// month from 0
-const countdown_end = new Date(countdown_start.getTime() + (6 * 60 * 1000));
+let countdown_start = new Date();
+let countdown_end = new Date(countdown_start.getTime() + (6 * 60 * 1000));
 const YEKT_timezone_offset = 5 * 60 * 60 * 1000;
 const sprite_coeff = 3;
 const canvasWidth = 182 * sprite_coeff;
@@ -22,6 +22,10 @@ export default class View {
 		controller.on('start', m => {
 			this.model = m;
 			this.init();
+		});
+		controller.on('start-time', () => {
+			countdown_start = new Date();
+			countdown_end = new Date(countdown_start.getTime() + (6 * 60 * 1000));
 		});
 		controller.on('showArrow', arrowData => {
 			this.showArrow(arrowData);

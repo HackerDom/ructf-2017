@@ -54,7 +54,9 @@ export default class Controller extends EventEmitter {
 		};
 		ws.onmessage = (e) => {
 			let event = JSON.parse(e.data);
-			if (event.type === "attack")
+			if (event.type === "start")
+				this.emit('start-time');
+			else if (event.type === "attack")
 				this.processAttack(event.value);
 			else if (event.type === "state")
 				this.processState(event.value);
@@ -72,13 +74,15 @@ export default class Controller extends EventEmitter {
 	}
 
 	processAttack(attack) {
-		if (attack.service_id === Invisible_service_id || attack.attacker_id === Invisible_team_id || attack.victim_id === Invisible_team_id)
+		if (attack.service_id == Invisible_service_id || attack.attacker_id == Invisible_team_id || attack.victim_id == Invisible_team_id)
 			return;
 		const arrow = {
 			from: this.model.getTeamById(attack.attacker_id),
 			to: this.model.getTeamById(attack.victim_id),
 			svc: this.model.getServiceById(attack.service_id)
 		};
+		if (arrow.from === undefined || arrow.to === undefined || arrow.svc === undefined)
+			console.log("Arrow error");
 		this.emit('showArrow', arrow);
 	}
 
