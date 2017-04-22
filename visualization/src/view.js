@@ -2,11 +2,11 @@ import $ from "jquery";
 import * as THREE from "three";
 import station from "./station";
 import * as THREE_particle from "./particle";
-import Stats from "stats.js";
+//import Stats from "stats.js";
 import _ from "underscore";
 
-const countdown_start = new Date(2017, 3, 16, 10, 0, 0); // month from 0
-const countdown_end = new Date(2017, 3, 16, 20, 20, 0);
+const countdown_start = new Date();// month from 0
+const countdown_end = new Date(countdown_start.getTime() + (6 * 60 * 1000));
 const YEKT_timezone_offset = 5 * 60 * 60 * 1000;
 const sprite_coeff = 3;
 const canvasWidth = 182 * sprite_coeff;
@@ -286,9 +286,9 @@ export default class View {
 		this.arrows = [];
 		const _this = this;
 
-		const stats = new Stats();
-		stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-		$("#stats-container").append(stats.dom);
+		//const stats = new Stats();
+		//stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+		//$("#stats-container").append(stats.dom);
 
 		init();
 		asyncEvents();
@@ -304,8 +304,8 @@ export default class View {
 
 			const light = new THREE.PointLight(0xdddddd, 1.5, 200, 1);
 			light.position.set(65, 20, 85);
-			light.shadow.mapSize.width = 1024;
-			light.shadow.mapSize.height = 1024;
+			light.shadow.mapSize.width = 2048;
+			light.shadow.mapSize.height = 2048;
 			light.castShadow = true;
 			light.shadow.camera.left = -45;
 			light.shadow.camera.right = 45;
@@ -518,9 +518,9 @@ export default class View {
 		}
 
 		function animate() {
-			stats.begin();
+			//.begin();
 			render();
-			stats.end();
+			//stats.end();
 			requestAnimationFrame(animate);
 		}
 
