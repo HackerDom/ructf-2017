@@ -6,7 +6,7 @@ import * as THREE_particle from "./particle";
 import _ from "underscore";
 
 let countdown_start = new Date();
-let countdown_end = new Date(countdown_start.getTime() + (6 * 60 * 1000));
+let countdown_end = new Date(countdown_start.getTime() + (12 * 60 * 1000));
 const YEKT_timezone_offset = 5 * 60 * 60 * 1000;
 const sprite_coeff = 3;
 const canvasWidth = 182 * sprite_coeff;
@@ -25,7 +25,7 @@ export default class View {
 		});
 		controller.on('start-time', () => {
 			countdown_start = new Date();
-			countdown_end = new Date(countdown_start.getTime() + (6 * 60 * 1000));
+			countdown_end = new Date(countdown_start.getTime() + (12 * 60 * 1000));
 		});
 		controller.on('showArrow', arrowData => {
 			this.showArrow(arrowData);
@@ -106,7 +106,7 @@ export default class View {
 				$countdown.text("00:00:00");
 				return;
 			}
-			const diff = countdown_end.getTime() - now;
+			const diff = (countdown_end.getTime() - now) / 2;
 			const str = milisecondsToTimeStr(diff);
 			$countdown.text(str);
 		}
@@ -157,12 +157,12 @@ export default class View {
 		this.createArrow(spline_points, arrowData.svc.color);
 		setTimeout(function() {
 			arrowData.to.lastExplosionTime = new Date().getTime();
-		}, 3000);
+		}, 3000 * 2);
 	}
 
 	createArrow(points, color) {
 		const particleSystem = new THREE_particle.GPUParticleSystem({
-			maxParticles: 1500,
+			maxParticles: 6000,
 			particleSpriteTex: this.particleSpriteTex
 		});
 		const spline = new THREE.CatmullRomCurve3(points);
@@ -196,7 +196,7 @@ export default class View {
 		canvas.height = canvasHeight;
 		const context = canvas.getContext('2d');
 
-		context.fillStyle = "rgba(255, 255, 255, 0.5)";
+		context.fillStyle = "rgba(255, 255, 255, 0.2)";
 		context.fillRect(0, 0, canvasWidth, canvasHeight);
 
 		const borderWidth = 1.5 * sprite_coeff;
@@ -229,7 +229,7 @@ export default class View {
 		context.fillText(team.score, textLeftOffset, 52 * sprite_coeff);
 
 		if (team.place !== null) {
-			context.fillStyle = "rgba(175, 197, 255, 1.0)";
+			context.fillStyle = "rgba(86, 138, 255, 1.0)";
 			context.font = "Bold " + (14 * sprite_coeff) + "px Roboto";
 			let place = team.place;
 			const dashIndex = place.indexOf("-");
@@ -279,12 +279,12 @@ export default class View {
 			colorRandomness: 0,
 			turbulence: 0.5,
 			lifetime: 0.8,
-			size: 6,
+			size: 5,
 			sizeRandomness: 3
 		};
 
 		const spawnerOptions = {
-			spawnRate: 500
+			spawnRate: 250
 		};
 
 		this.arrows = [];
@@ -304,7 +304,7 @@ export default class View {
 			renderer.shadowMap.enabled = true;
 			$container.append(renderer.domElement);
 
-			camera = new THREE.PerspectiveCamera(55, aspect, 1, 1000);
+			camera = new THREE.PerspectiveCamera(58, aspect, 1, 1000);
 
 			const light = new THREE.PointLight(0xdddddd, 1.5, 200, 1);
 			light.position.set(65, 20, 85);
@@ -356,7 +356,7 @@ export default class View {
 						{
 							"c":   { type: "f", value: 1.0 },
 							"p":   { type: "f", value: 1.4 },
-							glowColor: { type: "c", value: new THREE.Color(0xff4fea) },
+							glowColor: { type: "c", value: new THREE.Color(0xe059d0) },
 							viewVector: { type: "v3", value: camera.position }
 						},
 					vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
@@ -522,7 +522,7 @@ export default class View {
 		}
 
 		function animate() {
-			//.begin();
+			//stats.begin();
 			render();
 			//stats.end();
 			requestAnimationFrame(animate);
@@ -531,7 +531,7 @@ export default class View {
 		function removeParticleSystemsIfNeeded() {
 			const now = new Date().getTime();
 			_this.arrows = _this.arrows.filter(function(a) {
-				if(now - a.creationTime < 4.5 * 1000)
+				if(now - a.creationTime < 5 * 1000 * 2)
 					return true;
 				planetGroup.remove(a.particleSystem);
 				a.particleSystem.dispose();
@@ -552,19 +552,19 @@ export default class View {
 			camera.position.z = 100 * Math.sin(phi) * Math.sin(theta);
 			camera.lookAt(scene.position);
 			const delta = clock.getDelta();
-			planetGroup.rotateY(delta / 40);
+			planetGroup.rotateY(delta / 80);
 			//_this.clouds.rotateY(delta / 300);
 
 			removeParticleSystemsIfNeeded();
 			const now = new Date().getTime();
 			for (let i = 0; i < _this.arrows.length; i++) {
 				const arrow = _this.arrows[i];
-				if (now - arrow.creationTime < 3 * 1000) {
+				if (now - arrow.creationTime < 3 * 1000 * 2) {
 					if (delta > 0) {
 						options.color = arrow.color.getHex();
 						const steps = 10;
 						for (let step = 0; step < steps; step++) {
-							arrow.timer += delta / 3 / steps;
+							arrow.timer += delta / 3 / steps / 2;
 							options.position = arrow.spline.getPoint(arrow.timer);
 							for (let x = 0; x < spawnerOptions.spawnRate * delta / steps; x++) {
 								arrow.particleSystem.spawnParticle(options);
@@ -572,7 +572,7 @@ export default class View {
 						}
 					}
 				} else
-					arrow.timer += delta / 3;
+					arrow.timer += delta / 3 / 2;
 				arrow.particleSystem.update(arrow.timer);
 			}
 
@@ -580,8 +580,8 @@ export default class View {
 				const team = _this.model.teams[i];
 				if (team.lastExplosionTime === 0)
 					continue;
-				if (team.lastExplosionTime <= now && team.lastExplosionTime + 1000 >= now) {
-					team.glossMaterial.opacity = 0.65 - (now - team.lastExplosionTime) / 1000 * 0.65;
+				if (team.lastExplosionTime <= now && team.lastExplosionTime + 1000 * 2 >= now) {
+					team.glossMaterial.opacity = 0.45 - (now - team.lastExplosionTime) / 1000 / 2 * 0.45;
 				} else {
 					team.glossMaterial.opacity = 0;
 					team.lastExplosionTime = 0;

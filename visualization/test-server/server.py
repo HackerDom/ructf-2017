@@ -1488,7 +1488,7 @@ flags = [
 ]
 
 
-ROUND_TIME = 60*1000
+ROUND_TIME = 2 * 60*1000
 service_names = ["pool", "capter", "electrohub", "fooddispenser", "redbutton", "settings", "stargate"]
 team_names = ["Honeypot", "Переподвысмотрит", "BSUIR", "Bushwhackers", "c00kies@venice", "[censored]", "ENOFLAG",
               "Espacio", "girav", "keva", "LC↯BC", "Lights Out", "saarsec", "Shadow Servants", "SiBears",
@@ -1643,7 +1643,7 @@ async def create_attacks():
     global flags, start, flags_i
     step = 10  # ms
     while True:
-        while flags_i < len(flags) and flags[flags_i]["ts"] * 1000 - start_time * 1000 < gtime() - start:
+        while flags_i < len(flags) and flags[flags_i]["ts"] * 1000 - start_time * 1000 < (gtime() - start) / 2:
             event = {
                 "type": "attack",
                 "value": {
