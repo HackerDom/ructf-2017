@@ -1,0 +1,6 @@
+verbosity=7
+console=both
+machid=1029
+bootm_boot_mode=sec
+rootdev=UUID=fd472eba-571d-4583-8873-97f09353655c
+rootfstype=ext4
